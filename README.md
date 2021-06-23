@@ -1,17 +1,16 @@
 # Get started with the Microsoft Graph SDK for PHP
 
-[![Build Status](https://travis-ci.org/microsoftgraph/msgraph-sdk-php.svg?branch=master)](https://travis-ci.org/microsoftgraph/msgraph-sdk-php)
-[![Latest Stable Version](https://poser.pugx.org/microsoft/microsoft-graph/version)](https://packagist.org/packages/microsoft/microsoft-graph)
+[![Latest Stable Version](https://poser.pugx.org/microsoft/microsoft-graph-core/version)](https://packagist.org/packages/microsoft/microsoft-graph-core)
 
 ## Get started with the PHP Connect Sample
 If you want to play around with the PHP library, you can get up and running quickly with the [PHP Connect Sample](https://github.com/microsoftgraph/php-connect-sample). This sample will start you with a little Laravel project that helps you with registration, authentication, and making a simple call to the service.
 
 ## Install the SDK
-You can install the PHP SDK with Composer, either run `composer require microsoft/microsoft-graph`, or edit your `composer.json` file:
+You can install the PHP SDK with Composer, either run `composer require microsoft/microsoft-graph-core`, or edit your `composer.json` file:
 ```
 {
     "require": {
-        "microsoft/microsoft-graph": "^1.33.0"
+        "microsoft/microsoft-graph": "^0.1.0"
     }
 }
 ```
@@ -142,21 +141,20 @@ Now you can hit a Visual Studio Code breakpoint in a test. Try this:
 
 ## Documentation and resources
 
-* [Documentation](https://github.com/microsoftgraph/msgraph-sdk-php/blob/master/docs/index.html)
 
-* [Wiki](https://github.com/microsoftgraph/msgraph-sdk-php/wiki)
+* [Wiki](https://github.com/microsoftgraph/msgraph-sdk-php-core/wiki)
 
-* [Examples](https://github.com/microsoftgraph/msgraph-sdk-php/wiki/Example-calls)
+* [Examples](https://github.com/microsoftgraph/msgraph-sdk-php-core/wiki/Example-calls)
 
 * [Microsoft Graph website](https://developer.microsoft.com/en-us/graph/)
 
 ## Issues
 
-View or log issues on the [Issues](https://github.com/microsoftgraph/msgraph-sdk-php/issues) tab in the repo.
+View or log issues on the [Issues](https://github.com/microsoftgraph/msgraph-sdk-php-core/issues) tab in the repo.
 
 ## Contribute
 
-Please read our [Contributing](https://github.com/microsoftgraph/msgraph-sdk-php/blob/master/CONTRIBUTING.md) guidelines carefully for advice on how to contribute to this repo.
+Please read our [Contributing](https://github.com/microsoftgraph/msgraph-sdk-php-core/blob/master/CONTRIBUTING.md) guidelines carefully for advice on how to contribute to this repo.
 
 ## Copyright and license
 

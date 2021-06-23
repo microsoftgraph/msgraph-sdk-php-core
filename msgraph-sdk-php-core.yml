@@ -9,5 +9,5 @@ extensions:
   technologies:
     - Microsoft Graph
   createdDate: '8/26/2016 9:25:53 AM'
-title: Microsoft Graph SDK for PHP
+title: Microsoft Graph SDK Core for PHP
 description: Microsoft Graph Library for PHP.
