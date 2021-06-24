@@ -36,6 +36,9 @@ jobs:
     - name: composer validate
       run: |
         composer validate
-      - name: Run analysis 
-        run: |
+    - name: Composer install
+      run: |
+        composer install
+    - name: Run analysis 
+      run: |
           vendor/bin/psalm
