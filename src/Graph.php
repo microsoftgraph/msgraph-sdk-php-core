@@ -18,8 +18,12 @@
 namespace Microsoft\Graph;
 
 use Microsoft\Graph\Core\GraphConstants;
+use Microsoft\Graph\Core\NationalCloud;
+use Microsoft\Graph\Exception\ClientInitialisationException;
 use Microsoft\Graph\Http\GraphCollectionRequest;
 use Microsoft\Graph\Http\GraphRequest;
+use Microsoft\Graph\Http\HttpClientFactory;
+use Microsoft\Graph\Http\HttpClientInterface;
 
 /**
  * Class Graph
@@ -38,26 +42,27 @@ class Graph
     * @var string
     */
     private $_accessToken;
+
     /**
     * The api version to use ("v1.0", "beta")
     * Default is "v1.0"
     *
     * @var string
     */
-    private $_apiVersion;
+    private $_apiVersion = GraphConstants::API_VERSION;
+
     /**
-    * The base url to call
-    * Default is "https://graph.microsoft.com"
-    *
-    * @var string
-    */
-    private $_baseUrl;
+     * Host to use as the base URL and for authentication
+     * @var string
+     */
+    private $_nationalCloud = NationalCloud::GLOBAL;
+
     /**
-    * The port to use for proxy requests
-    * Null disables port forwarding
-    *
-    * @var string
-    */
+     * The port to use for proxy requests
+     * Null disables port forwarding
+     *
+     * @var string
+     */
     private $_proxyPort;
 
     /**
@@ -68,38 +73,56 @@ class Graph
     private $_proxyVerifySSL;
 
     /**
-    * Creates a new Graph object, which is used to call the Graph API
-    */
-    public function __construct()
-    {
-        $this->_apiVersion = GraphConstants::API_VERSION;
-        $this->_baseUrl = GraphConstants::REST_ENDPOINT;
-    }
+     * HttpClient to use for requests
+     * @var HttpClientInterface
+     */
+    private $_httpClient;
+
+
+    // TODO: Set middleware
 
     /**
-    * Sets the Base URL to call (defaults to https://graph.microsoft.com)
-    *
-    * @param string $baseUrl The URL to call
-    *
-    * @return Graph object
-    */
-    public function setBaseUrl($baseUrl)
+     * Graph constructor.
+     *
+     * Creates a Graph client object used to make requests to the Graph API
+     * @param string $apiVersion
+     * @param string $nationalCloud
+     * @throws \InvalidArgumentException|Exception\ClientInitialisationException
+     */
+    public function __construct(string $apiVersion = GraphConstants::API_VERSION,
+                                string $nationalCloud = NationalCloud::GLOBAL)
     {
-        $this->_baseUrl = $baseUrl;
-        return $this;
-    }
-
-    /**
-    * Sets the API version to use, e.g. "beta" (defaults to v1.0)
-    *
-    * @param string $apiVersion The API version to use
-    *
-    * @return Graph object
-    */
-    public function setApiVersion($apiVersion)
-    {
+        if (!$apiVersion) {
+            throw new \InvalidArgumentException("Api version string cannot be empty");
+        }
+        if (!in_array($nationalCloud, NationalCloud::getValues())) {
+            throw new \InvalidArgumentException("Invalid national cloud passed. See NationalCloud constants");
+        }
         $this->_apiVersion = $apiVersion;
-        return $this;
+        $this->_nationalCloud = $nationalCloud;
+        $this->_httpClient = (new HttpClientFactory())->nationalCloud($nationalCloud)->createAdapter();
+    }
+
+    /**
+     * Sets HTTP client to any implementation of HttpClientInterface
+     *
+     * @param HttpClientInterface $httpClient
+     */
+    public function setHttpClient(HttpClientInterface $httpClient) {
+        $this->_httpClient = $httpClient;
+    }
+
+    /**
+     * Sets HTTP client using Guzzle request options
+     * Creates a Guzzle client and wraps it under an implementation of HttpClientInterface
+     *
+     * @param array $guzzleConfig
+     * @throws ClientInitialisationException
+     */
+    public function setHttpClientFromConfig(array $guzzleConfig) {
+        $this->_httpClient = (new HttpClientFactory())->clientConfig($guzzleConfig)
+                                                    ->nationalCloud($this->_nationalCloud)
+                                                    ->createAdapter();
     }
 
     /**
@@ -114,24 +137,6 @@ class Graph
     public function setAccessToken($accessToken)
     {
         $this->_accessToken = $accessToken;
-        return $this;
-    }
-
-    /**
-    * Sets the proxy port. This allows you
-    * to use tools such as Fiddler to view
-    * requests and responses made with Guzzle
-    *
-    * @param string port The port number to use
-    * @param bool $verifySSL Whether SSL verification should be enabled
-    *
-    * @return Graph object
-    */
-    public function setProxyPort($port, $verifySSL = false)
-    {
-        $this->_proxyPort = $port;
-        $this->_proxyVerifySSL = $verifySSL;
-
         return $this;
     }
 
@@ -151,7 +156,7 @@ class Graph
             $requestType,
             $endpoint,
             $this->_accessToken,
-            $this->_baseUrl,
+            $this->_nationalCloud,
             $this->_apiVersion,
             $this->_proxyPort,
             $this->_proxyVerifySSL
@@ -175,7 +180,7 @@ class Graph
             $requestType,
             $endpoint,
             $this->_accessToken,
-            $this->_baseUrl,
+            $this->_nationalCloud,
             $this->_apiVersion,
             $this->_proxyPort,
             $this->_proxyVerifySSL

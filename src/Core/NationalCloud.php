@@ -31,12 +31,23 @@ final class NationalCloud
     const CHINA = "https://microsoftgraph.chinacloudapi.cn";
 
     /**
+     * Stores all enum values as list
+     * Prevents having to do reflection for each call to getValues()
+     *
+     * @var array
+     */
+    private static $values = [];
+
+    /**
      * Returns a list of the constant values
      *
      * @return array
      */
     public static function getValues(): array {
-        $reflectedClass = new \ReflectionClass(__CLASS__);
-        return array_values($reflectedClass->getConstants());
+        if (!self::$values) {
+            $reflectedClass = new \ReflectionClass(__CLASS__);
+            self::$values = array_values($reflectedClass->getConstants());
+        }
+        return self::$values;
     }
 }

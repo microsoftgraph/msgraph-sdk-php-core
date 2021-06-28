@@ -18,8 +18,13 @@
 namespace Microsoft\Graph\Http;
 
 use GuzzleHttp\Client;
+use Http\Adapter\Guzzle7\Client as GuzzleAdapter;
+use GuzzleHttp\RequestOptions;
+use Http\Promise\Promise;
 use Microsoft\Graph\Core\NationalCloud;
 use Microsoft\Graph\Exception\ClientInitialisationException;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Class HttpClientFactory
@@ -44,11 +49,11 @@ final class HttpClientFactory
     const REQUEST_TIMEOUT_SEC = 100;
 
     /**
-     * @var string Graph API host to use as base URL
+     * @var string Graph API host to use as base URL and for authentication
      */
     private $nationalCloud = NationalCloud::GLOBAL;
 
-    private $httpClientConfig = [];
+    private $clientConfig = [];
 
     //TODO: Init default middleware pipeline
     //TODO: Add custom hosts
@@ -78,8 +83,8 @@ final class HttpClientFactory
      * @param array $config
      * @return $this
      */
-    public function httpClientConfig(array $config): self {
-        $this->httpClientConfig = $config;
+    public function clientConfig(array $config): self {
+        $this->clientConfig = $config;
         return $this;
     }
 
@@ -90,11 +95,34 @@ final class HttpClientFactory
      * @return \GuzzleHttp\Client
      */
     public function create(): \GuzzleHttp\Client {
-        if (!$this->httpClientConfig) {
+        if (!$this->clientConfig) {
             return new Client($this->getDefaultConfig());
         }
-        $this->prepareConfig();
-        return new Client($this->httpClientConfig);
+        $this->mergeConfig();
+        return new Client($this->clientConfig);
+    }
+
+    /**
+     * Creates an HttpClientInterface implementation that wraps around a Guzzle client
+     *
+     * @return HttpClientInterface
+     */
+    public function createAdapter(): HttpClientInterface {
+        return new class($this->create()) implements HttpClientInterface {
+            private $clientAdapter;
+
+            public function __construct(Client $guzzleClient) {
+                $this->clientAdapter = new GuzzleAdapter($guzzleClient);
+            }
+
+            public function sendRequest(RequestInterface $request): ResponseInterface {
+                return $this->clientAdapter->sendRequest($request);
+            }
+
+            public function sendAsyncRequest(RequestInterface $request): Promise {
+                return $this->clientAdapter->sendAsyncRequest($request);
+            }
+        };
     }
 
     /**
@@ -104,12 +132,12 @@ final class HttpClientFactory
      */
     private function getDefaultConfig(): array {
         return [
-            "connect_timeout" => self::CONNECTION_TIMEOUT_SEC,
-            "timeout" => self::REQUEST_TIMEOUT_SEC,
-            "headers" => [
+            RequestOptions::CONNECT_TIMEOUT => self::CONNECTION_TIMEOUT_SEC,
+            RequestOptions::TIMEOUT => self::REQUEST_TIMEOUT_SEC,
+            RequestOptions::HEADERS => [
                 "Content-Type" => "application/json"
             ],
-            "http_errors" => false,
+            RequestOptions::HTTP_ERRORS => false,
             "base_uri" => $this->nationalCloud
         ];
     }
@@ -119,18 +147,18 @@ final class HttpClientFactory
      * Provides defaults for timeouts and headers if none have been provided.
      * Overrides base_uri.
      */
-    private function prepareConfig(): void {
+    private function mergeConfig(): void {
         $defaultConfig = $this->getDefaultConfig();
 
-        if (!isset($this->httpClientConfig["connect_timeout"])) {
-            $this->httpClientConfig["connect_timeout"] = $defaultConfig["connect_timeout"];
+        if (!isset($this->clientConfig[RequestOptions::CONNECT_TIMEOUT])) {
+            $this->clientConfig[RequestOptions::CONNECT_TIMEOUT] = $defaultConfig[RequestOptions::CONNECT_TIMEOUT];
         }
-        if (!isset($this->httpClientConfig["timeout"])) {
-            $this->httpClientConfig["timeout"] = $defaultConfig["timeout"];
+        if (!isset($this->clientConfig[RequestOptions::TIMEOUT])) {
+            $this->clientConfig[RequestOptions::TIMEOUT] = $defaultConfig[RequestOptions::TIMEOUT];
         }
-        if (!isset($this->httpClientConfig["headers"])) {
-            $this->httpClientConfig["headers"] = $defaultConfig["headers"];
+        if (!isset($this->clientConfig[RequestOptions::HEADERS])) {
+            $this->clientConfig[RequestOptions::HEADERS] = $defaultConfig[RequestOptions::HEADERS];
         }
-        $this->httpClientConfig["base_uri"] = $this->nationalCloud;
+        $this->clientConfig["base_uri"] = $this->nationalCloud;
     }
 }
