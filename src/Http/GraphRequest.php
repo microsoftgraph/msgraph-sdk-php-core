@@ -50,7 +50,7 @@ class GraphRequest
     *
     * @var string
     */
-    protected $baseUrl;
+    protected $nationalCloud;
     /**
     * The endpoint to call
     *
@@ -113,19 +113,21 @@ class GraphRequest
     */
     protected $http_errors;
 
+    protected $httpClient;
+
     /**
     * Constructs a new Graph Request object
     *
     * @param string $requestType  The HTTP method to use, e.g. "GET" or "POST"
     * @param string $endpoint     The Graph endpoint to call
     * @param string $accessToken  A valid access token to validate the Graph call
-    * @param string $baseUrl      The base URL to call
+    * @param string $nationalCloud      The base URL to call
     * @param string $apiVersion   The API version to use
-    * @param string $proxyPort    The url where to proxy through
-    * @param bool $proxyVerifySSL Whether the proxy requests should perform SSL verification
+     * @param HttpClientInterface $httpClient  The HTTP client to use
+
     * @throws GraphException when no access token is provided
     */
-    public function __construct($requestType, $endpoint, $accessToken, $baseUrl, $apiVersion, $proxyPort = null, $proxyVerifySSL = false)
+    public function __construct($requestType, $endpoint, $accessToken, $nationalCloud, $apiVersion, $httpClient)
     {
         $this->requestType = $requestType;
         $this->endpoint = $endpoint;
@@ -136,12 +138,11 @@ class GraphRequest
             throw new GraphException(GraphConstants::NO_ACCESS_TOKEN);
         }
 
-        $this->baseUrl = $baseUrl;
+        $this->nationalCloud = $nationalCloud;
         $this->apiVersion = $apiVersion;
         $this->timeout = 100;
         $this->headers = $this->_getDefaultHeaders();
-        $this->proxyPort = $proxyPort;
-        $this->proxyVerifySSL = $proxyVerifySSL;
+        $this->httpClient = $httpClient;
     }
 
     /**
@@ -149,9 +150,9 @@ class GraphRequest
      *
      * @return string
      */
-    public function getBaseUrl()
+    public function getNationalCloud()
     {
-        return $this->baseUrl;
+        return $this->nationalCloud;
     }
 
     /**
@@ -485,7 +486,7 @@ class GraphRequest
     private function _getDefaultHeaders()
     {
         $headers = [
-            'Host' => $this->baseUrl,
+            'Host' => $this->nationalCloud,
             'Content-Type' => 'application/json',
             'SdkVersion' => 'Graph-php-' . GraphConstants::SDK_VERSION,
             'Authorization' => 'Bearer ' . $this->accessToken
@@ -538,7 +539,7 @@ class GraphRequest
     protected function createGuzzleClient()
     {
         $clientSettings = [
-            'base_uri' => $this->baseUrl,
+            'base_uri' => $this->nationalCloud,
             'http_errors' => $this->http_errors,
             'headers' => $this->headers
         ];

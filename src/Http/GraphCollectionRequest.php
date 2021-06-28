@@ -76,11 +76,10 @@ class GraphCollectionRequest extends GraphRequest
     * @param string $accessToken  A valid access token
     * @param string $baseUrl      The base URL of the request
     * @param string $apiVersion   The version of the API to call
-    * @param string $proxyPort    The url where to proxy through
-    * @param bool $proxyVerifySSL Whether the proxy requests should perform SSL verification
+    * @param HttpClientInterface $httpClient The HTTP client to use
     * @throws GraphException when no access token is provided
     */
-    public function __construct($requestType, $endpoint, $accessToken, $baseUrl, $apiVersion, $proxyPort = null, $proxyVerifySSL = false)
+    public function __construct($requestType, $endpoint, $accessToken, $baseUrl, $apiVersion, $httpClient)
     {
         parent::__construct(
             $requestType,
@@ -88,8 +87,7 @@ class GraphCollectionRequest extends GraphRequest
             $accessToken,
             $baseUrl,
             $apiVersion,
-            $proxyPort,
-            $proxyVerifySSL
+            $httpClient
         );
         $this->end = false;
     }
@@ -108,7 +106,7 @@ class GraphCollectionRequest extends GraphRequest
             $this->requestType,
             $this->endpoint . $this->getConcatenator() . $query,
             $this->accessToken,
-            $this->baseUrl,
+            $this->nationalCloud,
             $this->apiVersion,
             $this->proxyPort
         );
@@ -175,7 +173,7 @@ class GraphCollectionRequest extends GraphRequest
         }
 
         if ($this->nextLink) {
-            $baseLength = strlen($this->baseUrl) + strlen($this->apiVersion);
+            $baseLength = strlen($this->nationalCloud) + strlen($this->apiVersion);
             $this->endpoint = substr($this->nextLink, $baseLength);
         } else {
             // This is the first request to the endpoint

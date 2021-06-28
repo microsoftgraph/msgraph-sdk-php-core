@@ -56,22 +56,7 @@ class Graph
      * @var string
      */
     private $_nationalCloud = NationalCloud::GLOBAL;
-
-    /**
-     * The port to use for proxy requests
-     * Null disables port forwarding
-     *
-     * @var string
-     */
-    private $_proxyPort;
-
-    /**
-     * Whether SSL verification should be used for proxy requests
-     *
-     * @var bool
-     */
-    private $_proxyVerifySSL;
-
+    
     /**
      * HttpClient to use for requests
      * @var HttpClientInterface
@@ -158,8 +143,7 @@ class Graph
             $this->_accessToken,
             $this->_nationalCloud,
             $this->_apiVersion,
-            $this->_proxyPort,
-            $this->_proxyVerifySSL
+            $this->_httpClient
         );
     }
 
@@ -182,8 +166,7 @@ class Graph
             $this->_accessToken,
             $this->_nationalCloud,
             $this->_apiVersion,
-            $this->_proxyPort,
-            $this->_proxyVerifySSL
+            $this->_httpClient
         );
     }
 }
