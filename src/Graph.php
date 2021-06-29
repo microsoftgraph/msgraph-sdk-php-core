@@ -63,17 +63,20 @@ class Graph
      */
     private $_httpClient;
 
-    
+
     /**
      * Graph constructor.
      *
      * Creates a Graph client object used to make requests to the Graph API
+     * Setting $httpClient to null will create a default Guzzle client.
      * @param string $apiVersion
      * @param string $nationalCloud
-     * @throws \InvalidArgumentException|Exception\ClientInitialisationException
+     * @param HttpClientInterface|null $httpClient
+     * @throws ClientInitialisationException
      */
     public function __construct(string $apiVersion = GraphConstants::API_VERSION,
-                                string $nationalCloud = NationalCloud::GLOBAL)
+                                string $nationalCloud = NationalCloud::GLOBAL,
+                                HttpClientInterface  $httpClient = null)
     {
         if (!$apiVersion) {
             throw new \InvalidArgumentException("Api version string cannot be empty");
@@ -83,29 +86,7 @@ class Graph
         }
         $this->_apiVersion = $apiVersion;
         $this->_nationalCloud = $nationalCloud;
-        $this->_httpClient = (new HttpClientFactory())->nationalCloud($nationalCloud)->createAdapter();
-    }
-
-    /**
-     * Sets HTTP client to any implementation of HttpClientInterface
-     *
-     * @param HttpClientInterface $httpClient
-     */
-    public function setHttpClient(HttpClientInterface $httpClient) {
-        $this->_httpClient = $httpClient;
-    }
-
-    /**
-     * Sets HTTP client using Guzzle request options
-     * Creates a Guzzle client and wraps it under an implementation of HttpClientInterface
-     *
-     * @param array $guzzleConfig
-     * @throws ClientInitialisationException
-     */
-    public function setHttpClientFromConfig(array $guzzleConfig) {
-        $this->_httpClient = (new HttpClientFactory())->clientConfig($guzzleConfig)
-                                                    ->nationalCloud($this->_nationalCloud)
-                                                    ->createAdapter();
+        $this->_httpClient = ($httpClient) ?: (new HttpClientFactory())->nationalCloud($nationalCloud)->createAdapter();
     }
 
     /**
