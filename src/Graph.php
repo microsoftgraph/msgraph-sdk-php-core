@@ -56,7 +56,7 @@ class Graph
      * @var string
      */
     private $_nationalCloud = NationalCloud::GLOBAL;
-    
+
     /**
      * HttpClient to use for requests
      * @var HttpClientInterface
