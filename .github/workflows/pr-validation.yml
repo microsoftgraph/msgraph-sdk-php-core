@@ -41,4 +41,4 @@ jobs:
         composer install
     - name: Run analysis 
       run: |
-          vendor/bin/psalm
+          vendor/bin/phpstan analyse --memory-limit=500M --error-format=github
