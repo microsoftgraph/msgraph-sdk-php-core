@@ -45,9 +45,6 @@ final class HttpClientFactory
 
     private $clientConfig = [];
 
-    //TODO: Init default middleware pipeline
-    //TODO: Add custom hosts
-
     /**
      * Set national cloud to be used as the base URL
      *

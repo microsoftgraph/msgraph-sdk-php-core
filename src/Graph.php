@@ -63,9 +63,7 @@ class Graph
      */
     private $_httpClient;
 
-
-    // TODO: Set middleware
-
+    
     /**
      * Graph constructor.
      *
