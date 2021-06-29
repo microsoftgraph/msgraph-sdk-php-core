@@ -86,7 +86,7 @@ class Graph
         }
         $this->_apiVersion = $apiVersion;
         $this->_nationalCloud = $nationalCloud;
-        $this->_httpClient = ($httpClient) ?: (new HttpClientFactory())->nationalCloud($nationalCloud)->createAdapter();
+        $this->_httpClient = ($httpClient) ?: HttpClientFactory::nationalCloud($nationalCloud)::createAdapter();
     }
 
     /**

@@ -8,8 +8,8 @@
 namespace Microsoft\Graph\Http;
 
 use GuzzleHttp\Client;
-use Http\Adapter\Guzzle7\Client as GuzzleAdapter;
 use GuzzleHttp\RequestOptions;
+use Http\Adapter\Guzzle7\Client as GuzzleAdapter;
 use Http\Promise\Promise;
 use Microsoft\Graph\Core\NationalCloud;
 use Microsoft\Graph\Exception\ClientInitialisationException;
@@ -41,9 +41,28 @@ final class HttpClientFactory
     /**
      * @var string Graph API host to use as base URL and for authentication
      */
-    private $nationalCloud = NationalCloud::GLOBAL;
+    private static $nationalCloud = NationalCloud::GLOBAL;
 
-    private $clientConfig = [];
+    /**
+     * @var array Guzzle client request options
+     */
+    private static $clientConfig = [];
+
+    /**
+     * @var HttpClientFactory|null Store singleton instance of the HttpClientFactory
+     */
+    private static $instance = null;
+
+    /**
+     * HttpClientFactory constructor.
+     * Creates only one instance to be reused in the static methods
+     */
+    private function __construct() {
+        if (!self::$instance) {
+            self::$instance = new HttpClientFactory();
+        }
+        return self::$instance;
+    }
 
     /**
      * Set national cloud to be used as the base URL
@@ -52,7 +71,7 @@ final class HttpClientFactory
      * @return $this
      * @throws ClientInitialisationException if $nationalCloud is empty or an invalid national cloud Host
      */
-    public function nationalCloud(string $nationalCloud = NationalCloud::GLOBAL): self {
+    public static function nationalCloud(string $nationalCloud = NationalCloud::GLOBAL): HttpClientFactory {
         if (!$nationalCloud) {
             throw new ClientInitialisationException("National cloud cannot be empty string");
         }
@@ -60,8 +79,8 @@ final class HttpClientFactory
         if (!in_array($nationalCloud, NationalCloud::getValues())) {
             throw new ClientInitialisationException("Invalid national cloud passed. See NationalCloud constants");
         }
-        $this->nationalCloud = $nationalCloud;
-        return $this;
+        self::$nationalCloud = $nationalCloud;
+        return new HttpClientFactory();
     }
 
     /**
@@ -70,9 +89,9 @@ final class HttpClientFactory
      * @param array $config
      * @return $this
      */
-    public function clientConfig(array $config): self {
-        $this->clientConfig = $config;
-        return $this;
+    public static function clientConfig(array $config): HttpClientFactory {
+        self::$clientConfig = $config;
+        return new HttpClientFactory();
     }
 
     /**
@@ -81,12 +100,12 @@ final class HttpClientFactory
      *
      * @return \GuzzleHttp\Client
      */
-    public function create(): \GuzzleHttp\Client {
-        if (!$this->clientConfig) {
-            return new Client($this->getDefaultConfig());
+    public static function create(): \GuzzleHttp\Client {
+        if (!self::$clientConfig) {
+            return new Client(self::getDefaultConfig());
         }
-        $this->mergeConfig();
-        return new Client($this->clientConfig);
+        self::mergeConfig();
+        return new Client(self::$clientConfig);
     }
 
     /**
@@ -94,8 +113,8 @@ final class HttpClientFactory
      *
      * @return HttpClientInterface
      */
-    public function createAdapter(): HttpClientInterface {
-        return new class($this->create()) implements HttpClientInterface {
+    public static function createAdapter(): HttpClientInterface {
+        return new class(self::create()) implements HttpClientInterface {
             private $clientAdapter;
 
             public function __construct(Client $guzzleClient) {
@@ -117,7 +136,7 @@ final class HttpClientFactory
      *
      * @return array
      */
-    private function getDefaultConfig(): array {
+    private static function getDefaultConfig(): array {
         return [
             RequestOptions::CONNECT_TIMEOUT => self::CONNECTION_TIMEOUT_SEC,
             RequestOptions::TIMEOUT => self::REQUEST_TIMEOUT_SEC,
@@ -125,7 +144,7 @@ final class HttpClientFactory
                 "Content-Type" => "application/json"
             ],
             RequestOptions::HTTP_ERRORS => false,
-            "base_uri" => $this->nationalCloud
+            "base_uri" => self::$nationalCloud
         ];
     }
 
@@ -134,18 +153,18 @@ final class HttpClientFactory
      * Provides defaults for timeouts and headers if none have been provided.
      * Overrides base_uri.
      */
-    private function mergeConfig(): void {
-        $defaultConfig = $this->getDefaultConfig();
+    private static function mergeConfig(): void {
+        $defaultConfig = self::getDefaultConfig();
 
-        if (!isset($this->clientConfig[RequestOptions::CONNECT_TIMEOUT])) {
-            $this->clientConfig[RequestOptions::CONNECT_TIMEOUT] = $defaultConfig[RequestOptions::CONNECT_TIMEOUT];
+        if (!isset(self::$clientConfig[RequestOptions::CONNECT_TIMEOUT])) {
+            self::$clientConfig[RequestOptions::CONNECT_TIMEOUT] = $defaultConfig[RequestOptions::CONNECT_TIMEOUT];
         }
-        if (!isset($this->clientConfig[RequestOptions::TIMEOUT])) {
-            $this->clientConfig[RequestOptions::TIMEOUT] = $defaultConfig[RequestOptions::TIMEOUT];
+        if (!isset(self::$clientConfig[RequestOptions::TIMEOUT])) {
+            self::$clientConfig[RequestOptions::TIMEOUT] = $defaultConfig[RequestOptions::TIMEOUT];
         }
-        if (!isset($this->clientConfig[RequestOptions::HEADERS])) {
-            $this->clientConfig[RequestOptions::HEADERS] = $defaultConfig[RequestOptions::HEADERS];
+        if (!isset(self::$clientConfig[RequestOptions::HEADERS])) {
+            self::$clientConfig[RequestOptions::HEADERS] = $defaultConfig[RequestOptions::HEADERS];
         }
-        $this->clientConfig["base_uri"] = $this->nationalCloud;
+        self::$clientConfig["base_uri"] = self::$nationalCloud;
     }
 }
