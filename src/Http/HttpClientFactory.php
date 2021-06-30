@@ -44,7 +44,7 @@ final class HttpClientFactory
     private static $nationalCloud = NationalCloud::GLOBAL;
 
     /**
-     * @var array Guzzle client request options
+     * @var array Guzzle client config options (https://docs.guzzlephp.org/en/stable/quickstart.html#creating-a-client)
      */
     private static $clientConfig = [];
 
