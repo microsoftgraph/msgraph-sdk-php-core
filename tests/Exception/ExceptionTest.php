@@ -1,6 +1,7 @@
 <?php
 use PHPUnit\Framework\TestCase;
 use Microsoft\Graph\Exception\GraphException;
+use Microsoft\Graph\Exception\ClientInitialisationException;
 
 class ExceptionTest extends TestCase
 {
@@ -8,5 +9,10 @@ class ExceptionTest extends TestCase
     {
         $exception = new GraphException('bad stuff', '404');
         $this->assertEquals("Microsoft\Graph\Exception\GraphException: [404]: bad stuff\n", $exception->__toString());
+    }
+
+    public function testChildExceptionClassToString() {
+        $exception = new ClientInitialisationException("Invalid national cloud");
+        $this->assertStringContainsString(get_class($exception), $exception);
     }
 }
