@@ -50,7 +50,7 @@ class GraphRequest
     *
     * @var string
     */
-    protected $nationalCloud;
+    protected $baseUrl;
     /**
     * The endpoint to call
     *
@@ -121,13 +121,13 @@ class GraphRequest
     * @param string $requestType  The HTTP method to use, e.g. "GET" or "POST"
     * @param string $endpoint     The Graph endpoint to call
     * @param string $accessToken  A valid access token to validate the Graph call
-    * @param string $nationalCloud      The base URL to call
+    * @param string $baseUrl      The base URL to call
     * @param string $apiVersion   The API version to use
      * @param HttpClientInterface $httpClient  The HTTP client to use
 
-    * @throws GraphException when no access token is provided
+    * @throws GraphException when no access token is provided | Invalid base URL provided
     */
-    public function __construct($requestType, $endpoint, $accessToken, $nationalCloud, $apiVersion, $httpClient)
+    public function __construct($requestType, $endpoint, $accessToken, $baseUrl, $apiVersion, $httpClient)
     {
         $this->requestType = $requestType;
         $this->endpoint = $endpoint;
@@ -137,8 +137,10 @@ class GraphRequest
         if (!$this->accessToken) {
             throw new GraphException(GraphConstants::NO_ACCESS_TOKEN);
         }
-
-        $this->nationalCloud = $nationalCloud;
+        if (!self::isValidHost($baseUrl)) {
+            throw new GraphException("Invalid base url provided. Ensure url contains a scheme and no query params/paths are included.");
+        }
+        $this->baseUrl = $baseUrl;
         $this->apiVersion = $apiVersion;
         $this->timeout = 100;
         $this->headers = $this->_getDefaultHeaders();
@@ -150,9 +152,9 @@ class GraphRequest
      *
      * @return string
      */
-    public function getNationalCloud()
+    public function getBaseUrl()
     {
-        return $this->nationalCloud;
+        return $this->baseUrl;
     }
 
     /**
@@ -479,6 +481,20 @@ class GraphRequest
     }
 
     /**
+     * Determine if url is a valid host for use as a base URL
+     *
+     * @param string $url
+     * @return bool
+     */
+    public static function isValidHost(string $url): bool {
+        $urlParts = parse_url($url);
+        return ($urlParts
+                && array_key_exists("scheme", $urlParts)
+                && array_key_exists("host", $urlParts)
+                && !(array_key_exists("path", $urlParts) || array_key_exists("query", $urlParts)));
+    }
+
+    /**
     * Get a list of headers for the request
     *
     * @return array The headers for the request
@@ -486,7 +502,7 @@ class GraphRequest
     private function _getDefaultHeaders()
     {
         $headers = [
-            'Host' => $this->nationalCloud,
+            'Host' => $this->baseUrl,
             'Content-Type' => 'application/json',
             'SdkVersion' => 'Graph-php-' . GraphConstants::SDK_VERSION,
             'Authorization' => 'Bearer ' . $this->accessToken
@@ -539,7 +555,7 @@ class GraphRequest
     protected function createGuzzleClient()
     {
         $clientSettings = [
-            'base_uri' => $this->nationalCloud,
+            'base_uri' => $this->baseUrl,
             'http_errors' => $this->http_errors,
             'headers' => $this->headers
         ];

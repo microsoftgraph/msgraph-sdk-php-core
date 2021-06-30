@@ -106,7 +106,7 @@ class GraphCollectionRequest extends GraphRequest
             $this->requestType,
             $this->endpoint . $this->getConcatenator() . $query,
             $this->accessToken,
-            $this->nationalCloud,
+            $this->baseUrl,
             $this->apiVersion,
             $this->proxyPort
         );
@@ -173,7 +173,7 @@ class GraphCollectionRequest extends GraphRequest
         }
 
         if ($this->nextLink) {
-            $baseLength = strlen($this->nationalCloud) + strlen($this->apiVersion);
+            $baseLength = strlen($this->baseUrl) + strlen($this->apiVersion);
             $this->endpoint = substr($this->nextLink, $baseLength);
         } else {
             // This is the first request to the endpoint

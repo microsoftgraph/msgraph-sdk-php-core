@@ -7,6 +7,8 @@
 
 namespace Microsoft\Graph\Core;
 
+use Microsoft\Graph\Http\GraphRequest;
+
 /**
  * Class NationalCloud
  *
@@ -40,13 +42,8 @@ final class NationalCloud
      */
     public static function isValidNationalCloudHost(string $url): bool {
         self::initHosts();
-        $urlParts = parse_url($url);
-        if ($urlParts
-            && array_key_exists("scheme", $urlParts)
-            && array_key_exists("host", $urlParts)
-            && !(array_key_exists("path", $urlParts) || array_key_exists("query", $urlParts))
-        ) {
-            return array_key_exists($urlParts["scheme"]."://".$urlParts["host"], self::$hosts);
+        if (GraphRequest::isValidHost($url)) {
+            return array_key_exists($url, self::$hosts);
         }
         return false;
     }
