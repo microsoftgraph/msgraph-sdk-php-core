@@ -68,24 +68,18 @@ class Graph
      * Graph constructor.
      *
      * Creates a Graph client object used to make requests to the Graph API
-     * Setting $httpClient to null will create a default Guzzle client.
-     * @param string $apiVersion
-     * @param string $nationalCloud
-     * @param HttpClientInterface|null $httpClient
+     *
+     * @param string|null $apiVersion if null|"" defaults to "v1.0"
+     * @param string|null $nationalCloud if null defaults to "https://graph.microsoft.com"
+     * @param HttpClientInterface|null $httpClient null creates default Guzzle client
      * @throws ClientInitialisationException
      */
-    public function __construct(string $apiVersion = GraphConstants::API_VERSION,
-                                string $nationalCloud = NationalCloud::GLOBAL,
-                                HttpClientInterface  $httpClient = null)
+    public function __construct(?string $apiVersion = GraphConstants::API_VERSION,
+                                ?string $nationalCloud = NationalCloud::GLOBAL,
+                                ?HttpClientInterface  $httpClient = null)
     {
-        if (!$apiVersion) {
-            throw new \InvalidArgumentException("Api version string cannot be empty");
-        }
-        if (!NationalCloud::isValidNationalCloudHost($nationalCloud)) {
-            throw new \InvalidArgumentException("Invalid national cloud passed. See https://docs.microsoft.com/en-us/graph/deployments#microsoft-graph-and-graph-explorer-service-root-endpoints");
-        }
-        $this->_apiVersion = $apiVersion;
-        $this->_nationalCloud = $nationalCloud;
+        $this->_apiVersion = ($apiVersion) ?: GraphConstants::API_VERSION;
+        $this->_nationalCloud = ($nationalCloud) ?: NationalCloud::GLOBAL;
         $this->_httpClient = ($httpClient) ?: HttpClientFactory::nationalCloud($nationalCloud)::createAdapter();
     }
 
