@@ -81,8 +81,8 @@ class Graph
         if (!$apiVersion) {
             throw new \InvalidArgumentException("Api version string cannot be empty");
         }
-        if (!in_array($nationalCloud, NationalCloud::getValues())) {
-            throw new \InvalidArgumentException("Invalid national cloud passed. See NationalCloud constants");
+        if (!NationalCloud::isValidNationalCloudHost($nationalCloud)) {
+            throw new \InvalidArgumentException("Invalid national cloud passed. See https://docs.microsoft.com/en-us/graph/deployments#microsoft-graph-and-graph-explorer-service-root-endpoints");
         }
         $this->_apiVersion = $apiVersion;
         $this->_nationalCloud = $nationalCloud;

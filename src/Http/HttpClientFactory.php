@@ -75,9 +75,8 @@ final class HttpClientFactory
         if (!$nationalCloud) {
             throw new ClientInitialisationException("National cloud cannot be empty string");
         }
-        // Verify $nationalCloud is valid
-        if (!in_array($nationalCloud, NationalCloud::getValues())) {
-            throw new ClientInitialisationException("Invalid national cloud passed. See NationalCloud constants");
+        if (!NationalCloud::isValidNationalCloudHost($nationalCloud)) {
+            throw new ClientInitialisationException("Invalid national cloud passed. See https://docs.microsoft.com/en-us/graph/deployments#microsoft-graph-and-graph-explorer-service-root-endpoints.");
         }
         self::$nationalCloud = $nationalCloud;
         return new HttpClientFactory();

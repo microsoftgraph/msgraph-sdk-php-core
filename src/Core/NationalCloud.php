@@ -26,23 +26,42 @@ final class NationalCloud
     const CHINA = "https://microsoftgraph.chinacloudapi.cn";
 
     /**
-     * Stores all enum values as list
-     * Prevents having to do reflection for each call to getValues()
+     * Unique hostnames from constant values
      *
      * @var array
      */
-    private static $values = [];
+    private static $hosts = [];
 
     /**
-     * Returns a list of the constant values
+     * Checks if url contains a valid National Cloud host
      *
-     * @return array
+     * @param string $url
+     * @return bool
      */
-    public static function getValues(): array {
-        if (!self::$values) {
-            $reflectedClass = new \ReflectionClass(__CLASS__);
-            self::$values = array_values($reflectedClass->getConstants());
+    public static function isValidNationalCloudHost(string $url): bool {
+        self::initHosts();
+        $urlParts = parse_url($url);
+        if ($urlParts
+            && array_key_exists("scheme", $urlParts)
+            && array_key_exists("host", $urlParts)
+            && !(array_key_exists("path", $urlParts) || array_key_exists("query", $urlParts))
+        ) {
+            return array_key_exists($urlParts["scheme"]."://".$urlParts["host"], self::$hosts);
         }
-        return self::$values;
+        return false;
+    }
+
+    /**
+     * Store constants values in array with unique keys for optimal lookup
+     */
+    private static function initHosts(): void {
+        if (!self::$hosts) {
+            $reflectedClass = new \ReflectionClass(__CLASS__);
+            $constants = $reflectedClass->getConstants();
+            foreach ($constants as $constName => $url) {
+                // Create associative array for O(1) key lookup
+                self::$hosts[$url] = true;
+            }
+        }
     }
 }
