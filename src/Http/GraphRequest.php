@@ -72,7 +72,7 @@ class GraphRequest
     /**
     * The type of request to make ("GET", "POST", etc.)
     *
-    * @var object
+    * @var string
     */
     protected $requestType;
     /**
@@ -85,13 +85,13 @@ class GraphRequest
     /**
     * The return type to cast the response as
     *
-    * @var object
+    * @var object|null
     */
     protected $returnType;
     /**
     * The timeout, in seconds
     *
-    * @var string
+    * @var int
     */
     protected $timeout;
     /**
@@ -177,7 +177,7 @@ class GraphRequest
     /**
     * Sets a http errors option
     *
-    * @param string $http_errors A bool option to the Graph call
+    * @param bool $http_errors A bool option to the Graph call
     *
     * @return GraphRequest object
     */
@@ -276,7 +276,7 @@ class GraphRequest
     /**
     * Sets the timeout limit of the cURL request
     *
-    * @param string $timeout The timeout in seconds
+    * @param int $timeout The timeout in seconds
     *
     * @return GraphRequest object
     */
@@ -289,7 +289,7 @@ class GraphRequest
     /**
      * Gets the timeout value of the request
      *
-     * @return string
+     * @return int
      */
     public function getTimeout()
     {

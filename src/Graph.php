@@ -122,7 +122,7 @@ class Graph
     * to use tools such as Fiddler to view
     * requests and responses made with Guzzle
     *
-    * @param string port The port number to use
+    * @param string $port The port number to use
     * @param bool $verifySSL Whether SSL verification should be enabled
     *
     * @return Graph object
