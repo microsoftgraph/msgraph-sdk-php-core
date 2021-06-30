@@ -30,6 +30,13 @@ use Microsoft\Graph\Core\GraphConstants;
  */
 class GraphResponse
 {
+
+    /**
+     * The request object
+     * @var object
+     */
+
+    private $_request;
     /**
     * The body of the response
     *
