@@ -1,7 +1,6 @@
 <?php
 use PHPUnit\Framework\TestCase;
 use Microsoft\Graph\Http\GraphCollectionRequest;
-use Microsoft\Graph\Model;
 
 class GraphCollectionRequestTest extends TestCase
 {
@@ -12,7 +11,6 @@ class GraphCollectionRequestTest extends TestCase
     public function setUp(): void
     {
         $this->collectionRequest = new GraphCollectionRequest("GET", "/endpoint", "token", "url", "version");
-        $this->collectionRequest->setReturnType(Model\User::class);
         $this->collectionRequest->setPageSize(2);
 
         $body = json_encode(array('body' => 'content', '@odata.nextLink' => 'url/version/endpoint?skiptoken=link'));
@@ -47,14 +45,6 @@ class GraphCollectionRequestTest extends TestCase
 
         //Expect error
         $this->collectionRequest->setPageCallInfo();
-    }
-
-    public function testProcessPageCallReturn()
-    {
-        $this->collectionRequest->setPageCallInfo();
-        $response = $this->collectionRequest->execute($this->client);
-        $result = $this->collectionRequest->processPageCallReturn($response);
-        $this->assertInstanceOf(Model\User::class, $result);
     }
 
     public function testEndpointManipulation()

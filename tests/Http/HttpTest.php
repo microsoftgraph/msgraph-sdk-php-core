@@ -123,18 +123,6 @@ class HttpTest extends TestCase
         $this->assertEquals(json_encode($body), $this->container[0]['request']->getBody()->getContents());
     }
 
-    public function testSendObject()
-    {
-        $user = new Microsoft\Graph\Model\User();
-        $user->setDisplayName('Bob Barker');
-        $request = $this->getRequest->attachBody($user);
-        $this->assertInstanceOf(GraphRequest::class, $request);
-
-        $response = $request->execute($this->client);
-        $this->assertInstanceOf(Microsoft\Graph\Http\GraphResponse::class, $response);
-        $this->assertEquals(json_encode($user->getProperties()), $this->container[0]['request']->getBody()->getContents());
-    }
-
     public function testSendString()
     {
         $body = '{"1":"a","2":"b"}';

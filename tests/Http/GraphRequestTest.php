@@ -107,7 +107,7 @@ class GraphRequestTest extends TestCase
 
     public function testAttachPropertyDictionary()
     {
-        $model = new Microsoft\Graph\Model\User(array("id" => 1, "manager" => new Microsoft\Graph\Model\User(array("id" => 2))));
+        $model = array("id" => 1, "manager" => array("id" => 2));
         $this->requests[0]->attachBody($model);
         $body = $this->requests[0]->getBody();
         $this->assertEquals('{"id":1,"manager":{"id":2}}', $body);
