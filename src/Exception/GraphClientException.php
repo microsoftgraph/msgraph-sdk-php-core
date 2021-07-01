@@ -15,7 +15,7 @@ namespace Microsoft\Graph\Exception;
  * @license https://opensource.org/licenses/MIT MIT License
  * @link https://developer.microsoft.com/graph
  */
-class ClientInitialisationException extends GraphException
+class GraphClientException extends GraphException
 {
 
 }

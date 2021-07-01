@@ -19,7 +19,7 @@ namespace Microsoft\Graph;
 
 use Microsoft\Graph\Core\GraphConstants;
 use Microsoft\Graph\Core\NationalCloud;
-use Microsoft\Graph\Exception\ClientInitialisationException;
+use Microsoft\Graph\Exception\GraphClientException;
 use Microsoft\Graph\Http\GraphCollectionRequest;
 use Microsoft\Graph\Http\GraphRequest;
 use Microsoft\Graph\Http\HttpClientFactory;
@@ -72,7 +72,7 @@ class Graph
      * @param string|null $apiVersion if null|"" defaults to "v1.0"
      * @param string|null $nationalCloud if null defaults to "https://graph.microsoft.com"
      * @param HttpClientInterface|null $httpClient null creates default Guzzle client
-     * @throws ClientInitialisationException
+     * @throws GraphClientException
      */
     public function __construct(?string $apiVersion = GraphConstants::API_VERSION,
                                 ?string $nationalCloud = NationalCloud::GLOBAL,

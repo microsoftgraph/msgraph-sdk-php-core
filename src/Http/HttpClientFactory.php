@@ -12,7 +12,7 @@ use GuzzleHttp\RequestOptions;
 use Http\Adapter\Guzzle7\Client as GuzzleAdapter;
 use Http\Promise\Promise;
 use Microsoft\Graph\Core\NationalCloud;
-use Microsoft\Graph\Exception\ClientInitialisationException;
+use Microsoft\Graph\Exception\GraphClientException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -69,14 +69,14 @@ final class HttpClientFactory
      *
      * @param string $nationalCloud
      * @return $this
-     * @throws ClientInitialisationException if $nationalCloud is empty or an invalid national cloud Host
+     * @throws GraphClientException if $nationalCloud is empty or an invalid national cloud Host
      */
     public static function nationalCloud(string $nationalCloud = NationalCloud::GLOBAL): HttpClientFactory {
         if (!$nationalCloud) {
-            throw new ClientInitialisationException("National cloud cannot be empty string");
+            throw new GraphClientException("National cloud cannot be empty string");
         }
         if (!NationalCloud::isValidNationalCloudHost($nationalCloud)) {
-            throw new ClientInitialisationException("Invalid national cloud passed. See https://docs.microsoft.com/en-us/graph/deployments#microsoft-graph-and-graph-explorer-service-root-endpoints.");
+            throw new GraphClientException("Invalid national cloud passed. See https://docs.microsoft.com/en-us/graph/deployments#microsoft-graph-and-graph-explorer-service-root-endpoints.");
         }
         self::$nationalCloud = $nationalCloud;
         return new HttpClientFactory();

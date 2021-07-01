@@ -5,19 +5,19 @@ namespace Http;
 
 
 use Microsoft\Graph\Core\NationalCloud;
-use Microsoft\Graph\Exception\ClientInitialisationException;
+use Microsoft\Graph\Exception\GraphClientException;
 use Microsoft\Graph\Http\HttpClientFactory;
 use Microsoft\Graph\Http\HttpClientInterface;
 
 class HttpClientFactoryTest extends \PHPUnit\Framework\TestCase
 {
     function testNationalCloudWithEmptyString() {
-        $this->expectException(ClientInitialisationException::class);
+        $this->expectException(GraphClientException::class);
         HttpClientFactory::nationalCloud("");
     }
 
     function testNationalCloudWithInvalidUrl() {
-        $this->expectException(ClientInitialisationException::class);
+        $this->expectException(GraphClientException::class);
         HttpClientFactory::nationalCloud("https://www.microsoft.com");
     }
 
