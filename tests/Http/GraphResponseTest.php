@@ -4,6 +4,7 @@ use Microsoft\Graph\Graph;
 use Microsoft\Graph\Http\GraphRequest;
 use Microsoft\Graph\Http\GraphResponse;
 use Microsoft\Graph\Exception\GraphException;
+use Microsoft\Graph\Test\TestData\Model;
 
 class GraphResponseTest extends TestCase
 {
@@ -33,6 +34,15 @@ class GraphResponseTest extends TestCase
 
         $this->request = new GraphRequest("GET", "/endpoint", "token", "baseUrl", "version");
         $this->response = new GraphResponse($this->request, "{response}", "200", ["foo" => "bar"]);
+    }
+
+    public function testGetResponseAsObject()
+    {
+        $this->request->setReturnType(Model\User::class);
+        $response = $this->request->execute($this->client);
+
+        $this->assertInstanceOf(Model\User::class, $response);
+        $this->assertEquals($this->responseBody['displayName'], $response->getDisplayName());
     }
 
     public function testGetResponseHeaders()
@@ -110,12 +120,23 @@ class GraphResponseTest extends TestCase
     {
         $this->request->execute($this->client);
         $this->request->execute($this->client);
-        $hosts = $this->request->execute($this->client);
-        $hostsResponseArray = [0 => $hosts->getBody()['value']];
-        $this->assertIsArray($hostsResponseArray);
-        $this->assertSame(array_values($hostsResponseArray), $hostsResponseArray);
-        $this->assertEquals(2, count($hostsResponseArray[0]));
-        $this->assertEquals("Bob", $hostsResponseArray[0][1]['givenName']);
+        $hosts = $this->request->setReturnType(Model\User::class)->execute($this->client);
+
+        $this->assertIsArray($hosts);
+        $this->assertContainsOnlyInstancesOf(Model\User::class, $hosts);
+        $this->assertSame(array_values($hosts), $hosts);
+        $this->assertEquals(2, count($hosts));
+        $this->assertEquals("Bob", $hosts[0]->getGivenName());
+    }
+
+    public function testGetValueObject()
+    {
+        $this->request->execute($this->client);
+        $this->request->execute($this->client);
+        $this->request->execute($this->client);
+        $response = $this->request->setReturnType(Model\User::class)->execute($this->client);
+
+        $this->assertInstanceOf(Model\User::class, $response);
     }
 
     public function testGetZeroMultipleObjects()
@@ -124,8 +145,8 @@ class GraphResponseTest extends TestCase
         $this->request->execute($this->client);
         $this->request->execute($this->client);
         $this->request->execute($this->client);
-        $response = $this->request->execute($this->client);
+        $response = $this->request->setReturnType(Model\User::class)->execute($this->client);
 
-        $this->assertSame(array(), $response->getBody()['value']);
+        $this->assertSame(array(), $response);
     }
 }

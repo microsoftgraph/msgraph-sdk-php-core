@@ -7,6 +7,7 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Client;
+use Microsoft\Graph\Test\TestData\Model;
 
 class HttpTest extends TestCase
 {
@@ -123,6 +124,18 @@ class HttpTest extends TestCase
         $this->assertEquals(json_encode($body), $this->container[0]['request']->getBody()->getContents());
     }
 
+    public function testSendObject()
+    {
+        $user = new Model\User();
+        $user->setDisplayName('Bob Barker');
+        $request = $this->getRequest->attachBody($user);
+        $this->assertInstanceOf(GraphRequest::class, $request);
+
+        $response = $request->execute($this->client);
+        $this->assertInstanceOf(Microsoft\Graph\Http\GraphResponse::class, $response);
+        $this->assertEquals(json_encode($user->getProperties()), $this->container[0]['request']->getBody()->getContents());
+    }
+
     public function testSendString()
     {
         $body = '{"1":"a","2":"b"}';
@@ -136,7 +149,7 @@ class HttpTest extends TestCase
 
     public function testSendStream()
     {
-        $body = GuzzleHttp\Psr7\stream_for('stream');
+        $body = GuzzleHttp\Psr7\Utils::streamFor('stream');
         $request = $this->getRequest->attachBody($body);
         $this->assertInstanceOf(GraphRequest::class, $request);
 
