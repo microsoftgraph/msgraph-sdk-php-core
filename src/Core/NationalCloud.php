@@ -7,7 +7,7 @@
 
 namespace Microsoft\Graph\Core;
 
-use Microsoft\Graph\Http\GraphRequest;
+use Microsoft\Graph\Http\GraphRequestUtil;
 
 /**
  * Class NationalCloud
@@ -28,7 +28,7 @@ final class NationalCloud
     const CHINA = "https://microsoftgraph.chinacloudapi.cn";
 
     /**
-     * Unique hostnames from constant values
+     * Unique hostnames from constant values [graph.microsoft.com, graph.microsoft.us, ...]
      *
      * @var array
      */
@@ -42,14 +42,12 @@ final class NationalCloud
      */
     public static function isValidNationalCloudHost(string $url): bool {
         self::initHosts();
-        if (GraphRequest::isValidHost($url)) {
-            return array_key_exists($url, self::$hosts);
-        }
-        return false;
+        $validUrlParts = GraphRequestUtil::isValidBaseUrl($url);
+        return $validUrlParts && array_key_exists($validUrlParts["host"], self::$hosts);
     }
 
     /**
-     * Store constants values in array with unique keys for optimal lookup
+     * Extracts hostnames from constant values to an array with unique keys for optimal lookup
      */
     private static function initHosts(): void {
         if (!self::$hosts) {
@@ -57,7 +55,8 @@ final class NationalCloud
             $constants = $reflectedClass->getConstants();
             foreach ($constants as $constName => $url) {
                 // Create associative array for O(1) key lookup
-                self::$hosts[$url] = true;
+                $hostname = parse_url($url)["host"];
+                self::$hosts[$hostname] = true;
             }
         }
     }

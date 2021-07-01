@@ -137,7 +137,7 @@ class GraphRequest
         if (!$this->accessToken) {
             throw new GraphException(GraphConstants::NO_ACCESS_TOKEN);
         }
-        if (!self::isValidHost($baseUrl)) {
+        if (!GraphRequestUtil::isValidBaseUrl($baseUrl)) {
             throw new GraphException("Invalid base url provided. Ensure url contains a scheme and no query params/paths are included.");
         }
         $this->baseUrl = $baseUrl;
@@ -478,20 +478,6 @@ class GraphRequest
         } catch(GraphException $e) {
             throw new GraphException(GraphConstants::INVALID_FILE);
         }
-    }
-
-    /**
-     * Determine if url is a valid host for use as a base URL
-     *
-     * @param string $url
-     * @return bool
-     */
-    public static function isValidHost(string $url): bool {
-        $urlParts = parse_url($url);
-        return ($urlParts
-                && array_key_exists("scheme", $urlParts)
-                && array_key_exists("host", $urlParts)
-                && !(array_key_exists("path", $urlParts) || array_key_exists("query", $urlParts)));
     }
 
     /**

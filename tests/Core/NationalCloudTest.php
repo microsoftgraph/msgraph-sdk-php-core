@@ -19,6 +19,14 @@ class NationalCloudTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue(NationalCloud::isValidNationalCloudHost(NationalCloud::GLOBAL.":1234"));
     }
 
+    function testNationalCloudWithTrailingForwardSlashIsValid() {
+        $this->assertTrue(NationalCloud::isValidNationalCloudHost(NationalCloud::GLOBAL."/"));
+    }
+
+    function testNationalCloudWithPathIsValid() {
+        $this->assertTrue(NationalCloud::isValidNationalCloudHost(NationalCloud::GLOBAL."/v1.0/"));
+    }
+
     function testEmptyNationalCloudUrlInvalid() {
         $this->assertFalse(NationalCloud::isValidNationalCloudHost(""));
     }
