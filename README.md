@@ -2,15 +2,12 @@
 
 [![Latest Stable Version](https://poser.pugx.org/microsoft/microsoft-graph-core/version)](https://packagist.org/packages/microsoft/microsoft-graph-core)
 
-## Get started with the PHP Connect Sample
-If you want to play around with the PHP library, you can get up and running quickly with the [PHP Connect Sample](https://github.com/microsoftgraph/php-connect-sample). This sample will start you with a little Laravel project that helps you with registration, authentication, and making a simple call to the service.
-
-## Install the SDK
-You can install the PHP SDK with Composer, either run `composer require microsoft/microsoft-graph-core`, or edit your `composer.json` file:
+## Install the Core Library
+To install the `microsoft-graph-core` library with Composer, either run `composer require microsoft/microsoft-graph-core`, or edit your `composer.json` file:
 ```
 {
     "require": {
-        "microsoft/microsoft-graph": "^0.1.0"
+        "microsoft/microsoft-graph-core": "^2.0.0"
     }
 }
 ```
