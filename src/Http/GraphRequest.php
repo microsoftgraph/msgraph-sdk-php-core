@@ -65,7 +65,7 @@ class GraphRequest
     /**
      * The Graph client
      *
-     * @var BaseClient
+     * @var AbstractGraphClient
      */
     protected $graphClient;
     /**
@@ -88,11 +88,11 @@ class GraphRequest
      *
      * @param string $requestType The HTTP method to use e.g. "GET" or "POST"
      * @param string $endpoint The url path on the host to be called-
-     * @param BaseClient $graphClient The Graph client to use
+     * @param AbstractGraphClient $graphClient The Graph client to use
      * @param string $baseUrl (optional) Use to pass a custom host defined on the graph client. If empty, it's set to $client's national cloud
      * @throws GraphClientException
      */
-    public function __construct(string $requestType, string $endpoint, BaseClient $graphClient, string $baseUrl = "")
+    public function __construct(string $requestType, string $endpoint, AbstractGraphClient $graphClient, string $baseUrl = "")
     {
         if (!$requestType || !$endpoint || !$graphClient) {
             throw new GraphClientException("Request type, endpoint and client cannot be null or empty");

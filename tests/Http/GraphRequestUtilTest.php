@@ -9,7 +9,7 @@ namespace Http;
 
 
 use Microsoft\Graph\Core\NationalCloud;
-use Microsoft\Graph\Http\BaseClient;
+use Microsoft\Graph\Http\AbstractGraphClient;
 use Microsoft\Graph\Http\GraphRequestUtil;
 
 class GraphRequestUtilTest extends \PHPUnit\Framework\TestCase
@@ -17,7 +17,16 @@ class GraphRequestUtilTest extends \PHPUnit\Framework\TestCase
     private $apiVersion;
 
     function setUp(): void {
-        $this->apiVersion = (new BaseClient())->getApiVersion();
+        $graphClient = (new class extends AbstractGraphClient {
+            public function getSdkVersion(): string {
+                return "";
+            }
+
+            public function getApiVersion(): string {
+                return "v1.0";
+            }
+        });
+        $this->apiVersion = $graphClient->getApiVersion();
     }
 
     function testGetRequestUriWithFullNationalCloudEndpointUrlReturnsUri() {

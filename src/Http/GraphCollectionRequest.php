@@ -63,11 +63,11 @@ class GraphCollectionRequest extends GraphRequest
      * @param string $requestType The HTTP verb for the
      *                             request ("GET", "POST", "PUT", etc.)
      * @param string $endpoint The URI of the endpoint to hit
-     * @param BaseClient $graphClient
+     * @param AbstractGraphClient $graphClient
      * @param string $baseUrl The base URL of the request
      * @throws GraphClientException
      */
-    public function __construct(string $requestType, string $endpoint, BaseClient $graphClient, string $baseUrl = "")
+    public function __construct(string $requestType, string $endpoint, AbstractGraphClient $graphClient, string $baseUrl = "")
     {
         parent::__construct(
             $requestType,
