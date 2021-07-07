@@ -13,6 +13,7 @@ use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
 use Microsoft\Graph\Core\ExceptionWrapper;
 use Microsoft\Graph\Core\GraphConstants;
+use Microsoft\Graph\Core\NationalCloud;
 use Microsoft\Graph\Exception\GraphClientException;
 use Microsoft\Graph\Exception\GraphException;
 
@@ -97,37 +98,17 @@ class GraphRequest
         if (!$requestType || !$endpoint || !$graphClient) {
             throw new GraphClientException("Request type, endpoint and client cannot be null or empty");
         }
-        $this->requestType = $requestType;
-        $this->graphClient = $graphClient;
-        $this->headers = $this->_getDefaultHeaders();
-
         if (!$graphClient->getAccessToken()) {
             throw new GraphClientException(GraphConstants::NO_ACCESS_TOKEN);
         }
+        $this->requestType = $requestType;
+        $this->graphClient = $graphClient;
         $this->accessToken = $graphClient->getAccessToken();
         $baseUrl = ($baseUrl) ?: $graphClient->getNationalCloud();
         $this->initRequestUri($baseUrl, $endpoint);
+        $this->initHeaders($baseUrl);
         // Initialise PSR-7 Request object
         $this->httpRequest = new Request($requestType, $this->requestUri, $this->headers);
-    }
-
-    /**
-     * Creates full request URI by resolving $baseUrl and $endpoint based on RFC 3986
-     *
-     * @param string $baseUrl
-     * @param $endpoint
-     * @throws GraphClientException
-     */
-    private function initRequestUri(string $baseUrl, $endpoint): void {
-        try {
-            $this->requestUri = GraphRequestUtil::getRequestUri($baseUrl, $endpoint, $this->graphClient->getApiVersion());
-            if (!$this->requestUri) {
-                // $endpoint is a full URL but doesn't meet criteria
-                throw new GraphClientException("Endpoint is not a valid URL. Must contain national cloud host.");
-            }
-        } catch (\InvalidArgumentException $ex) {
-            throw new GraphClientException("Unable to resolve base URL=".$baseUrl."\" with endpoint=".$endpoint."\"", 0, $ex);
-        }
     }
 
     public function getHttpRequest(): Request
@@ -413,18 +394,42 @@ class GraphRequest
     }
 
     /**
-    * Get a list of headers for the request
-    *
-    * @return array The headers for the request
-    */
-    private function _getDefaultHeaders()
+     * Sets default headers based on baseUrl being a Graph endpoint or not
+     */
+    private function initHeaders(string $baseUrl): void
     {
-        $headers = [
-            'Content-Type' => 'application/json',
-            'SdkVersion' => 'Graph-php-' . GraphConstants::SDK_VERSION,
-            'Authorization' => 'Bearer ' . $this->graphClient->getAccessToken()
-        ];
-        return $headers;
+        $coreSdkVersion = "graph-php-core/".GraphConstants::SDK_VERSION;
+        $serviceLibSdkVersion = "Graph-php-".$this->graphClient->getSdkVersion();
+        if (NationalCloud::containsNationalCloudHost($baseUrl)) {
+            $this->headers = [
+                'Content-Type' => 'application/json',
+                'SdkVersion' => $coreSdkVersion.", ".$serviceLibSdkVersion,
+                'Authorization' => 'Bearer ' . $this->graphClient->getAccessToken()
+            ];
+        } else {
+            $this->headers = [
+                'Content-Type' => 'application/json',
+            ];
+        }
+    }
+
+    /**
+     * Creates full request URI by resolving $baseUrl and $endpoint based on RFC 3986
+     *
+     * @param string $baseUrl
+     * @param $endpoint
+     * @throws GraphClientException
+     */
+    private function initRequestUri(string $baseUrl, $endpoint): void {
+        try {
+            $this->requestUri = GraphRequestUtil::getRequestUri($baseUrl, $endpoint, $this->graphClient->getApiVersion());
+            if (!$this->requestUri) {
+                // $endpoint is a full URL but doesn't meet criteria
+                throw new GraphClientException("Endpoint is not a valid URL. Must contain national cloud host.");
+            }
+        } catch (\InvalidArgumentException $ex) {
+            throw new GraphClientException("Unable to resolve base URL=".$baseUrl."\" with endpoint=".$endpoint."\"", 0, $ex);
+        }
     }
 
     /**
