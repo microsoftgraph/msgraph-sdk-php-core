@@ -3,30 +3,20 @@
 * Copyright (c) Microsoft Corporation.  All Rights Reserved.
 * Licensed under the MIT License.  See License in the project root
 * for license information.
-*
-* GraphCollectionRequest File
-* PHP version 7
-*
-* @category  Library
-* @package   Microsoft.Graph
-* @copyright 2016 Microsoft Corporation
-* @license   https://opensource.org/licenses/MIT MIT License
-* @version   GIT: 0.1.0
-* @link      https://graph.microsoft.io/
 */
 
 namespace Microsoft\Graph\Http;
 
+use Microsoft\Graph\Exception\GraphClientException;
 use Microsoft\Graph\Exception\GraphException;
 use Microsoft\Graph\Core\GraphConstants;
 
 /**
  * Class GraphCollectionRequest
- *
- * @category Library
- * @package  Microsoft.Graph
- * @license  https://opensource.org/licenses/MIT MIT License
- * @link     https://graph.microsoft.io/
+ * @package Microsoft\Graph\Http
+ * @copyright 2021 Microsoft Corporation
+ * @license https://opensource.org/licenses/MIT MIT License
+ * @link https://developer.microsoft.com/graph
  */
 class GraphCollectionRequest extends GraphRequest
 {
@@ -68,26 +58,22 @@ class GraphCollectionRequest extends GraphRequest
     protected $originalReturnType;
 
     /**
-    * Constructs a new GraphCollectionRequest object
-    *
-    * @param string $requestType  The HTTP verb for the
-    *                             request ("GET", "POST", "PUT", etc.)
-    * @param string $endpoint     The URI of the endpoint to hit
-    * @param string $accessToken  A valid access token
-    * @param string $baseUrl      The base URL of the request
-    * @param string $apiVersion   The version of the API to call
-    * @param HttpClientInterface $httpClient The HTTP client to use
-    * @throws GraphException when no access token is provided
-    */
-    public function __construct($requestType, $endpoint, $accessToken, $baseUrl, $apiVersion, $httpClient)
+     * Constructs a new GraphCollectionRequest object
+     *
+     * @param string $requestType The HTTP verb for the
+     *                             request ("GET", "POST", "PUT", etc.)
+     * @param string $endpoint The URI of the endpoint to hit
+     * @param BaseClient $graphClient
+     * @param string $baseUrl The base URL of the request
+     * @throws GraphClientException
+     */
+    public function __construct(string $requestType, string $endpoint, BaseClient $graphClient, string $baseUrl = "")
     {
         parent::__construct(
             $requestType,
             $endpoint,
-            $accessToken,
-            $baseUrl,
-            $apiVersion,
-            $httpClient
+            $graphClient,
+            $baseUrl
         );
         $this->end = false;
     }
@@ -104,11 +90,8 @@ class GraphCollectionRequest extends GraphRequest
         $query = '$count=true';
         $request = new GraphRequest(
             $this->requestType,
-            $this->endpoint . $this->getConcatenator() . $query,
-            $this->accessToken,
-            $this->baseUrl,
-            $this->apiVersion,
-            $this->proxyPort
+            $this->requestUri . $this->getConcatenator() . $query,
+            $this->graphClient
         );
         $result = $request->execute()->getBody();
 

@@ -3,33 +3,25 @@
 * Copyright (c) Microsoft Corporation.  All Rights Reserved.
 * Licensed under the MIT License.  See License in the project root
 * for license information.
-*
-* GraphRequest File
-* PHP version 7
-*
-* @category  Library
-* @package   Microsoft.Graph
-* @copyright 2016 Microsoft Corporation
-* @license   https://opensource.org/licenses/MIT MIT License
-* @version   GIT: 0.1.0
-* @link      https://graph.microsoft.io/
 */
 
 namespace Microsoft\Graph\Http;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
-use Microsoft\Graph\Core\GraphConstants;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Uri;
 use Microsoft\Graph\Core\ExceptionWrapper;
+use Microsoft\Graph\Core\GraphConstants;
+use Microsoft\Graph\Exception\GraphClientException;
 use Microsoft\Graph\Exception\GraphException;
 
 /**
  * Class GraphRequest
- *
- * @category Library
- * @package  Microsoft.Graph
- * @license  https://opensource.org/licenses/MIT MIT License
- * @link     https://graph.microsoft.io/
+ * @package Microsoft\Graph\Http
+ * @copyright 2021 Microsoft Corporation
+ * @license https://opensource.org/licenses/MIT MIT License
+ * @link https://developer.microsoft.com/graph
  */
 class GraphRequest
 {
@@ -39,24 +31,6 @@ class GraphRequest
     * @var string
     */
     protected $accessToken;
-    /**
-    * The API version to use ("v1.0", "beta")
-    *
-    * @var string
-    */
-    protected $apiVersion;
-    /**
-    * The base url to call
-    *
-    * @var string
-    */
-    protected $baseUrl;
-    /**
-    * The endpoint to call
-    *
-    * @var string
-    */
-    protected $endpoint;
     /**
     * An array of headers to send with the request
     *
@@ -72,7 +46,7 @@ class GraphRequest
     /**
     * The type of request to make ("GET", "POST", etc.)
     *
-    * @var object
+    * @var string
     */
     protected $requestType;
     /**
@@ -83,88 +57,82 @@ class GraphRequest
     */
     protected $returnsStream;
     /**
-    * The return type to cast the response as
+    * The object type to cast the response to
     *
-    * @var object
+    * @var string
     */
     protected $returnType;
     /**
-    * The timeout, in seconds
-    *
-    * @var string
-    */
-    protected $timeout;
-    /**
-    * The proxy port to use. Null to disable
-    *
-    * @var string
-    */
-    protected $proxyPort;
-    /**
-     * Whether SSL verification should be used for proxy requests
+     * The Graph client
      *
-     * @var bool
+     * @var BaseClient
      */
-    protected $proxyVerifySSL;
+    protected $graphClient;
     /**
-    * Request options to decide if Guzzle Client should throw exceptions when http code is 4xx or 5xx
-    *
-    * @var bool
-    */
-    protected $http_errors;
-
-    protected $httpClient;
+     * PSR-7 Request to be passed to HTTP client
+     *
+     * @var \GuzzleHttp\Psr7\Request
+     */
+    protected $httpRequest;
+    /**
+     * Full Request URI (base URL + endpoint)
+     *
+     * @var Uri
+     */
+    protected $requestUri;
 
     /**
-    * Constructs a new Graph Request object
-    *
-    * @param string $requestType  The HTTP method to use, e.g. "GET" or "POST"
-    * @param string $endpoint     The Graph endpoint to call
-    * @param string $accessToken  A valid access token to validate the Graph call
-    * @param string $baseUrl      The base URL to call
-    * @param string $apiVersion   The API version to use
-     * @param HttpClientInterface $httpClient  The HTTP client to use
-
-    * @throws GraphException when no access token is provided | Invalid base URL provided
-    */
-    public function __construct($requestType, $endpoint, $accessToken, $baseUrl, $apiVersion, $httpClient)
+     * GraphRequest constructor.
+     * Sets $baseUrl by default to $graphClient's national cloud
+     * Resolves $baseUrl and $endpoint based on RFC 3986
+     *
+     * @param string $requestType The HTTP method to use e.g. "GET" or "POST"
+     * @param string $endpoint The url path on the host to be called-
+     * @param BaseClient $graphClient The Graph client to use
+     * @param string $baseUrl (optional) Use to pass a custom host defined on the graph client. If empty, it's set to $client's national cloud
+     * @throws GraphClientException
+     */
+    public function __construct(string $requestType, string $endpoint, BaseClient $graphClient, string $baseUrl = "")
     {
+        if (!$requestType || !$endpoint || !$graphClient) {
+            throw new GraphClientException("Request type, endpoint and client cannot be null or empty");
+        }
         $this->requestType = $requestType;
-        $this->endpoint = $endpoint;
-        $this->accessToken = $accessToken;
-        $this->http_errors = true;
-
-        if (!$this->accessToken) {
-            throw new GraphException(GraphConstants::NO_ACCESS_TOKEN);
-        }
-        if (!GraphRequestUtil::isValidBaseUrl($baseUrl)) {
-            throw new GraphException("Invalid base url provided. Ensure url contains a scheme and no query params/paths are included.");
-        }
-        $this->baseUrl = $baseUrl;
-        $this->apiVersion = $apiVersion;
-        $this->timeout = 100;
+        $this->graphClient = $graphClient;
         $this->headers = $this->_getDefaultHeaders();
-        $this->httpClient = $httpClient;
+
+        if (!$graphClient->getAccessToken()) {
+            throw new GraphClientException(GraphConstants::NO_ACCESS_TOKEN);
+        }
+        $this->accessToken = $graphClient->getAccessToken();
+        $baseUrl = ($baseUrl) ?: $graphClient->getNationalCloud();
+        $this->initRequestUri($baseUrl, $endpoint);
+        // Initialise PSR-7 Request object
+        $this->httpRequest = new Request($requestType, $this->requestUri, $this->headers);
     }
 
     /**
-     * Gets the Base URL the request is made to
+     * Creates full request URI by resolving $baseUrl and $endpoint based on RFC 3986
      *
-     * @return string
+     * @param string $baseUrl
+     * @param $endpoint
+     * @throws GraphClientException
      */
-    public function getBaseUrl()
-    {
-        return $this->baseUrl;
+    private function initRequestUri(string $baseUrl, $endpoint): void {
+        try {
+            $this->requestUri = GraphRequestUtil::getRequestUri($baseUrl, $endpoint, $this->graphClient->getApiVersion());
+            if (!$this->requestUri) {
+                // $endpoint is a full URL but doesn't meet criteria
+                throw new GraphClientException("Endpoint is not a valid URL. Must contain national cloud host.");
+            }
+        } catch (\InvalidArgumentException $ex) {
+            throw new GraphClientException("Unable to resolve base URL=".$baseUrl."\" with endpoint=".$endpoint."\"", 0, $ex);
+        }
     }
 
-    /**
-     * Gets the API version in use for the request
-     *
-     * @return string
-     */
-    public function getApiVersion()
+    public function getHttpRequest(): Request
     {
-        return $this->apiVersion;
+        return $this->httpRequest;
     }
 
     /**
@@ -175,19 +143,6 @@ class GraphRequest
     public function getReturnsStream()
     {
         return $this->returnsStream;
-    }
-
-    /**
-    * Sets a http errors option
-    *
-    * @param string $http_errors A bool option to the Graph call
-    *
-    * @return GraphRequest object
-    */
-    public function setHttpErrors($http_errors)
-    {
-        $this->http_errors = $http_errors;
-        return $this;
     }
 
     /**
@@ -274,29 +229,6 @@ class GraphRequest
     public function getBody()
     {
         return $this->requestBody;
-    }
-
-    /**
-    * Sets the timeout limit of the cURL request
-    *
-    * @param string $timeout The timeout in seconds
-    *
-    * @return GraphRequest object
-    */
-    public function setTimeout($timeout)
-    {
-        $this->timeout = $timeout;
-        return $this;
-    }
-
-    /**
-     * Gets the timeout value of the request
-     *
-     * @return string
-     */
-    public function getTimeout()
-    {
-        return $this->timeout;
     }
 
     /**
@@ -488,27 +420,11 @@ class GraphRequest
     private function _getDefaultHeaders()
     {
         $headers = [
-            'Host' => $this->baseUrl,
             'Content-Type' => 'application/json',
             'SdkVersion' => 'Graph-php-' . GraphConstants::SDK_VERSION,
-            'Authorization' => 'Bearer ' . $this->accessToken
+            'Authorization' => 'Bearer ' . $this->graphClient->getAccessToken()
         ];
         return $headers;
-    }
-
-    /**
-    * Get the concatenated request URL
-    *
-    * @return string request URL
-    */
-    private function _getRequestUrl()
-    {
-        //Send request with opaque URL
-        if (stripos($this->endpoint, "http") === 0) {
-            return $this->endpoint;
-        }
-
-        return $this->apiVersion . $this->endpoint;
     }
 
     /**

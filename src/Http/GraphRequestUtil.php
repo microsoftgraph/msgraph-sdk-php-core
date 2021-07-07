@@ -8,6 +8,11 @@
 
 namespace Microsoft\Graph\Http;
 
+use GuzzleHttp\Psr7\Uri;
+use GuzzleHttp\Psr7\UriResolver;
+use Microsoft\Graph\Core\NationalCloud;
+use Psr\Http\Message\UriInterface;
+
 /**
  * Class GraphRequestUtil
  * @package Microsoft\Graph\Http
@@ -18,30 +23,22 @@ namespace Microsoft\Graph\Http;
 class GraphRequestUtil
 {
     /**
-     * Determine if $url meets criteria for use as a base URL.
-     * Returns null if $url is invalid
-     * Returns an array of URL parts if $url is valid
+     * Returns full request URI by resolving $baseUrl and $endpoint based on RFC 3986
+     * Prepends $apiVersion to $endpoint if $baseUrl contains a national cloud host
+     * $endpoint can be a full URI with a national cloud host
      *
-     * @param string $url
-     * @return array|null
+     * @param string $baseUrl if empty, is overwritten with $client's national cloud
+     * @param string $endpoint can be a full URL
+     * @param string $apiVersion
+     * @return UriInterface|null
      */
-    public static function isValidBaseUrl(string $url): ?array {
-        $urlParts = parse_url($url);
-        if ($urlParts
-            && array_key_exists("scheme", $urlParts)
-            && strtolower($urlParts["scheme"]) == "https"
-            && array_key_exists("host", $urlParts)
-            && (
-                // if there's a path, must end with "/" e.g. https://graph.microsoft.com/beta/
-                (array_key_exists("path", $urlParts) && substr($url, -1) == "/")
-                // hostname alone without path is also valid e.g. https://graph.microsoft.com
-                || !array_key_exists("path", $urlParts)
-            )
-            && !(array_key_exists("query", $urlParts))
-        ) {
-            return $urlParts;
+    public static function getRequestUri(string $baseUrl, string $endpoint, string $apiVersion = "v1.0"): ?UriInterface {
+        // If endpoint is a full url, ensure the host is a national cloud or custom host
+        if (parse_url($endpoint, PHP_URL_SCHEME)) {
+            return (NationalCloud::containsNationalCloudHost($endpoint)) ? new Uri($endpoint) : null;
         }
-        return null;
+        $relativeUrl = (NationalCloud::containsNationalCloudHost($baseUrl)) ? "/".$apiVersion : "";
+        $relativeUrl .= (substr($endpoint, 0, 1) == "/") ? $endpoint : "/".$endpoint;
+        return UriResolver::resolve(new Uri($baseUrl), new Uri($relativeUrl));
     }
-
 }

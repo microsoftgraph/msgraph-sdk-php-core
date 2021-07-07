@@ -132,10 +132,7 @@ class BaseClient
         return new GraphRequest(
             $requestType,
             $endpoint,
-            $this->accessToken,
-            $this->nationalCloud,
-            $this->apiVersion,
-            $this->httpClient
+            $this
         );
     }
 
@@ -155,10 +152,7 @@ class BaseClient
         return new GraphCollectionRequest(
             $requestType,
             $endpoint,
-            $this->accessToken,
-            $this->nationalCloud,
-            $this->apiVersion,
-            $this->httpClient
+            $this
         );
     }
 }

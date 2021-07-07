@@ -8,55 +8,75 @@
 namespace Http;
 
 
+use Microsoft\Graph\Core\NationalCloud;
+use Microsoft\Graph\Http\BaseClient;
 use Microsoft\Graph\Http\GraphRequestUtil;
 
 class GraphRequestUtilTest extends \PHPUnit\Framework\TestCase
 {
-    function testValidBaseUrlReturnsUrlParts() {
-        $url = "https://graph.microsoft.com";
-        $expected = [
-            "scheme" => "https",
-            "host" => "graph.microsoft.com"
+    private $apiVersion;
+
+    function setUp(): void {
+        $this->apiVersion = (new BaseClient())->getApiVersion();
+    }
+
+    function testGetRequestUriWithFullNationalCloudEndpointUrlReturnsUri() {
+        $endpoint = NationalCloud::GLOBAL."/me/events?\$skip=100&\$top=10";
+        $result = GraphRequestUtil::getRequestUri("", $endpoint, $this->apiVersion);
+        self::assertEquals($endpoint, strval($result));
+    }
+
+    function testGetRequestUriWithFullNonNationalCloudEndpointReturnsNull() {
+        $endpoint = "https://www.outlook.com/mail?user=me";
+        $uri = GraphRequestUtil::getRequestUri("", $endpoint, $this->apiVersion);
+        self::assertNull($uri);
+    }
+
+    function testGetRequestUriWithValidBaseUrlResolvesCorrectly() {
+        $validBaseUrls = [
+            "https://graph.microsoft.com",
+            "https://graph.microsoft.com/",
+            "https://graph.microsoft.com/beta",
+            "https://graph.microsoft.com/v1.0/"
         ];
-        $this->assertEquals($expected, GraphRequestUtil::isValidBaseUrl($url));
+        $endpoints = ["/me/events", "me/events"];
+        $expected = "https://graph.microsoft.com/v1.0/me/events";
+        foreach ($validBaseUrls as $baseUrl) {
+            foreach ($endpoints as $endpoint) {
+                $uri = GraphRequestUtil::getRequestUri($baseUrl, $endpoint, $this->apiVersion);
+                self::assertEquals($expected, strval($uri));
+            }
+        }
     }
 
-    function testValidBaseUrlWithPathReturnsUrlParts() {
-        $url = "https://graph.microsoft.com/beta/";
-        $expected = [
-            "scheme" => "https",
-            "host" => "graph.microsoft.com",
-            "path" => "/beta/"
-        ];
-        $this->assertEquals($expected, GraphRequestUtil::isValidBaseUrl($url));
+    function testGetRequestUriWithEmptyBaseUriUsesNationalCloudByDefault() {
+        $endpoints= ["/me/events", "me/events"];
+        $expected = "https://graph.microsoft.com/v1.0/me/events";
+        foreach ($endpoints as $endpoint) {
+            $uri = GraphRequestUtil::getRequestUri("", $endpoint, $this->apiVersion);
+            self::assertEquals($expected, strval($uri));
+        }
     }
 
-    function testBaseUrlWithPathButNoTrailingBackslashReturnsNull() {
-        $url = "https://graph.microsoft.com/v1.0";
-        $this->assertNull(GraphRequestUtil::isValidBaseUrl($url));
+    function testGetRequestUriWithoutNationalCloudHostDoesntSetApiVersion() {
+        $baseUrl = "https://outlook.microsoft.com/mail/";
+        $endpoint = "?startDate=2020-10-02&sort=desc";
+        $expected = $baseUrl.$endpoint;
+        $uri = GraphRequestUtil::getRequestUri($baseUrl, $endpoint, $this->apiVersion);
+        self::assertEquals($expected, strval($uri));
+
     }
 
-    function testBaseUrlWithoutHttpsReturnsNull() {
-        $url = "http://graph.microsoft.com";
-        $this->assertNull(GraphRequestUtil::isValidBaseUrl($url));
+    function testGetRequestUriWithInvalidFullEndpointUrlThrowsException() {
+        $this->expectException(\InvalidArgumentException::class);
+        $endpoint = "http:/microsoft.com:localhost\$endpoint";
+        $uri = GraphRequestUtil::getRequestUri("", $endpoint, $this->apiVersion);
     }
 
-    function testBaseUrlWithoutHostReturnsNull() {
-        $url = "https:///beta";
-        $this->assertNull(GraphRequestUtil::isValidBaseUrl($url));
-    }
-
-    function testBaseUrlWithQueryParamsReturnsNull() {
-        $url = "https://graph.microsoft.com/v1.0?key=value";
-        $this->assertNull(GraphRequestUtil::isValidBaseUrl($url));
-    }
-
-    function testEmptyBaseUrlReturnsNull() {
-        $this->assertNull(GraphRequestUtil::isValidBaseUrl(""));
-    }
-
-    function testNullBaseUrlThrowsException() {
-        $this->expectException(\TypeError::class);
-        GraphRequestUtil::isValidBaseUrl(null);
+    function testGetRequestUrlWithInvalidBaseUrlAndEndpointThrowsException() {
+        $this->expectException(\InvalidArgumentException::class);
+        $baseUrl = "https://graph.microsoft.com";
+        $endpoint = "http:/microsoft.com:localhost\$endpoint";
+        $uri = GraphRequestUtil::getRequestUri($baseUrl, $endpoint, $this->apiVersion);
     }
 }
