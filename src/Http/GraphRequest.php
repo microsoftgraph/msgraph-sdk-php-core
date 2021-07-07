@@ -43,7 +43,7 @@ class GraphRequest
     *
     * @var string
     */
-    protected $requestBody;
+    protected $requestBody = null;
     /**
     * The type of request to make ("GET", "POST", etc.)
     *
@@ -165,9 +165,10 @@ class GraphRequest
     *
     * @return GraphRequest object
     */
-    public function addHeaders($headers)
+    public function addHeaders(array $headers): self
     {
-        $this->headers = array_merge($this->headers, $headers);
+        $this->headers = array_merge_recursive($this->headers, $headers);
+        $this->initPsr7HttpRequest();
         return $this;
     }
 
@@ -176,7 +177,7 @@ class GraphRequest
     *
     * @return array of headers
     */
-    public function getHeaders()
+    public function getHeaders(): array
     {
         return $this->headers;
     }
@@ -189,7 +190,7 @@ class GraphRequest
     *
     * @return GraphRequest object
     */
-    public function attachBody($obj)
+    public function attachBody($obj): self
     {
         // Attach streams & JSON automatically
         if (is_string($obj) || is_a($obj, 'GuzzleHttp\\Psr7\\Stream')) {
@@ -199,6 +200,7 @@ class GraphRequest
         else {
             $this->requestBody = json_encode($obj);
         }
+        $this->initPsr7HttpRequest();
         return $this;
     }
 
@@ -430,6 +432,10 @@ class GraphRequest
         } catch (\InvalidArgumentException $ex) {
             throw new GraphClientException("Unable to resolve base URL=".$baseUrl."\" with endpoint=".$endpoint."\"", 0, $ex);
         }
+    }
+
+    private function initPsr7HttpRequest(): void {
+        $this->httpRequest = new Request($this->requestType, $this->requestUri, $this->headers, $this->requestBody);
     }
 
     /**
