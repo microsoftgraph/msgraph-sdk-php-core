@@ -45,7 +45,7 @@ final class NationalCloud
                 && array_key_exists("scheme", $validUrlParts)
                 && $validUrlParts["scheme"] == "https"
                 && array_key_exists("host", $validUrlParts)
-                && array_key_exists($validUrlParts["host"], self::$hosts);
+                && array_key_exists(strtolower($validUrlParts["host"]), self::$hosts);
     }
 
     /**

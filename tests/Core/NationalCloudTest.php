@@ -27,6 +27,11 @@ class NationalCloudTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue(NationalCloud::containsNationalCloudHost(NationalCloud::GLOBAL."/v1.0/"));
     }
 
+    function testContainsNationalCloudWithCapitalisedHost() {
+        $url = "https://GRAPH.microsoft.COM";
+        self::assertTrue(NationalCloud::containsNationalCloudHost($url));
+    }
+
     function testEmptyNationalCloudUrlInvalid() {
         $this->assertFalse(NationalCloud::containsNationalCloudHost(""));
     }
