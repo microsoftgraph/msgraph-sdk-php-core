@@ -103,8 +103,7 @@ class GraphRequest
         $baseUrl = ($baseUrl) ?: $graphClient->getNationalCloud();
         $this->initRequestUri($baseUrl, $endpoint);
         $this->initHeaders($baseUrl);
-        // Initialise PSR-7 Request object
-        $this->httpRequest = new Request($requestType, $this->requestUri, $this->headers);
+        $this->initPsr7HttpRequest();
     }
 
     public function getHttpRequest(): Request
