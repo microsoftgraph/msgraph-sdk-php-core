@@ -41,4 +41,13 @@ class GraphRequestUtil
         $relativeUrl .= (substr($endpoint, 0, 1) == "/") ? $endpoint : "/".$endpoint;
         return UriResolver::resolve(new Uri($baseUrl), new Uri($relativeUrl));
     }
+
+    /**
+     * Determine correct symbol to add before concatenating query parameters to $url
+     * @param Uri $url
+     * @return string
+     */
+    public static function getQueryParamConcatenator(Uri $url): string {
+        return stripos($url, "?") ? "&" : "?";
+    }
 }

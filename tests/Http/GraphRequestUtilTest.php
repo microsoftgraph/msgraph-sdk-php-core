@@ -8,6 +8,7 @@
 namespace Http;
 
 
+use GuzzleHttp\Psr7\Uri;
 use Microsoft\Graph\Core\NationalCloud;
 use Microsoft\Graph\Http\AbstractGraphClient;
 use Microsoft\Graph\Http\GraphRequestUtil;
@@ -87,5 +88,17 @@ class GraphRequestUtilTest extends \PHPUnit\Framework\TestCase
         $baseUrl = "https://graph.microsoft.com";
         $endpoint = "http:/microsoft.com:localhost\$endpoint";
         $uri = GraphRequestUtil::getRequestUri($baseUrl, $endpoint, $this->apiVersion);
+    }
+
+    function testGetQueryParamConcatenatorWithExistingQueryParams() {
+        $uri = new Uri("https://graph.microsoft.com?\$skip=10");
+        $result = GraphRequestUtil::getQueryParamConcatenator($uri);
+        self::assertEquals("&", $result);
+    }
+
+    function testGetQueryParamConcatenatorWithoutQueryParams() {
+        $uri = new Uri("https://graph.microsoft.com");
+        $result = GraphRequestUtil::getQueryParamConcatenator($uri);
+        self::assertEquals("?", $result);
     }
 }

@@ -30,23 +30,17 @@ use Psr\Http\Message\StreamInterface;
 class GraphRequest
 {
     /**
-    * A valid access token
-    *
-    * @var string
-    */
-    protected $accessToken;
-    /**
     * An array of headers to send with the request
     *
     * @var array(string => string)
     */
-    protected $headers;
+    private $headers;
     /**
     * The body of the request (optional)
     *
     * @var string
     */
-    protected $requestBody = null;
+    private $requestBody = null;
     /**
     * The type of request to make ("GET", "POST", etc.)
     *
@@ -71,19 +65,19 @@ class GraphRequest
      *
      * @var AbstractGraphClient
      */
-    protected $graphClient;
+    private $graphClient;
     /**
      * PSR-7 Request to be passed to HTTP client
      *
      * @var \GuzzleHttp\Psr7\Request
      */
-    protected $httpRequest;
+    private $httpRequest;
     /**
      * Full Request URI (base URL + endpoint)
      *
      * @var Uri
      */
-    protected $requestUri;
+    private $requestUri;
 
     /**
      * GraphRequest constructor.
@@ -93,7 +87,7 @@ class GraphRequest
      * @param string $requestType The HTTP method to use e.g. "GET" or "POST"
      * @param string $endpoint The url path on the host to be called-
      * @param AbstractGraphClient $graphClient The Graph client to use
-     * @param string $baseUrl (optional) Use to pass a custom host defined on the graph client. If empty, it's set to $client's national cloud
+     * @param string $baseUrl (optional) If empty, it's set to $client's national cloud
      * @throws GraphClientException
      */
     public function __construct(string $requestType, string $endpoint, AbstractGraphClient $graphClient, string $baseUrl = "")
@@ -106,7 +100,6 @@ class GraphRequest
         }
         $this->requestType = $requestType;
         $this->graphClient = $graphClient;
-        $this->accessToken = $graphClient->getAccessToken();
         $baseUrl = ($baseUrl) ?: $graphClient->getNationalCloud();
         $this->initRequestUri($baseUrl, $endpoint);
         $this->initHeaders($baseUrl);
@@ -117,6 +110,15 @@ class GraphRequest
     public function getHttpRequest(): Request
     {
         return $this->httpRequest;
+    }
+
+    protected function setRequestUri(Uri $uri): void {
+        $this->requestUri = $uri;
+        $this->initPsr7HttpRequest();
+    }
+
+    protected function getRequestUri(): Uri {
+        return $this->requestUri;
     }
 
     /**
@@ -138,8 +140,7 @@ class GraphRequest
     */
     public function setAccessToken(string $accessToken): self
     {
-        $this->accessToken = $accessToken;
-        $this->headers['Authorization'] = 'Bearer ' . $this->accessToken;
+        $this->addHeaders(['Authorization' => 'Bearer '.$accessToken]);
         return $this;
     }
 
@@ -370,7 +371,7 @@ class GraphRequest
      * @param $endpoint
      * @throws GraphClientException
      */
-    private function initRequestUri(string $baseUrl, $endpoint): void {
+    protected function initRequestUri(string $baseUrl, $endpoint): void {
         try {
             $this->requestUri = GraphRequestUtil::getRequestUri($baseUrl, $endpoint, $this->graphClient->getApiVersion());
             if (!$this->requestUri) {
@@ -382,22 +383,7 @@ class GraphRequest
         }
     }
 
-    private function initPsr7HttpRequest(): void {
+    protected function initPsr7HttpRequest(): void {
         $this->httpRequest = new Request($this->requestType, $this->requestUri, $this->headers, $this->requestBody);
-    }
-
-    /**
-    * Checks whether the endpoint currently contains query
-    * parameters and returns the relevant concatenator for
-    * the new query string
-    *
-    * @return string "?" or "&"
-    */
-    protected function getConcatenator()
-    {
-        if (stripos($this->endpoint, "?") === false) {
-            return "?";
-        }
-        return "&";
     }
 }
