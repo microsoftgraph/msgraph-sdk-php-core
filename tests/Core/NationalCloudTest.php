@@ -8,22 +8,22 @@ use Microsoft\Graph\Core\NationalCloud;
 
 class NationalCloudTest extends \PHPUnit\Framework\TestCase
 {
-    function testNationalCloudConstantsAreValid() {
+    function testNationalCloudConstantsContainNationalCloudHost() {
         $nationalClouds = array_values((new \ReflectionClass(NationalCloud::class))->getConstants());
         foreach ($nationalClouds as $nationalCloud) {
             $this->assertTrue(NationalCloud::containsNationalCloudHost($nationalCloud));
         }
     }
 
-    function testNationalCloudWithPortIsValid() {
+    function testContainsNationalCloudHostWithPortInUrl() {
         $this->assertTrue(NationalCloud::containsNationalCloudHost(NationalCloud::GLOBAL.":1234"));
     }
 
-    function testNationalCloudWithTrailingForwardSlashIsValid() {
+    function testContainsNationalCloudHostWithTrailingForwardSlash() {
         $this->assertTrue(NationalCloud::containsNationalCloudHost(NationalCloud::GLOBAL."/"));
     }
 
-    function testNationalCloudWithPathIsValid() {
+    function testContainsNationalCloudHostWithPathInUrl() {
         $this->assertTrue(NationalCloud::containsNationalCloudHost(NationalCloud::GLOBAL."/v1.0/"));
     }
 
@@ -32,11 +32,11 @@ class NationalCloudTest extends \PHPUnit\Framework\TestCase
         self::assertTrue(NationalCloud::containsNationalCloudHost($url));
     }
 
-    function testEmptyNationalCloudUrlInvalid() {
+    function testContainsNationalCloudHostWithEmptyUrl() {
         $this->assertFalse(NationalCloud::containsNationalCloudHost(""));
     }
 
-    function testNullNationalCloudThrowsError() {
+    function testContainsNationalCloudHostWithNullUrlThrowsError() {
         $this->expectException(\TypeError::class);
         NationalCloud::containsNationalCloudHost(null);
     }
@@ -45,11 +45,11 @@ class NationalCloudTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse(NationalCloud::containsNationalCloudHost("https://www.microsoft.com"));
     }
 
-    function testNationalCloudWithoutSchemeInvalid() {
+    function testContainsNationalCloudHostWithoutSchemeInvalid() {
         $this->assertFalse(NationalCloud::containsNationalCloudHost("graph.microsoft.com"));
     }
 
-    function testMalformedNationalCloudInvalid() {
+    function testContainsNationalCloudHostWithMalformedUrlInvalid() {
         $this->assertFalse(NationalCloud::containsNationalCloudHost("https:///"));
     }
 }
