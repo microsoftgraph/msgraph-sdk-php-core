@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Core;
+namespace Microsoft\Graph\Test\Core;
 
 
 use Microsoft\Graph\Core\NationalCloud;

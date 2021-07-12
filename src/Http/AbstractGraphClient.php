@@ -7,10 +7,8 @@
 
 namespace Microsoft\Graph\Http;
 
-use Microsoft\Graph\Core\GraphConstants;
 use Microsoft\Graph\Core\NationalCloud;
 use Microsoft\Graph\Exception\GraphClientException;
-use Microsoft\Graph\Exception\GraphException;
 
 /**
  * Class BaseClient
@@ -54,11 +52,11 @@ abstract class AbstractGraphClient
      * @param HttpClientInterface|null $httpClient if null creates default Guzzle client
      * @throws GraphClientException
      */
-    protected function __construct(?string $nationalCloud = NationalCloud::GLOBAL,
+    public function __construct(?string $nationalCloud = NationalCloud::GLOBAL,
                                 ?HttpClientInterface  $httpClient = null)
     {
         $this->nationalCloud = ($nationalCloud) ?: NationalCloud::GLOBAL;
-        $this->httpClient = ($httpClient) ?: HttpClientFactory::nationalCloud($nationalCloud)::createAdapter();
+        $this->httpClient = ($httpClient) ?: HttpClientFactory::nationalCloud($this->nationalCloud)::createAdapter();
     }
 
     /**
@@ -70,7 +68,7 @@ abstract class AbstractGraphClient
     *
     * @return $this object
     */
-    protected function setAccessToken(string $accessToken): self
+    public function setAccessToken(string $accessToken): self
     {
         $this->accessToken = $accessToken;
         return $this;
@@ -79,7 +77,7 @@ abstract class AbstractGraphClient
     /**
      * @return string
      */
-    public function getAccessToken(): string {
+    public function getAccessToken(): ?string {
         return $this->accessToken;
     }
 
@@ -107,9 +105,9 @@ abstract class AbstractGraphClient
 	 *
 	 * @return GraphRequest The request object, which can be used to
 	 *                      make queries against Graph
-	 * @throws GraphException
+	 * @throws GraphClientException
 	 */
-    protected function createRequest(string $requestType, string $endpoint): GraphRequest
+    public function createRequest(string $requestType, string $endpoint): GraphRequest
     {
         return new GraphRequest(
             $requestType,
@@ -127,9 +125,9 @@ abstract class AbstractGraphClient
 	 *
 	 * @return GraphCollectionRequest The request object, which can be
 	 *                                used to make queries against Graph
-	 * @throws GraphException
+	 * @throws GraphClientException
 	 */
-    protected function createCollectionRequest(string $requestType, string $endpoint): GraphRequest
+    public function createCollectionRequest(string $requestType, string $endpoint): GraphCollectionRequest
     {
         return new GraphCollectionRequest(
             $requestType,

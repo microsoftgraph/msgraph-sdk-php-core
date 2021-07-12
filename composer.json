@@ -32,8 +32,7 @@
 	},
 	"autoload-dev": {
 		"psr-4": {
-			"Microsoft\\Graph\\Test\\": "tests/Functional/",
-			"Microsoft\\Graph\\Http\\Test\\": "tests/Http/"
+			"Microsoft\\Graph\\Test\\": "tests/"
 		}
 	}
 }
