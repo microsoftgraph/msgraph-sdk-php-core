@@ -54,7 +54,7 @@ abstract class AbstractGraphClient
      * @param HttpClientInterface|null $httpClient if null creates default Guzzle client
      * @throws GraphClientException
      */
-    protected function __construct(?string $nationalCloud = NationalCloud::GLOBAL,
+    public function __construct(?string $nationalCloud = NationalCloud::GLOBAL,
                                 ?HttpClientInterface  $httpClient = null)
     {
         $this->nationalCloud = ($nationalCloud) ?: NationalCloud::GLOBAL;
@@ -70,7 +70,7 @@ abstract class AbstractGraphClient
     *
     * @return $this object
     */
-    protected function setAccessToken(string $accessToken): self
+    public function setAccessToken(string $accessToken): self
     {
         $this->accessToken = $accessToken;
         return $this;
@@ -109,7 +109,7 @@ abstract class AbstractGraphClient
 	 *                      make queries against Graph
 	 * @throws GraphException
 	 */
-    protected function createRequest(string $requestType, string $endpoint): GraphRequest
+    public function createRequest(string $requestType, string $endpoint): GraphRequest
     {
         return new GraphRequest(
             $requestType,
@@ -129,7 +129,7 @@ abstract class AbstractGraphClient
 	 *                                used to make queries against Graph
 	 * @throws GraphException
 	 */
-    protected function createCollectionRequest(string $requestType, string $endpoint): GraphRequest
+    public function createCollectionRequest(string $requestType, string $endpoint): GraphRequest
     {
         return new GraphCollectionRequest(
             $requestType,
