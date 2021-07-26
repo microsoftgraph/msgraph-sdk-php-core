@@ -17,8 +17,7 @@
 
 namespace Microsoft\Graph\Http;
 
-use Microsoft\Graph\Exception\GraphException;
-use Microsoft\Graph\Core\GraphConstants;
+use Psr\Http\Message\StreamInterface;
 
 /**
  * Class GraphResponse
@@ -33,7 +32,7 @@ class GraphResponse
     /**
     * The body of the response
     *
-    * @var string
+    * @var StreamInterface
     */
     private $_body;
     /**
@@ -52,19 +51,19 @@ class GraphResponse
     /**
     * The status code of the response
     *
-    * @var string
+    * @var int
     */
     private $_httpStatusCode;
 
     /**
     * Creates a new Graph HTTP response entity
     *
-    * @param object $request        The request
-    * @param string $body           The body of the response
-    * @param string $httpStatusCode The returned status code
+    * @param GraphRequest $request  The request
+    * @param StreamInterface $body  The body of the response
+    * @param int $httpStatusCode The returned status code
     * @param array  $headers        The returned headers
     */
-    public function __construct($request, $body = null, $httpStatusCode = null, $headers = null)
+    public function __construct($request, $body = null, $httpStatusCode = 0, $headers = null)
     {
         $this->_request = $request;
         $this->_body = $body;
@@ -100,7 +99,7 @@ class GraphResponse
     /**
     * Get the undecoded body of the HTTP response
     *
-    * @return string|null The undecoded body
+    * @return StreamInterface|null The undecoded body
     */
     public function getRawBody()
     {
@@ -110,9 +109,9 @@ class GraphResponse
     /**
     * Get the status of the HTTP response
     *
-    * @return string|null The HTTP status
+    * @return int The HTTP status
     */
-    public function getStatus()
+    public function getStatus(): int
     {
         return $this->_httpStatusCode;
     }

@@ -5,7 +5,7 @@
  * for license information.
  */
 
-namespace Http;
+namespace Microsoft\Graph\Test\Http\Request;
 
 
 use GuzzleHttp\Psr7\Uri;

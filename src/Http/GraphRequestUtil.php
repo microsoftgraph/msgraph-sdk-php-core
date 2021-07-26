@@ -30,12 +30,22 @@ class GraphRequestUtil
      * @param string $baseUrl if empty, is overwritten with $client's national cloud
      * @param string $endpoint can be a full URL
      * @param string $apiVersion
-     * @return UriInterface|null
+     * @return UriInterface
+     * @throws \InvalidArgumentException
      */
-    public static function getRequestUri(string $baseUrl, string $endpoint, string $apiVersion = "v1.0"): ?UriInterface {
+    public static function getRequestUri(string $baseUrl, string $endpoint, string $apiVersion = "v1.0"): UriInterface {
         // If endpoint is a full url, ensure the host is a national cloud or custom host
         if (parse_url($endpoint, PHP_URL_SCHEME)) {
-            return (NationalCloud::containsNationalCloudHost($endpoint)) ? new Uri($endpoint) : null;
+            if (NationalCloud::containsNationalCloudHost($endpoint)) {
+                return new Uri($endpoint);
+            }
+            throw new \InvalidArgumentException("Invalid national cloud host in endpoint=".$endpoint.". See https://docs.microsoft.com/en-us/graph/deployments#microsoft-graph-and-graph-explorer-service-root-endpoints.");
+        }
+        if ($baseUrl) {
+            $urlParts = parse_url($baseUrl);
+            if (!$urlParts || !array_key_exists("scheme", $urlParts) || !array_key_exists("host", $urlParts)) {
+                throw new \InvalidArgumentException("Invalid baseUrl=".$baseUrl.". Ensure URL has scheme and host");
+            }
         }
         $relativeUrl = (NationalCloud::containsNationalCloudHost($baseUrl)) ? "/".$apiVersion : "";
         $relativeUrl .= (substr($endpoint, 0, 1) == "/") ? $endpoint : "/".$endpoint;
