@@ -19,6 +19,7 @@ class GraphRequestStreamTest extends BaseGraphRequestTest
 
     public function testUpload()
     {
+        MockHttpClientResponseConfig::configureWithEmptyPayload($this->mockHttpClient);
         $file = vfsStream::newFile('foo.txt')
                             ->withContent("content")
                             ->at($this->rootDir);

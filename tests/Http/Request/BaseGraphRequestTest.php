@@ -14,7 +14,7 @@ use Microsoft\Graph\Http\AbstractGraphClient;
 use Microsoft\Graph\Http\GraphRequest;
 use Microsoft\Graph\Http\HttpClientInterface;
 
-class BaseGraphRequestTest extends \PHPUnit\Framework\TestCase
+abstract class BaseGraphRequestTest extends \PHPUnit\Framework\TestCase
 {
     const DEFAULT_NEXT_LINK = "https://graph.microsoft.com/me/users?\$skip=2&\$top=2";
     const DEFAULT_REQUEST_ENDPOINT = "/endpoint";

@@ -32,6 +32,7 @@ class GraphCollectionRequestTest extends BaseGraphRequestTest
     }
 
     public function testGetPageAppendsPageSizeToInitialCollectionRequestUrl(): void {
+        MockHttpClientResponseConfig::configureWithCollectionPayload($this->mockHttpClient);
         $this->defaultCollectionRequest->getPage();
         $expectedRequestUrl = GraphRequestUtil::getRequestUri($this->mockGraphClient->getNationalCloud(), $this->defaultEndpoint)."?\$top=".$this->defaultPageSize;
         $this->assertEquals($expectedRequestUrl, strval($this->defaultCollectionRequest->getRequestUri()));

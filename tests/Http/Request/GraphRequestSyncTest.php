@@ -20,6 +20,7 @@ use Psr\Http\Message\StreamInterface;
 class GraphRequestSyncTest extends BaseGraphRequestTest
 {
     public function testExecuteWithNullClientUsesGraphClientHttpClient(): void {
+        MockHttpClientResponseConfig::configureWithEmptyPayload($this->mockHttpClient);
         $this->mockHttpClient->expects($this->once())
             ->method('sendRequest');
         $this->defaultGraphRequest->execute(null);
@@ -27,6 +28,7 @@ class GraphRequestSyncTest extends BaseGraphRequestTest
 
     public function testExecuteWithCustomClientUsesCustomClient(): void {
         $customClient = $this->createMock(ClientInterface::class);
+        MockHttpClientResponseConfig::configureWithEmptyPayload($customClient);
         $customClient->expects($this->once())->method('sendRequest');
         $this->mockHttpClient->expects($this->never())->method('sendRequest');
         $this->defaultGraphRequest->execute($customClient);
