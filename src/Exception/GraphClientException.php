@@ -8,8 +8,7 @@
 namespace Microsoft\Graph\Exception;
 
 /**
- * Class ClientInitialisationException
- *
+ * Class GraphClientException
  * @package Microsoft\Graph\Exception
  * @copyright 2021 Microsoft Corporation
  * @license https://opensource.org/licenses/MIT MIT License
