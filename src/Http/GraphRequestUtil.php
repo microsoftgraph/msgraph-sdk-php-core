@@ -34,7 +34,7 @@ class GraphRequestUtil
      * @throws \InvalidArgumentException
      */
     public static function getRequestUri(string $baseUrl, string $endpoint, string $apiVersion = "v1.0"): UriInterface {
-        // If endpoint is a full url, ensure the host is a national cloud or custom host
+        // If endpoint is a full url, ensure the host is a national cloud
         if (parse_url($endpoint, PHP_URL_SCHEME)) {
             if (NationalCloud::containsNationalCloudHost($endpoint)) {
                 return new Uri($endpoint);
@@ -46,10 +46,11 @@ class GraphRequestUtil
             if (!$urlParts || !array_key_exists("scheme", $urlParts) || !array_key_exists("host", $urlParts)) {
                 throw new \InvalidArgumentException("Invalid baseUrl=".$baseUrl.". Ensure URL has scheme and host");
             }
+            $relativeUrl = (NationalCloud::containsNationalCloudHost($baseUrl)) ? "/".$apiVersion : "";
+            $relativeUrl .= (substr($endpoint, 0, 1) == "/") ? $endpoint : "/".$endpoint;
+            return UriResolver::resolve(new Uri($baseUrl), new Uri($relativeUrl));
         }
-        $relativeUrl = (NationalCloud::containsNationalCloudHost($baseUrl)) ? "/".$apiVersion : "";
-        $relativeUrl .= (substr($endpoint, 0, 1) == "/") ? $endpoint : "/".$endpoint;
-        return UriResolver::resolve(new Uri($baseUrl), new Uri($relativeUrl));
+        throw new \InvalidArgumentException("Unable to create uri with empty baseUrl and endpoint=".$endpoint);
     }
 
     /**
