@@ -15,6 +15,7 @@ use Http\Promise\Promise;
 use Microsoft\Graph\Http\GraphResponse;
 use Microsoft\Graph\Test\Http\SampleGraphResponsePayload;
 use Microsoft\Graph\Test\Http\TestModel;
+use Microsoft\Graph\Test\TestData\Model\User;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\NetworkExceptionInterface;
 use Psr\Http\Message\StreamInterface;
@@ -75,8 +76,8 @@ class GraphRequestAsyncTest extends BaseGraphRequestTest
             $this->mockHttpClient,
             SampleGraphResponsePayload::ENTITY_PAYLOAD
         );
-        $promise = $this->defaultGraphRequest->setReturnType(TestModel::class)->executeAsync();
-        $this->assertInstanceOf(TestModel::class, $promise->wait());
+        $promise = $this->defaultGraphRequest->setReturnType(User::class)->executeAsync();
+        $this->assertInstanceOf(User::class, $promise->wait());
     }
 
     public function testExecuteAsyncResolvesToModelArrayForCollectionRequest(): void {
@@ -84,10 +85,10 @@ class GraphRequestAsyncTest extends BaseGraphRequestTest
             $this->mockHttpClient,
             SampleGraphResponsePayload::COLLECTION_PAYLOAD
         );
-        $promise = $this->defaultGraphRequest->setReturnType(TestModel::class)->executeAsync();
+        $promise = $this->defaultGraphRequest->setReturnType(User::class)->executeAsync();
         $response = $promise->wait();
         $this->assertIsArray($response);
         $this->assertEquals(2, sizeof($response));
-        $this->assertContainsOnlyInstancesOf(TestModel::class, $response);
+        $this->assertContainsOnlyInstancesOf(User::class, $response);
     }
 }

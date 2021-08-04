@@ -17,7 +17,7 @@ class SampleGraphResponsePayload
     const ENTITY_PAYLOAD = [
         "@odata.id" => "https://graph.microsoft.com/v2/dcd219dd-bc68-4b9b-bf0b-4a33a796be35",
         "jobTitle" => "developer",
-        "name" => "user1"
+        "givenName" => "user1"
     ];
 
     const COLLECTION_PAYLOAD = [
@@ -26,11 +26,11 @@ class SampleGraphResponsePayload
         "value" => [
             [
                 "id" => 1,
-                "name" => "user1"
+                "givenName" => "user1"
             ],
             [
                 "id" => 2,
-                "name" => "user2"
+                "givenName" => "user2"
             ]
         ]
     ];
@@ -40,11 +40,11 @@ class SampleGraphResponsePayload
         "value" => [
             [
                 "id" => 1,
-                "name" => "user1"
+                "givenName" => "user1"
             ],
             [
                 "id" => 2,
-                "name" => "user2"
+                "givenName" => "user2"
             ]
         ]
     ];

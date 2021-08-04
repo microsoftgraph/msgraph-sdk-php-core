@@ -8,6 +8,7 @@ use Microsoft\Graph\Exception\GraphClientException;
 use Microsoft\Graph\Http\AbstractGraphClient;
 use Microsoft\Graph\Http\GraphRequest;
 use Microsoft\Graph\Test\Http\TestModel;
+use Microsoft\Graph\Test\TestData\Model\User;
 
 class GraphRequestTest extends BaseGraphRequestTest
 {
@@ -121,7 +122,7 @@ class GraphRequestTest extends BaseGraphRequestTest
     }
 
     public function testSetReturnTypeReturnsGraphRequestInstance(): void {
-        $this->assertInstanceOf(GraphRequest::class, $this->defaultGraphRequest->setReturnType(TestModel::class));
+        $this->assertInstanceOf(GraphRequest::class, $this->defaultGraphRequest->setReturnType(User::class));
     }
 
     public function testSetReturnTypeWithInvalidClassThrowsException(): void {
@@ -178,7 +179,7 @@ class GraphRequestTest extends BaseGraphRequestTest
     }
 
     public function testAttachBodyWithObjectSetsJsonSerializedStringBody(): void {
-        $model = new TestModel(array("id" => 1, "child" => new TestModel(["id" => 2])));
+        $model = new User(array("id" => 1, "child" => new User(["id" => 2])));
         $this->defaultGraphRequest->attachBody($model);
         $this->assertEquals('{"id":1,"child":{"id":2}}', $this->defaultGraphRequest->getBody());
     }

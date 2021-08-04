@@ -5,6 +5,7 @@ namespace Microsoft\Graph\Test\Http;
 use GuzzleHttp\Psr7\Utils;
 use Microsoft\Graph\Http\GraphRequest;
 use Microsoft\Graph\Http\GraphResponse;
+use Microsoft\Graph\Test\TestData\Model\User;
 use PHPUnit\Framework\TestCase;
 
 class GraphResponseTest extends TestCase
@@ -65,9 +66,9 @@ class GraphResponseTest extends TestCase
 
     public function testGetMultipleObjects()
     {
-        $obj = $this->defaultGraphResponse->getResponseAsObject(TestModel::class);
+        $obj = $this->defaultGraphResponse->getResponseAsObject(User::class);
         $this->assertIsArray($obj);
-        $this->assertContainsOnlyInstancesOf(TestModel::class, $obj);
+        $this->assertContainsOnlyInstancesOf(User::class, $obj);
         $this->assertSameSize($this->defaultBody['value'], $obj);
         $this->assertEquals(1, $obj[0]->getId());
     }
@@ -81,8 +82,8 @@ class GraphResponseTest extends TestCase
             $this->defaultHeaders
         );
 
-        $obj = $response->getResponseAsObject(TestModel::class);
-        $this->assertInstanceOf(TestModel::class, $obj);
+        $obj = $response->getResponseAsObject(User::class);
+        $this->assertInstanceOf(User::class, $obj);
     }
 
     public function testGetZeroMultipleObjects()
@@ -92,7 +93,7 @@ class GraphResponseTest extends TestCase
             Utils::streamFor(json_encode(['value' => []])),
         );
 
-        $obj = $response->getResponseAsObject(TestModel::class);
+        $obj = $response->getResponseAsObject(User::class);
         $this->assertSame(array(), $obj);
     }
 }

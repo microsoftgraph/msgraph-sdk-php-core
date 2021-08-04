@@ -7,6 +7,7 @@ use Microsoft\Graph\Http\GraphCollectionRequest;
 use Microsoft\Graph\Http\GraphRequestUtil;
 use Microsoft\Graph\Test\Http\SampleGraphResponsePayload;
 use Microsoft\Graph\Test\Http\TestModel;
+use Microsoft\Graph\Test\TestData\Model\User;
 
 class GraphCollectionRequestTest extends BaseGraphRequestTest
 {
@@ -19,7 +20,7 @@ class GraphCollectionRequestTest extends BaseGraphRequestTest
         parent::setUp();
         $this->defaultCollectionRequest = new GraphCollectionRequest("GET", $this->defaultEndpoint, $this->mockGraphClient);
         $this->defaultCollectionRequest->setPageSize($this->defaultPageSize);
-        $this->defaultCollectionRequest->setReturnType(TestModel::class);
+        $this->defaultCollectionRequest->setReturnType(User::class);
     }
 
     public function testSetPageSizeReturnsInstance(): void {
@@ -66,6 +67,6 @@ class GraphCollectionRequestTest extends BaseGraphRequestTest
         $response = $this->defaultCollectionRequest->execute();
         $result = $this->defaultCollectionRequest->processPageCallReturn($response);
         $this->assertIsArray($result);
-        array_filter($result, function ($item) { $this->assertInstanceOf(TestModel::class, $item); });
+        array_filter($result, function ($item) { $this->assertInstanceOf(User::class, $item); });
     }
 }

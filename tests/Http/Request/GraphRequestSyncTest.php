@@ -12,6 +12,7 @@ namespace Microsoft\Graph\Test\Http\Request;
 use GuzzleHttp\Psr7\Stream;
 use Microsoft\Graph\Http\GraphResponse;
 use Microsoft\Graph\Test\Http\TestModel;
+use Microsoft\Graph\Test\TestData\Model\User;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Client\NetworkExceptionInterface;
@@ -73,34 +74,34 @@ class GraphRequestSyncTest extends BaseGraphRequestTest
 
     public function testExecuteWithModelReturnTypeReturnsModelForSuccessPayload(): void {
         MockHttpClientResponseConfig::configureWithEntityPayload($this->mockHttpClient);
-        $response = $this->defaultGraphRequest->setReturnType(TestModel::class)->execute();
-        $this->assertInstanceOf(TestModel::class, $response);
+        $response = $this->defaultGraphRequest->setReturnType(User::class)->execute();
+        $this->assertInstanceOf(User::class, $response);
     }
 
     public function testExecuteWithModelReturnTypeReturnsModelForEmptyPayload(): void {
         MockHttpClientResponseConfig::configureWithEmptyPayload($this->mockHttpClient);
-        $response = $this->defaultGraphRequest->setReturnType(TestModel::class)->execute();
-        $this->assertInstanceOf(TestModel::class, $response);
+        $response = $this->defaultGraphRequest->setReturnType(User::class)->execute();
+        $this->assertInstanceOf(User::class, $response);
     }
 
     public function testExecuteWithModelReturnTypeReturnsModelForErrorPayload(): void {
         MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient);
-        $response = $this->defaultGraphRequest->setReturnType(TestModel::class)->execute();
-        $this->assertInstanceOf(TestModel::class, $response);
+        $response = $this->defaultGraphRequest->setReturnType(User::class)->execute();
+        $this->assertInstanceOf(User::class, $response);
     }
 
     public function testExecuteWithModelReturnTypeReturnsModelForStreamPayload(): void {
         MockHttpClientResponseConfig::configureWithStreamPayload($this->mockHttpClient);
-        $response = $this->defaultGraphRequest->setReturnType(TestModel::class)->execute();
-        $this->assertInstanceOf(TestModel::class, $response);
+        $response = $this->defaultGraphRequest->setReturnType(User::class)->execute();
+        $this->assertInstanceOf(User::class, $response);
     }
 
     public function testExecuteWithModelReturnTypeReturnsArrayOfModelsForCollectionPayload(): void {
         MockHttpClientResponseConfig::configureWithCollectionPayload($this->mockHttpClient);
-        $response = $this->defaultGraphRequest->setReturnType(TestModel::class)->execute();
+        $response = $this->defaultGraphRequest->setReturnType(User::class)->execute();
         $this->assertIsArray($response);
         $this->assertEquals(2, sizeof($response));
-        $this->assertContainsOnlyInstancesOf(TestModel::class, $response);
+        $this->assertContainsOnlyInstancesOf(User::class, $response);
     }
 
     public function testExecuteWithStreamReturnTypeReturnsStreamForSuccessPayload(): void {
