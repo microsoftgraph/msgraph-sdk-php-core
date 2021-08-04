@@ -5,6 +5,8 @@ use Microsoft\Graph\Core\GraphConstants;
 use Microsoft\Graph\Exception\GraphClientException;
 use Microsoft\Graph\Http\GraphCollectionRequest;
 use Microsoft\Graph\Http\GraphRequestUtil;
+use Microsoft\Graph\Test\Http\SampleGraphResponsePayload;
+use Microsoft\Graph\Test\Http\TestModel;
 
 class GraphCollectionRequestTest extends BaseGraphRequestTest
 {

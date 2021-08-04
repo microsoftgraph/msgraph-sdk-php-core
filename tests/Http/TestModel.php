@@ -6,7 +6,7 @@
  */
 
 
-namespace Microsoft\Graph\Test\Http\Request;
+namespace Microsoft\Graph\Test\Http;
 
 
 class TestModel implements \JsonSerializable
@@ -16,6 +16,13 @@ class TestModel implements \JsonSerializable
     public function __construct($propDict = array())
     {
         $this->propDict = $propDict;
+    }
+
+    public function getId() {
+        if (array_key_exists("id", $this->propDict)) {
+            return $this->propDict["id"];
+        }
+        return null;
     }
 
     public function jsonSerialize()

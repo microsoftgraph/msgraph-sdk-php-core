@@ -12,6 +12,7 @@ namespace Microsoft\Graph\Test\Http\Request;
 use GuzzleHttp\Psr7\Response;
 use Http\Promise\FulfilledPromise;
 use Http\Promise\RejectedPromise;
+use Microsoft\Graph\Test\Http\SampleGraphResponsePayload;
 
 class MockHttpClientAsyncResponseConfig
 {

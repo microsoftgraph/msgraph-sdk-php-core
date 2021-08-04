@@ -10,6 +10,7 @@ namespace Microsoft\Graph\Test\Http\Request;
 
 
 use GuzzleHttp\Psr7\Response;
+use Microsoft\Graph\Test\Http\SampleGraphResponsePayload;
 
 class MockHttpClientResponseConfig
 {

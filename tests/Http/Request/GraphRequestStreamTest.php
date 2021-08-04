@@ -3,6 +3,7 @@
 namespace Microsoft\Graph\Test\Http\Request;
 
 use Microsoft\Graph\Exception\GraphClientException;
+use Microsoft\Graph\Test\Http\SampleGraphResponsePayload;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamFile;
 

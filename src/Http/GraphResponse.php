@@ -17,6 +17,7 @@
 
 namespace Microsoft\Graph\Http;
 
+use GuzzleHttp\Psr7\Utils;
 use Psr\Http\Message\StreamInterface;
 
 /**
@@ -59,11 +60,11 @@ class GraphResponse
     * Creates a new Graph HTTP response entity
     *
     * @param GraphRequest $request  The request
-    * @param StreamInterface $body  The body of the response
+    * @param ?StreamInterface $body  The body of the response
     * @param int $httpStatusCode The returned status code
     * @param array  $headers        The returned headers
     */
-    public function __construct($request, $body = null, $httpStatusCode = 0, $headers = null)
+    public function __construct(GraphRequest $request, ?StreamInterface $body = null, int $httpStatusCode = 0, array $headers = [])
     {
         $this->_request = $request;
         $this->_body = $body;
@@ -80,6 +81,9 @@ class GraphResponse
     private function _decodeBody()
     {
         $decodedBody = json_decode($this->_body, true);
+        if ($this->_body) {
+            $this->_body->rewind(); //rewind stream so that it can be read again
+        }
         if ($decodedBody === null) {
             $decodedBody = array();
         }
@@ -99,11 +103,11 @@ class GraphResponse
     /**
     * Get the undecoded body of the HTTP response
     *
-    * @return StreamInterface|null The undecoded body
+    * @return string|null The undecoded body
     */
     public function getRawBody()
     {
-        return $this->_body;
+        return (is_null($this->_body)) ? null : $this->_body->getContents();
     }
 
     /**
@@ -130,7 +134,7 @@ class GraphResponse
     * Converts the response JSON object to a Graph SDK object
     *
     * @param mixed $returnType The type to convert the object(s) to
-    *
+//    *
     * @return mixed object or array of objects of type $returnType
     */
     public function getResponseAsObject($returnType)

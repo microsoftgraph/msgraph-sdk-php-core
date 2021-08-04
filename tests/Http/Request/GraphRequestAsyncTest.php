@@ -13,6 +13,8 @@ use GuzzleHttp\Psr7\Stream;
 use Http\Client\HttpAsyncClient;
 use Http\Promise\Promise;
 use Microsoft\Graph\Http\GraphResponse;
+use Microsoft\Graph\Test\Http\SampleGraphResponsePayload;
+use Microsoft\Graph\Test\Http\TestModel;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\NetworkExceptionInterface;
 use Psr\Http\Message\StreamInterface;
@@ -86,6 +88,6 @@ class GraphRequestAsyncTest extends BaseGraphRequestTest
         $response = $promise->wait();
         $this->assertIsArray($response);
         $this->assertEquals(2, sizeof($response));
-        array_filter($response, function ($item) { $this->assertInstanceOf(TestModel::class, $item); });
+        $this->assertContainsOnlyInstancesOf(TestModel::class, $response);
     }
 }

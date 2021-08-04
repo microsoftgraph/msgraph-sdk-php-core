@@ -11,6 +11,7 @@ namespace Microsoft\Graph\Test\Http\Request;
 
 use GuzzleHttp\Psr7\Stream;
 use Microsoft\Graph\Http\GraphResponse;
+use Microsoft\Graph\Test\Http\TestModel;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Client\NetworkExceptionInterface;
@@ -97,7 +98,7 @@ class GraphRequestSyncTest extends BaseGraphRequestTest
         $response = $this->defaultGraphRequest->setReturnType(TestModel::class)->execute();
         $this->assertIsArray($response);
         $this->assertEquals(2, sizeof($response));
-        array_filter($response, function ($item) { $this->assertInstanceOf(TestModel::class, $item); });
+        $this->assertContainsOnlyInstancesOf(TestModel::class, $response);
     }
 
     public function testExecuteWithStreamReturnTypeReturnsStreamForSuccessPayload(): void {

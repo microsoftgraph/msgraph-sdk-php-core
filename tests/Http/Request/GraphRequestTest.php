@@ -7,6 +7,7 @@ use Microsoft\Graph\Core\NationalCloud;
 use Microsoft\Graph\Exception\GraphClientException;
 use Microsoft\Graph\Http\AbstractGraphClient;
 use Microsoft\Graph\Http\GraphRequest;
+use Microsoft\Graph\Test\Http\TestModel;
 
 class GraphRequestTest extends BaseGraphRequestTest
 {
