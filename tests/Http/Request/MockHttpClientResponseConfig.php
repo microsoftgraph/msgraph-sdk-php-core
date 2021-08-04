@@ -47,6 +47,18 @@ class MockHttpClientResponseConfig
         return $mockHttpClient;
     }
 
+    public static function configureWithLastPageCollectionPayload($mockHttpClient) {
+        $mockHttpClient->method(self::METHOD_NAME)
+            ->willReturn(
+                new Response(
+                    self::$statusCode,
+                    self::$headers,
+                    json_encode(SampleGraphResponsePayload::LAST_PAGE_COLLECTION_PAYLOAD)
+                )
+            );
+        return $mockHttpClient;
+    }
+
     public static function configureWithErrorPayload($mockHttpClient, $statusCode = 400) {
         $mockHttpClient->method(self::METHOD_NAME)
                         ->willReturn(

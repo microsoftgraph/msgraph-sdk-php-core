@@ -1,74 +1,68 @@
 <?php
-use PHPUnit\Framework\TestCase;
-use Microsoft\Graph\Http\GraphCollectionRequest;
-use Microsoft\Graph\Model;
+namespace Microsoft\Graph\Test\Http\Request;
 
-class GraphCollectionRequestTest extends TestCase
+use Microsoft\Graph\Core\GraphConstants;
+use Microsoft\Graph\Exception\GraphClientException;
+use Microsoft\Graph\Http\GraphCollectionRequest;
+use Microsoft\Graph\Http\GraphRequestUtil;
+
+class GraphCollectionRequestTest extends BaseGraphRequestTest
 {
-    private $collectionRequest;
-    private $client;
-    private $reflectedRequestUrlHandler;
+    private $defaultCollectionRequest;
+    private $defaultEndpoint = "/endpoint";
+    private $defaultPageSize = 2;
 
     public function setUp(): void
     {
-        $this->collectionRequest = new GraphCollectionRequest("GET", "/endpoint", "token", "url", "version");
-        $this->collectionRequest->setReturnType(Model\User::class);
-        $this->collectionRequest->setPageSize(2);
+        parent::setUp();
+        $this->defaultCollectionRequest = new GraphCollectionRequest("GET", $this->defaultEndpoint, $this->mockGraphClient);
+        $this->defaultCollectionRequest->setPageSize($this->defaultPageSize);
+        $this->defaultCollectionRequest->setReturnType(TestModel::class);
+    }
 
-        $body = json_encode(array('body' => 'content', '@odata.nextLink' => 'url/version/endpoint?skiptoken=link'));
-        $body2 = json_encode(array('body' => 'content'));
-        $mock = new GuzzleHttp\Handler\MockHandler([
-            new GuzzleHttp\Psr7\Response(200, ['foo' => 'bar'], $body),
-            new GuzzleHttp\Psr7\Response(200, ['foo' => 'bar'], $body2),
-            new GuzzleHttp\Psr7\Response(200, ['foo' => 'bar'], $body2),
-        ]);
-        $handler = GuzzleHttp\HandlerStack::create($mock);
-        $this->client = new GuzzleHttp\Client(['handler' => $handler]);
+    public function testSetPageSizeReturnsInstance(): void {
+        $this->assertInstanceOf(GraphCollectionRequest::class, $this->defaultCollectionRequest->setPageSize(1));
+    }
 
-        $this->reflectedRequestUrlHandler = new ReflectionMethod('Microsoft\Graph\Http\GraphRequest', '_getRequestUrl');
-        $this->reflectedRequestUrlHandler->setAccessible(true);
+    public function testSetPageSizeExceedingMaxSizeThrowsException(): void {
+        $this->expectException(GraphClientException::class);
+        $this->defaultCollectionRequest->setPageSize(GraphConstants::MAX_PAGE_SIZE + 1);
+    }
+
+    public function testGetPageAppendsPageSizeToInitialCollectionRequestUrl(): void {
+        $this->defaultCollectionRequest->getPage();
+        $expectedRequestUrl = GraphRequestUtil::getRequestUri($this->mockGraphClient->getNationalCloud(), $this->defaultEndpoint)."?\$top=".$this->defaultPageSize;
+        $this->assertEquals($expectedRequestUrl, strval($this->defaultCollectionRequest->getRequestUri()));
+    }
+
+    public function testGetPageUsesNextLinkForSubsequentRequests(): void {
+        MockHttpClientResponseConfig::configureWithCollectionPayload($this->mockHttpClient);
+        // First page
+        $this->defaultCollectionRequest->getPage();
+        // Next page
+        $this->defaultCollectionRequest->getPage();
+        $expectedRequestUrl = SampleGraphResponsePayload::COLLECTION_PAYLOAD['@odata.nextLink'];
+        $this->assertEquals($expectedRequestUrl, strval($this->defaultCollectionRequest->getRequestUri()));
     }
 
     public function testHitEndOfCollection()
     {
         $this->expectError();
-
-        //First page
-        $this->collectionRequest->setPageCallInfo();
-        $response = $this->collectionRequest->execute($this->client);
-        $this->collectionRequest->processPageCallReturn($response);
-
+        MockHttpClientResponseConfig::configureWithLastPageCollectionPayload($this->mockHttpClient);
         //Last page
-        $this->collectionRequest->setPageCallInfo();
-        $response = $this->collectionRequest->execute($this->client);
-        $result1 = $this->collectionRequest->processPageCallReturn($response);
-
-        $this->assertTrue($this->collectionRequest->isEnd());
-
+        $this->defaultCollectionRequest->getPage();
+        $this->assertTrue($this->defaultCollectionRequest->isEnd());
         //Expect error
-        $this->collectionRequest->setPageCallInfo();
+        $this->defaultCollectionRequest->getPage();
     }
 
     public function testProcessPageCallReturn()
     {
-        $this->collectionRequest->setPageCallInfo();
-        $response = $this->collectionRequest->execute($this->client);
-        $result = $this->collectionRequest->processPageCallReturn($response);
-        $this->assertInstanceOf(Model\User::class, $result);
-    }
-
-    public function testEndpointManipulation()
-    {
-        //Page should be 1
-        $this->assertFalse($this->collectionRequest->isEnd());
-
-        $requestUrl = $this->reflectedRequestUrlHandler->invokeArgs($this->collectionRequest, array());
-
-        $this->assertEquals($requestUrl, 'version/endpoint');
-
-        $this->collectionRequest->setPageCallInfo();
-
-        $requestUrl = $this->reflectedRequestUrlHandler->invokeArgs($this->collectionRequest, array());
-        $this->assertEquals('version/endpoint?$top=2', $requestUrl);
+        MockHttpClientResponseConfig::configureWithCollectionPayload($this->mockHttpClient);
+        $this->defaultCollectionRequest->setPageCallInfo();
+        $response = $this->defaultCollectionRequest->execute();
+        $result = $this->defaultCollectionRequest->processPageCallReturn($response);
+        $this->assertIsArray($result);
+        array_filter($result, function ($item) { $this->assertInstanceOf(TestModel::class, $item); });
     }
 }

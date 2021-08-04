@@ -16,6 +16,9 @@ use Microsoft\Graph\Http\HttpClientInterface;
 
 class BaseGraphRequestTest extends \PHPUnit\Framework\TestCase
 {
+    const DEFAULT_NEXT_LINK = "https://graph.microsoft.com/me/users?\$skip=2&\$top=2";
+    const DEFAULT_REQUEST_ENDPOINT = "/endpoint";
+
     protected $mockHttpClient;
     protected $mockGraphClient;
     protected $defaultGraphRequest;
@@ -23,7 +26,7 @@ class BaseGraphRequestTest extends \PHPUnit\Framework\TestCase
     public function setUp(): void {
         $this->mockHttpClient = $this->createMock(HttpClientInterface::class);
         $this->setupMockGraphClient();
-        $this->defaultGraphRequest = new GraphRequest("GET", "/me/users?\$top=10", $this->mockGraphClient);
+        $this->defaultGraphRequest = new GraphRequest("GET", self::DEFAULT_REQUEST_ENDPOINT, $this->mockGraphClient);
     }
 
     private function setupMockGraphClient(): void {

@@ -8,9 +8,8 @@
 namespace Microsoft\Graph\Http;
 
 use GuzzleHttp\Psr7\Uri;
-use Microsoft\Graph\Exception\GraphClientException;
-use Microsoft\Graph\Exception\GraphException;
 use Microsoft\Graph\Core\GraphConstants;
+use Microsoft\Graph\Exception\GraphClientException;
 
 /**
  * Class GraphCollectionRequest
@@ -210,5 +209,13 @@ class GraphCollectionRequest extends GraphRequest
     public function getDeltaLink(): ?string
     {
         return $this->deltaLink;
+    }
+
+    /**
+     * Get page size
+     * @return int
+     */
+    public function getPageSize(): int {
+        return $this->pageSize;
     }
 }
