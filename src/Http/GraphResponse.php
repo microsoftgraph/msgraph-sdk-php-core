@@ -30,6 +30,13 @@ use Psr\Http\Message\StreamInterface;
  */
 class GraphResponse
 {
+
+    /**
+     * The request object
+     * @var object
+     */
+
+    private $_request;
     /**
     * The body of the response
     *
