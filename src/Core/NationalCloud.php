@@ -39,13 +39,23 @@ final class NationalCloud
      * @return bool
      */
     public static function containsNationalCloudHost(string $url): bool {
-        self::initHosts();
         $validUrlParts = parse_url($url);
-        return $validUrlParts
-                && array_key_exists("scheme", $validUrlParts)
-                && $validUrlParts["scheme"] == "https"
-                && array_key_exists("host", $validUrlParts)
-                && array_key_exists(strtolower($validUrlParts["host"]), self::$hosts);
+        return self::containsNationalCloudHostFromUrlParts($validUrlParts);
+    }
+
+    /**
+     * Checks if $urlParts contain a valid National Cloud host
+     *
+     * @param array<string, string>|false $urlParts return value of parse_url()
+     * @return bool
+     */
+    public static function containsNationalCloudHostFromUrlParts($urlParts): bool {
+        self::initHosts();
+        return $urlParts
+            && array_key_exists("scheme", $urlParts)
+            && $urlParts["scheme"] == "https"
+            && array_key_exists("host", $urlParts)
+            && array_key_exists(strtolower($urlParts["host"]), self::$hosts);
     }
 
     /**

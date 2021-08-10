@@ -39,15 +39,27 @@ class GraphRequestUtil
             return new Uri($endpoint);
         }
         if ($baseUrl) {
-            $urlParts = parse_url($baseUrl);
-            if (!$urlParts || !array_key_exists("scheme", $urlParts) || !array_key_exists("host", $urlParts)) {
+            $baseUrlParts = parse_url($baseUrl);
+            if (!self::isValidBaseUrl($baseUrlParts)) {
                 throw new \InvalidArgumentException("Invalid baseUrl=".$baseUrl.". Ensure URL has scheme and host");
             }
-            $relativeUrl = (NationalCloud::containsNationalCloudHost($baseUrl)) ? "/".$apiVersion : "";
+            $relativeUrl = (NationalCloud::containsNationalCloudHostFromUrlParts($baseUrlParts)) ? "/".$apiVersion : "";
             $relativeUrl .= (substr($endpoint, 0, 1) == "/") ? $endpoint : "/".$endpoint;
             return UriResolver::resolve(new Uri($baseUrl), new Uri($relativeUrl));
         }
         throw new \InvalidArgumentException("Unable to create uri with empty baseUrl and endpoint=".$endpoint);
+    }
+
+    /**
+     * Check whether $urlParts meet criteria for a valid base url
+     *
+     * @param array<string, string>|false $urlParts return value of parse_url()
+     * @return bool
+     */
+    public static function isValidBaseUrl($urlParts): bool {
+        return $urlParts
+                && array_key_exists("scheme", $urlParts)
+                && array_key_exists("host", $urlParts);
     }
 
     /**
