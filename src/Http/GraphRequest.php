@@ -344,7 +344,7 @@ class GraphRequest
     {
         $coreSdkVersion = "graph-php-core/".GraphConstants::SDK_VERSION;
         $serviceLibSdkVersion = "Graph-php-".$this->graphClient->getSdkVersion();
-        if (NationalCloud::containsNationalCloudHost($baseUrl)) {
+        if (NationalCloud::containsNationalCloudHost($this->requestUri)) {
             $this->headers = [
                 'Content-Type' => 'application/json',
                 'SdkVersion' => $coreSdkVersion.", ".$serviceLibSdkVersion,

@@ -108,6 +108,29 @@ class GraphRequestTest extends BaseGraphRequestTest
         $this->assertEquals($expectedHeaders, $request->getHeaders());
     }
 
+    public function testConstructorSetsExpectedHeadersGivenGraphEndpointUrl(): void {
+        $endpoint = "https://graph.microsoft.com/v1.0/me/users\$skip=10&\$top=5";
+        $expectedHeaders = [
+            'Content-Type' => ['application/json'],
+            'SdkVersion' => ["graph-php-core/".GraphConstants::SDK_VERSION.", Graph-php-".$this->mockGraphClient->getSdkVersion()],
+            'Authorization' => ['Bearer ' . $this->mockGraphClient->getAccessToken()],
+            'Host' => [substr($this->mockGraphClient->getNationalCloud(), strlen("https://"))]
+        ];
+        $request = new GraphRequest("GET", $endpoint, $this->mockGraphClient);
+        $this->assertEquals($expectedHeaders, $request->getHeaders());
+
+    }
+
+    public function testConstructorSetsExpectedHeadersGivenNonGraphEndpointUrl(): void {
+        $endpoint = "https://www.outlook.com/messages";
+        $expectedHeaders = [
+            'Content-Type' => ['application/json'],
+            'Host' => ["www.outlook.com"]
+        ];
+        $request = new GraphRequest("GET", $endpoint, $this->mockGraphClient);
+        $this->assertEquals($expectedHeaders, $request->getHeaders());
+    }
+
     public function testSetAccessTokenReturnsGraphRequestInstance(): void {
         $this->assertInstanceOf(GraphRequest::class, $this->defaultGraphRequest->setAccessToken("123"));
     }
