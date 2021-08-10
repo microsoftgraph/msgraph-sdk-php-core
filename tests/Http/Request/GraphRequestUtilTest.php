@@ -36,10 +36,10 @@ class GraphRequestUtilTest extends \PHPUnit\Framework\TestCase
         self::assertEquals($endpoint, strval($result));
     }
 
-    function testGetRequestUriWithFullNonNationalCloudEndpointThrowsException() {
-        $this->expectException(\InvalidArgumentException::class);
+    function testGetRequestUriWithFullNonNationalCloudEndpointReturnsUri() {
         $endpoint = "https://www.outlook.com/mail?user=me";
         $uri = GraphRequestUtil::getRequestUri("", $endpoint, $this->apiVersion);
+        $this->assertEquals($endpoint, strval($uri));
     }
 
     function testGetRequestUriWithValidBaseUrlResolvesCorrectly() {
@@ -76,15 +76,8 @@ class GraphRequestUtilTest extends \PHPUnit\Framework\TestCase
 
     function testGetRequestUriWithInvalidFullEndpointUrlThrowsException() {
         $this->expectException(\InvalidArgumentException::class);
-        $endpoint = "http:/microsoft.com:localhost\$endpoint";
+        $endpoint = "http/microsoft.com:localhost\$endpoint";
         $uri = GraphRequestUtil::getRequestUri("", $endpoint, $this->apiVersion);
-    }
-
-    function testGetRequestUriWithInvalidBaseUrlAndEndpointThrowsException() {
-        $this->expectException(\InvalidArgumentException::class);
-        $baseUrl = "https://graph.microsoft.com";
-        $endpoint = "http:/microsoft.com:localhost\$endpoint";
-        $uri = GraphRequestUtil::getRequestUri($baseUrl, $endpoint, $this->apiVersion);
     }
 
     function testGetQueryParamConcatenatorWithExistingQueryParams() {

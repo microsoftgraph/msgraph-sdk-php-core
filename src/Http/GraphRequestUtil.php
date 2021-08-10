@@ -36,10 +36,7 @@ class GraphRequestUtil
     public static function getRequestUri(string $baseUrl, string $endpoint, string $apiVersion = "v1.0"): UriInterface {
         // If endpoint is a full url, ensure the host is a national cloud
         if (parse_url($endpoint, PHP_URL_SCHEME)) {
-            if (NationalCloud::containsNationalCloudHost($endpoint)) {
-                return new Uri($endpoint);
-            }
-            throw new \InvalidArgumentException("Invalid national cloud host in endpoint=".$endpoint.". See https://docs.microsoft.com/en-us/graph/deployments#microsoft-graph-and-graph-explorer-service-root-endpoints.");
+            return new Uri($endpoint);
         }
         if ($baseUrl) {
             $urlParts = parse_url($baseUrl);
