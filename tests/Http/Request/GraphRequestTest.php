@@ -81,10 +81,11 @@ class GraphRequestTest extends BaseGraphRequestTest
         $this->assertEquals($expectedUrl, strval($request->getRequestUri()));
     }
 
-    public function testConstructorThrowsExceptionGivenInvalidFullEndpointUri(): void {
-        $this->expectException(GraphClientException::class);
-        $invalidEndpoint = "http://graph.microsoft.com/beta/me/"; # Not https
+    public function testConstructorGivenInvalidFullEndpointUriAppendsItToDefaultBaseUrl(): void {
+        $invalidEndpoint = "http/microsoft.com:localhost\$endpoint"; # Not https
         $request = new GraphRequest("GET", $invalidEndpoint, $this->mockGraphClient);
+        $expected = NationalCloud::GLOBAL."/".$this->mockGraphClient->getApiVersion()."/".$invalidEndpoint;
+        $this->assertEquals($expected, strval($request->getRequestUri()));
     }
 
     public function testConstructorSetsExpectedHeadersGivenValidGraphBaseUrl(): void {
