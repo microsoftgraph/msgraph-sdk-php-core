@@ -106,31 +106,31 @@ class GraphRequestSyncTest extends BaseGraphRequestTest
 
     public function testExecuteWithStreamReturnTypeReturnsStreamForSuccessPayload(): void {
         MockHttpClientResponseConfig::configureWithEntityPayload($this->mockHttpClient);
-        $response = $this->defaultGraphRequest->setReturnType(Stream::class)->execute();
+        $response = $this->defaultGraphRequest->setReturnType(StreamInterface::class)->execute();
         $this->assertInstanceOf(StreamInterface::class, $response);
     }
 
     public function testExecuteWithStreamReturnTypeReturnsStreamForEmptyPayload(): void {
         MockHttpClientResponseConfig::configureWithEmptyPayload($this->mockHttpClient);
-        $response = $this->defaultGraphRequest->setReturnType(Stream::class)->execute();
+        $response = $this->defaultGraphRequest->setReturnType(StreamInterface::class)->execute();
         $this->assertInstanceOf(StreamInterface::class, $response);
     }
 
     public function testExecuteWithStreamReturnTypeReturnsStreamForErrorPayload(): void {
         MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient);
-        $response = $this->defaultGraphRequest->setReturnType(Stream::class)->execute();
+        $response = $this->defaultGraphRequest->setReturnType(StreamInterface::class)->execute();
         $this->assertInstanceOf(StreamInterface::class, $response);
     }
 
     public function testExecuteWithStreamReturnTypeReturnsStreamForStreamPayload(): void {
         MockHttpClientResponseConfig::configureWithStreamPayload($this->mockHttpClient);
-        $response = $this->defaultGraphRequest->setReturnType(Stream::class)->execute();
+        $response = $this->defaultGraphRequest->setReturnType(StreamInterface::class)->execute();
         $this->assertInstanceOf(StreamInterface::class, $response);
     }
 
     public function testExecuteWithStreamReturnTypeReturnsStreamForCollectionPayload(): void {
         MockHttpClientResponseConfig::configureWithCollectionPayload($this->mockHttpClient);
-        $response = $this->defaultGraphRequest->setReturnType(Stream::class)->execute();
+        $response = $this->defaultGraphRequest->setReturnType(StreamInterface::class)->execute();
         $this->assertInstanceOf(StreamInterface::class, $response);
     }
 }

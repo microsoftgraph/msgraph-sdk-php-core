@@ -130,7 +130,7 @@ class GraphRequest
 
     /**
      * Sets the return type of the response object
-     * Can be set to a model or \GuzzleHttp\Psr7\Stream or \Psr7\
+     * Can be set to a model or \Psr\Http\Message\StreamInterface
      *
      * @param string $returnClass The class name to use
      *
@@ -139,11 +139,11 @@ class GraphRequest
      */
     public function setReturnType(string $returnClass): self
     {
-        if (!class_exists($returnClass)) {
+        if (!class_exists($returnClass) && !interface_exists($returnClass)) {
             throw new GraphClientException("Return type specified does not match an existing class definition");
         }
         $this->returnType = $returnClass;
-        if ($this->returnType == \GuzzleHttp\Psr7\Stream::class || $this->requestType == StreamInterface::class) {
+        if ($this->returnType == StreamInterface::class) {
             $this->returnsStream  = true;
         } else {
             $this->returnsStream = false;

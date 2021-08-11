@@ -51,7 +51,7 @@ class GraphRequestAsyncTest extends BaseGraphRequestTest
             $this->mockHttpClient,
             SampleGraphResponsePayload::STREAM_PAYLOAD()
         );
-        $promise = $this->defaultGraphRequest->setReturnType(Stream::class)
+        $promise = $this->defaultGraphRequest->setReturnType(StreamInterface::class)
             ->executeAsync();
         $this->assertInstanceOf(StreamInterface::class, $promise->wait());
     }
