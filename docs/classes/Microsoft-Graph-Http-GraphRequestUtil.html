@@ -83,22 +83,20 @@
                     <ul class="phpdocumentor-breadcrumbs">
             <li class="phpdocumentor-breadcrumb"><a href="namespaces/microsoft.html">Microsoft</a></li>
             <li class="phpdocumentor-breadcrumb"><a href="namespaces/microsoft-graph.html">Graph</a></li>
-            <li class="phpdocumentor-breadcrumb"><a href="namespaces/microsoft-graph-exception.html">Exception</a></li>
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/microsoft-graph-http.html">Http</a></li>
     </ul>
 
     <article class="phpdocumentor-element -class">
         <h2 class="phpdocumentor-content__title">
-    GraphException
+    GraphRequestUtil
 
-        <span class="phpdocumentor-element__extends">
-        extends <abbr title="\Exception">Exception</abbr>
-    </span>
     
             <div class="phpdocumentor-element__package">
             in package
             <ul class="phpdocumentor-breadcrumbs">
                                     <li class="phpdocumentor-breadcrumb"><a href="packages/Microsoft.html">Microsoft</a></li>
                                     <li class="phpdocumentor-breadcrumb"><a href="packages/Microsoft-Graph.html">Graph</a></li>
+                                    <li class="phpdocumentor-breadcrumb"><a href="packages/Microsoft-Graph-Http.html">Http</a></li>
                             </ul>
         </div>
     
@@ -106,12 +104,12 @@
     </h2>
 
         <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Exception/GraphException.php"><a href="files/src-exception-graphexception.html"><abbr title="src/Exception/GraphException.php">GraphException.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Http/GraphRequestUtil.php"><a href="files/src-http-graphrequestutil.html"><abbr title="src/Http/GraphRequestUtil.php">GraphRequestUtil.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">28</span>
+    <span class="phpdocumentor-element-found-in__line">23</span>
 </aside>
 
-            <p class="phpdocumentor-summary">Class GraphException</p>
+            <p class="phpdocumentor-summary">Class GraphRequestUtil</p>
 
     <section class="phpdocumentor-description"></section>
 
@@ -122,11 +120,11 @@
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
-                    <span class="phpdocumentor-tag__name">category</span>
+                    <span class="phpdocumentor-tag__name">copyright</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
                                                                                 
-                                                 <section class="phpdocumentor-description"><p>Library</p>
+                                                 <section class="phpdocumentor-description"><p>2021 Microsoft Corporation</p>
 </section>
 
                                     </dd>
@@ -143,7 +141,7 @@
                     <span class="phpdocumentor-tag__name">link</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
-                                                                                                        <a class="phpdocumentor-tag-link" href="https://graph.microsoft.io/"> https://graph.microsoft.io/ </a>
+                                                                                                        <a class="phpdocumentor-tag-link" href="https://developer.microsoft.com/graph"> https://developer.microsoft.com/graph </a>
                     
                                     </dd>
                         </dl>
@@ -160,18 +158,20 @@
 
 <dl class="phpdocumentor-table-of-contents">
                     <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Microsoft-Graph-Exception-GraphException.html#method___construct">__construct()</a>
-    <span>
-                        &nbsp;: mixed    </span>
-</dt>
-<dd>Construct a new Graph Exception handler</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Microsoft-Graph-Exception-GraphException.html#method___toString">__toString()</a>
+    <a href="classes/Microsoft-Graph-Http-GraphRequestUtil.html#method_getQueryParamConcatenator">getQueryParamConcatenator()</a>
     <span>
                         &nbsp;: string    </span>
 </dt>
-<dd>Stringify the returned error and message</dd>
+<dd>Determine correct symbol to add before concatenating query parameters to $url</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a href="classes/Microsoft-Graph-Http-GraphRequestUtil.html#method_getRequestUri">getRequestUri()</a>
+    <span>
+                        &nbsp;: <abbr title="\Psr\Http\Message\UriInterface">UriInterface</abbr>|null    </span>
+</dt>
+<dd>Returns full request URI by resolving $baseUrl and $endpoint based on RFC 3986
+Prepends $apiVersion to $endpoint if $baseUrl contains a national cloud host
+$endpoint can be a full URI with a national cloud host</dd>
 
         </dl>
 
@@ -184,59 +184,40 @@
             <section class="phpdocumentor-methods">
         <h3 class="phpdocumentor-elements__header" id="methods">
             Methods
-            <a href="classes/Microsoft-Graph-Exception-GraphException.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
+            <a href="classes/Microsoft-Graph-Http-GraphRequestUtil.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
         </h3>
                     <article
         class="phpdocumentor-element
             -method
             -public
-                                                        "
+                                    -static                    "
 >
-    <h4 class="phpdocumentor-element__name" id="method___construct">
-        __construct()
-        <a href="classes/Microsoft-Graph-Exception-GraphException.html#method___construct" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_getQueryParamConcatenator">
+        getQueryParamConcatenator()
+        <a href="classes/Microsoft-Graph-Http-GraphRequestUtil.html#method_getQueryParamConcatenator" class="headerlink"><i class="fas fa-link"></i></a>
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Exception/GraphException.php"><a href="files/src-exception-graphexception.html"><abbr title="src/Exception/GraphException.php">GraphException.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Http/GraphRequestUtil.php"><a href="files/src-http-graphrequestutil.html"><abbr title="src/Http/GraphRequestUtil.php">GraphRequestUtil.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">37</span>
+    <span class="phpdocumentor-element-found-in__line">50</span>
 </aside>
 
-        <p class="phpdocumentor-summary">Construct a new Graph Exception handler</p>
+        <p class="phpdocumentor-summary">Determine correct symbol to add before concatenating query parameters to $url</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$message</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$code</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__return-type"><abbr title="\Exception">Exception</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$previous</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+            <span class="phpdocumentor-signature__static">static</span>    <span class="phpdocumentor-signature__name">getQueryParamConcatenator</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type"><abbr title="\GuzzleHttp\Psr7\Uri">Uri</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$url</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
 
         <section class="phpdocumentor-description"></section>
 
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-signature__argument__name">$message</span>
-                : <span class="phpdocumentor-signature__argument__return-type">string</span>
+                <span class="phpdocumentor-signature__argument__name">$url</span>
+                : <span class="phpdocumentor-signature__argument__return-type"><abbr title="\GuzzleHttp\Psr7\Uri">Uri</abbr></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The error to send</p>
-</section>
-
-            </dd>
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-signature__argument__name">$code</span>
-                : <span class="phpdocumentor-signature__argument__return-type">int</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The error code associated with the error</p>
-</section>
-
-            </dd>
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-signature__argument__name">$previous</span>
-                : <span class="phpdocumentor-signature__argument__return-type"><abbr title="\Exception">Exception</abbr></span>
-                 = <span class="phpdocumentor-signature__argument__default-value">null</span>            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The last error sent, defaults to null</p>
-</section>
+                    <section class="phpdocumentor-description"></section>
 
             </dd>
             </dl>
@@ -244,7 +225,7 @@
     
 
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-    <span class="phpdocumentor-signature__response_type">mixed</span>
+    <span class="phpdocumentor-signature__response_type">string</span>
             &mdash;
             <section class="phpdocumentor-description"></section>
 
@@ -254,34 +235,64 @@
         class="phpdocumentor-element
             -method
             -public
-                                                        "
+                                    -static                    "
 >
-    <h4 class="phpdocumentor-element__name" id="method___toString">
-        __toString()
-        <a href="classes/Microsoft-Graph-Exception-GraphException.html#method___toString" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_getRequestUri">
+        getRequestUri()
+        <a href="classes/Microsoft-Graph-Http-GraphRequestUtil.html#method_getRequestUri" class="headerlink"><i class="fas fa-link"></i></a>
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Exception/GraphException.php"><a href="files/src-exception-graphexception.html"><abbr title="src/Exception/GraphException.php">GraphException.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Http/GraphRequestUtil.php"><a href="files/src-http-graphrequestutil.html"><abbr title="src/Http/GraphRequestUtil.php">GraphRequestUtil.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">47</span>
+    <span class="phpdocumentor-element-found-in__line">35</span>
 </aside>
 
-        <p class="phpdocumentor-summary">Stringify the returned error and message</p>
+        <p class="phpdocumentor-summary">Returns full request URI by resolving $baseUrl and $endpoint based on RFC 3986
+Prepends $apiVersion to $endpoint if $baseUrl contains a national cloud host
+$endpoint can be a full URI with a national cloud host</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                <span class="phpdocumentor-signature__name">__toString</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
+            <span class="phpdocumentor-signature__static">static</span>    <span class="phpdocumentor-signature__name">getRequestUri</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$baseUrl</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$endpoint</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$apiVersion</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">&quot;v1.0&quot;</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="\Psr\Http\Message\UriInterface">UriInterface</abbr>|null</span></code>
 
         <section class="phpdocumentor-description"></section>
 
-    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-signature__argument__name">$baseUrl</span>
+                : <span class="phpdocumentor-signature__argument__return-type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>if empty, is overwritten with $client's national cloud</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-signature__argument__name">$endpoint</span>
+                : <span class="phpdocumentor-signature__argument__return-type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>can be a full URL</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-signature__argument__name">$apiVersion</span>
+                : <span class="phpdocumentor-signature__argument__return-type">string</span>
+                 = <span class="phpdocumentor-signature__argument__default-value">&quot;v1.0&quot;</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"></section>
+
+            </dd>
+            </dl>
+
     
 
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-    <span class="phpdocumentor-signature__response_type">string</span>
+    <span class="phpdocumentor-signature__response_type"><abbr title="\Psr\Http\Message\UriInterface">UriInterface</abbr>|null</span>
             &mdash;
-            <section class="phpdocumentor-description"><p>The returned string message</p>
-</section>
+            <section class="phpdocumentor-description"></section>
 
     
 </article>
@@ -301,7 +312,7 @@
 </section>
             </div>
         </div>
-        <a href="classes/Microsoft-Graph-Exception-GraphException.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+        <a href="classes/Microsoft-Graph-Http-GraphRequestUtil.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
 
     </main>
 
