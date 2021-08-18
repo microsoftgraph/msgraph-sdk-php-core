@@ -19,7 +19,6 @@ namespace Microsoft\Graph\Core;
 final class GraphConstants
 {
     // These can be overwritten in setters in the Graph object
-    const API_VERSION = "v1.0";
     const REST_ENDPOINT = "https://graph.microsoft.com/";
 
     // Define HTTP request constants

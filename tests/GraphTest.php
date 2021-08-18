@@ -44,7 +44,7 @@ class GraphTest extends TestCase
         $graph->setBaseUrl('url2');
 
         $request = $graph->createRequest("GET", "/me");
-        $this->assertEquals('url2', $request->getBaseUrl());
+        $this->assertEquals('url2', $request->getNationalCloud());
     }
 
     public function testBetaRequest()

@@ -1,9 +1,9 @@
-<?php 
+<?php
 /**
-* Copyright (c) Microsoft Corporation.  All Rights Reserved.  
-* Licensed under the MIT License.  See License in the project root 
+* Copyright (c) Microsoft Corporation.  All Rights Reserved.
+* Licensed under the MIT License.  See License in the project root
 * for license information.
-* 
+*
 * Exceptions File
 * PHP version 7
 *
@@ -46,6 +46,6 @@ class GraphException extends \Exception
     */
     public function __toString()
     {
-        return __CLASS__ . ": [{$this->code}]: {$this->message}\n";
+        return get_called_class() . ": [{$this->code}]: {$this->message}\n";
     }
 }

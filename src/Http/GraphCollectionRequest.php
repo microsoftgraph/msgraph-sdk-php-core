@@ -3,30 +3,21 @@
 * Copyright (c) Microsoft Corporation.  All Rights Reserved.
 * Licensed under the MIT License.  See License in the project root
 * for license information.
-*
-* GraphCollectionRequest File
-* PHP version 7
-*
-* @category  Library
-* @package   Microsoft.Graph
-* @copyright 2016 Microsoft Corporation
-* @license   https://opensource.org/licenses/MIT MIT License
-* @version   GIT: 0.1.0
-* @link      https://graph.microsoft.io/
 */
 
 namespace Microsoft\Graph\Http;
 
+use GuzzleHttp\Psr7\Uri;
+use Microsoft\Graph\Exception\GraphClientException;
 use Microsoft\Graph\Exception\GraphException;
 use Microsoft\Graph\Core\GraphConstants;
 
 /**
  * Class GraphCollectionRequest
- *
- * @category Library
- * @package  Microsoft.Graph
- * @license  https://opensource.org/licenses/MIT MIT License
- * @link     https://graph.microsoft.io/
+ * @package Microsoft\Graph\Http
+ * @copyright 2021 Microsoft Corporation
+ * @license https://opensource.org/licenses/MIT MIT License
+ * @link https://developer.microsoft.com/graph
  */
 class GraphCollectionRequest extends GraphRequest
 {
@@ -55,12 +46,6 @@ class GraphCollectionRequest extends GraphRequest
     */
     protected $end;
     /**
-    * The endpoint that the user called (with query parameters)
-    *
-    * @var string
-    */
-    protected $originalEndpoint;
-    /**
      * The return type that the user specified
      *
      * @var object
@@ -68,28 +53,21 @@ class GraphCollectionRequest extends GraphRequest
     protected $originalReturnType;
 
     /**
-    * Constructs a new GraphCollectionRequest object
-    *
-    * @param string $requestType  The HTTP verb for the
-    *                             request ("GET", "POST", "PUT", etc.)
-    * @param string $endpoint     The URI of the endpoint to hit
-    * @param string $accessToken  A valid access token
-    * @param string $baseUrl      The base URL of the request
-    * @param string $apiVersion   The version of the API to call
-    * @param string $proxyPort    The url where to proxy through
-    * @param bool $proxyVerifySSL Whether the proxy requests should perform SSL verification
-    * @throws GraphException when no access token is provided
-    */
-    public function __construct($requestType, $endpoint, $accessToken, $baseUrl, $apiVersion, $proxyPort = null, $proxyVerifySSL = false)
+     * Constructs a new GraphCollectionRequest object
+     *
+     * @param string $requestType The HTTP verb for the request ("GET", "POST", "PUT", etc.)
+     * @param string $endpoint The URI of the endpoint to hit
+     * @param AbstractGraphClient $graphClient
+     * @param string $baseUrl (optional) If empty, it's set to $client's national cloud
+     * @throws GraphClientException
+     */
+    public function __construct(string $requestType, string $endpoint, AbstractGraphClient $graphClient, string $baseUrl = "")
     {
         parent::__construct(
             $requestType,
             $endpoint,
-            $accessToken,
-            $baseUrl,
-            $apiVersion,
-            $proxyPort,
-            $proxyVerifySSL
+            $graphClient,
+            $baseUrl
         );
         $this->end = false;
     }
@@ -98,21 +76,14 @@ class GraphCollectionRequest extends GraphRequest
 	 * Gets the number of entries in the collection
 	 *
 	 * @return int the number of entries
-	 * @throws GraphException
-	 * @throws \GuzzleHttp\Exception\GuzzleException
-	 */
+     * @throws \Psr\Http\Client\ClientExceptionInterface
+     */
     public function count()
     {
         $query = '$count=true';
-        $request = new GraphRequest(
-            $this->requestType,
-            $this->endpoint . $this->getConcatenator() . $query,
-            $this->accessToken,
-            $this->baseUrl,
-            $this->apiVersion,
-            $this->proxyPort
-        );
-        $result = $request->execute()->getBody();
+        $requestUri = $this->getRequestUri();
+        $this->setRequestUri(new Uri( $requestUri . GraphRequestUtil::getQueryParamConcatenator($requestUri) . $query));
+        $result = $this->execute()->getBody();
 
         if (array_key_exists("@odata.count", $result)) {
             return $result['@odata.count'];
@@ -129,25 +100,25 @@ class GraphCollectionRequest extends GraphRequest
     *
     * @param int $pageSize The page size
     *
-     * @throws GraphException if the requested page size exceeds
+     * @throws GraphClientException if the requested page size exceeds
      *         the Graph's defined page size limit
     * @return GraphCollectionRequest object
     */
-    public function setPageSize($pageSize)
+    public function setPageSize(int $pageSize): self
     {
         if ($pageSize > GraphConstants::MAX_PAGE_SIZE) {
-            throw new GraphException(GraphConstants::MAX_PAGE_SIZE_ERROR);
+            throw new GraphClientException(GraphConstants::MAX_PAGE_SIZE_ERROR);
         }
         $this->pageSize = $pageSize;
         return $this;
     }
 
-	/**
-	 * Gets the next page of results
-	 *
-	 * @return array of objects of class $returnType
-	 * @throws \GuzzleHttp\Exception\GuzzleException
-	 */
+    /**
+     * Gets the next page of results
+     *
+     * @return array of objects of class $returnType
+     * @throws \Psr\Http\Client\ClientExceptionInterface
+     */
     public function getPage()
     {
         $this->setPageCallInfo();
@@ -157,11 +128,11 @@ class GraphCollectionRequest extends GraphRequest
     }
 
     /**
-    * Sets the required query information to get a new page
-    *
-    * @return GraphCollectionRequest
-    */
-    public function setPageCallInfo()
+     * Sets the required query information to get a new page
+     *
+     * @return GraphCollectionRequest
+     */
+    public function setPageCallInfo(): self
     {
         // Store these to add temporary query data to request
         $this->originalReturnType = $this->returnType;
@@ -175,11 +146,13 @@ class GraphCollectionRequest extends GraphRequest
         }
 
         if ($this->nextLink) {
-            $this->endpoint = "/" . implode("/", array_slice(explode("/", $this->nextLink), 4));
+            $this->setRequestUri(new Uri($this->nextLink));
         } else {
             // This is the first request to the endpoint
             if ($this->pageSize) {
-                $this->endpoint .= $this->getConcatenator() . '$top=' . $this->pageSize;
+                $query = '$top='.$this->pageSize;
+                $requestUri = $this->getRequestUri();
+                $this->setRequestUri(new Uri( $requestUri . GraphRequestUtil::getQueryParamConcatenator($requestUri) . $query));
             }
         }
         return $this;
@@ -194,7 +167,7 @@ class GraphCollectionRequest extends GraphRequest
     * @return mixed result of the call, formatted according
     *         to the returnType set by the user
     */
-    public function processPageCallReturn($response)
+    public function processPageCallReturn(GraphResponse $response)
     {
         $this->nextLink = $response->getNextLink();
         $this->deltaLink = $response->getDeltaLink();
@@ -223,7 +196,7 @@ class GraphCollectionRequest extends GraphRequest
     *
     * @return bool The end
     */
-    public function isEnd()
+    public function isEnd(): bool
     {
         return $this->end;
     }
@@ -234,7 +207,7 @@ class GraphCollectionRequest extends GraphRequest
     *
     * @return string|null The delta link
     */
-    public function getDeltaLink()
+    public function getDeltaLink(): ?string
     {
         return $this->deltaLink;
     }
