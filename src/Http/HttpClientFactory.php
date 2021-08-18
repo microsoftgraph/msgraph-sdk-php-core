@@ -72,10 +72,7 @@ final class HttpClientFactory
      * @throws GraphClientException if $nationalCloud is empty or an invalid national cloud Host
      */
     public static function nationalCloud(string $nationalCloud = NationalCloud::GLOBAL): HttpClientFactory {
-        if (!$nationalCloud) {
-            throw new GraphClientException("National cloud cannot be empty string");
-        }
-        if (!NationalCloud::isValidNationalCloudHost($nationalCloud)) {
+        if (!$nationalCloud || !NationalCloud::containsNationalCloudHost($nationalCloud)) {
             throw new GraphClientException("Invalid national cloud passed. See https://docs.microsoft.com/en-us/graph/deployments#microsoft-graph-and-graph-explorer-service-root-endpoints.");
         }
         self::$nationalCloud = $nationalCloud;

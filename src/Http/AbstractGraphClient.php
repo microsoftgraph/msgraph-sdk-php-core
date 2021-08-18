@@ -22,7 +22,7 @@ use Microsoft\Graph\Exception\GraphException;
  * @license https://opensource.org/licenses/MIT MIT License
  * @link https://developer.microsoft.com/graph
  */
-class BaseClient
+abstract class AbstractGraphClient
 {
     /**
     * The access_token provided after authenticating
@@ -31,14 +31,6 @@ class BaseClient
     * @var string
     */
     private $accessToken;
-
-    /**
-    * The api version to use ("v1.0", "beta")
-    * Default is "v1.0"
-    *
-    * @var string
-    */
-    private $apiVersion = GraphConstants::API_VERSION;
 
     /**
      * Host to use as the base URL and for authentication
@@ -58,16 +50,13 @@ class BaseClient
      *
      * Creates a Graph client object used to make requests to the Graph API
      *
-     * @param string|null $apiVersion if null|"" defaults to "v1.0"
      * @param string|null $nationalCloud if null defaults to "https://graph.microsoft.com"
      * @param HttpClientInterface|null $httpClient if null creates default Guzzle client
      * @throws GraphClientException
      */
-    public function __construct(?string $apiVersion = GraphConstants::API_VERSION,
-                                ?string $nationalCloud = NationalCloud::GLOBAL,
+    public function __construct(?string $nationalCloud = NationalCloud::GLOBAL,
                                 ?HttpClientInterface  $httpClient = null)
     {
-        $this->apiVersion = ($apiVersion) ?: GraphConstants::API_VERSION;
         $this->nationalCloud = ($nationalCloud) ?: NationalCloud::GLOBAL;
         $this->httpClient = ($httpClient) ?: HttpClientFactory::nationalCloud($nationalCloud)::createAdapter();
     }
@@ -92,13 +81,6 @@ class BaseClient
      */
     public function getAccessToken(): string {
         return $this->accessToken;
-    }
-
-    /**
-     * @return string
-     */
-    public function getApiVersion(): string {
-        return $this->apiVersion;
     }
 
     /**
@@ -132,10 +114,7 @@ class BaseClient
         return new GraphRequest(
             $requestType,
             $endpoint,
-            $this->accessToken,
-            $this->nationalCloud,
-            $this->apiVersion,
-            $this->httpClient
+            $this
         );
     }
 
@@ -155,10 +134,21 @@ class BaseClient
         return new GraphCollectionRequest(
             $requestType,
             $endpoint,
-            $this->accessToken,
-            $this->nationalCloud,
-            $this->apiVersion,
-            $this->httpClient
+            $this
         );
     }
+
+    /**
+     * Return SDK version used in the service library client.
+     *
+     * @return string
+     */
+    public abstract function getSdkVersion(): string;
+
+    /**
+     * Returns API version used in the service library
+     *
+     * @return string
+     */
+    public abstract function getApiVersion(): string;
 }
