@@ -22,8 +22,7 @@
 	"require-dev": {
 		"phpunit/phpunit": "^8.0 || ^9.0",
 		"mikey179/vfsstream": "^1.2",
-		"vimeo/psalm": "^4.8",
-		"microsoft/microsoft-graph": "^1.34"
+		"phpstan/phpstan": "^0.12.90"
 	},
 	"autoload": {
 		"psr-4": {
@@ -32,7 +31,7 @@
 	},
 	"autoload-dev": {
 		"psr-4": {
-			"Microsoft\\Graph\\Test\\": "tests/Functional/",
+			"Microsoft\\Graph\\Test\\": "tests/",
 			"Microsoft\\Graph\\Http\\Test\\": "tests/Http/"
 		}
 	}
