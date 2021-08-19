@@ -18,6 +18,7 @@ use Microsoft\Graph\Exception\GraphClientException;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\UriInterface;
 
 /**
  * Class GraphRequest
@@ -56,7 +57,7 @@ class GraphRequest
     /**
     * The object type to cast the response to
     *
-    * @var string
+    * @var string|null
     */
     protected $returnType;
     /**
@@ -74,7 +75,7 @@ class GraphRequest
     /**
      * Full Request URI (base URL + endpoint)
      *
-     * @var Uri
+     * @var UriInterface
      */
     private $requestUri;
 
@@ -105,12 +106,12 @@ class GraphRequest
         $this->initPsr7HttpRequest();
     }
 
-    protected function setRequestUri(Uri $uri): void {
+    protected function setRequestUri(UriInterface $uri): void {
         $this->requestUri = $uri;
         $this->httpRequest = $this->httpRequest->withUri($uri);
     }
 
-    public function getRequestUri(): Uri {
+    public function getRequestUri(): UriInterface {
         return $this->requestUri;
     }
 
@@ -361,10 +362,10 @@ class GraphRequest
      * Creates full request URI by resolving $baseUrl and $endpoint based on RFC 3986
      *
      * @param string $baseUrl
-     * @param $endpoint
+     * @param string $endpoint
      * @throws GraphClientException
      */
-    protected function initRequestUri(string $baseUrl, $endpoint): void {
+    protected function initRequestUri(string $baseUrl, string $endpoint): void {
         try {
             $this->requestUri = GraphRequestUtil::getRequestUri($baseUrl, $endpoint, $this->graphClient->getApiVersion());
         } catch (\InvalidArgumentException $ex) {

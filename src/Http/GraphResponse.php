@@ -172,11 +172,10 @@ class GraphResponse
     *
     * @return string|null nextLink, if provided
     */
-    public function getNextLink()
+    public function getNextLink(): ?string
     {
         if (array_key_exists("@odata.nextLink", $this->getBody())) {
-            $nextLink = $this->getBody()['@odata.nextLink'];
-            return $nextLink;
+            return $this->getBody()['@odata.nextLink'];
         }
         return null;
     }
@@ -188,11 +187,23 @@ class GraphResponse
     *
     * @return string|null deltaLink
     */
-    public function getDeltaLink()
+    public function getDeltaLink(): ?string
     {
         if (array_key_exists("@odata.deltaLink", $this->getBody())) {
-            $deltaLink = $this->getBody()['@odata.deltaLink'];
-            return $deltaLink;
+            return $this->getBody()['@odata.deltaLink'];
+        }
+        return null;
+    }
+
+    /**
+     * Gets the number of items in the response payload
+     *
+     * @return int|null
+     */
+    public function getCount(): ?int
+    {
+        if (array_key_exists("@odata.count", $this->getBody())) {
+            return $this->getBody()["@odata.count"];
         }
         return null;
     }

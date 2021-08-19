@@ -3,6 +3,7 @@ namespace Microsoft\Graph\Test\Http\Request;
 
 use Microsoft\Graph\Core\GraphConstants;
 use Microsoft\Graph\Exception\GraphClientException;
+use Microsoft\Graph\Exception\GraphException;
 use Microsoft\Graph\Http\GraphCollectionRequest;
 use Microsoft\Graph\Http\GraphRequestUtil;
 use Microsoft\Graph\Test\Http\SampleGraphResponsePayload;
@@ -60,13 +61,15 @@ class GraphCollectionRequestTest extends BaseGraphRequestTest
         $this->defaultCollectionRequest->getPage();
     }
 
-    public function testProcessPageCallReturn()
-    {
+    public function testCount(): void {
         MockHttpClientResponseConfig::configureWithCollectionPayload($this->mockHttpClient);
-        $this->defaultCollectionRequest->setPageCallInfo();
-        $response = $this->defaultCollectionRequest->execute();
-        $result = $this->defaultCollectionRequest->processPageCallReturn($response);
-        $this->assertIsArray($result);
-        array_filter($result, function ($item) { $this->assertInstanceOf(User::class, $item); });
+        $count = $this->defaultCollectionRequest->count();
+        $this->assertEquals(SampleGraphResponsePayload::COLLECTION_PAYLOAD["@odata.count"], $count);
+    }
+
+    public function testCountThrowsErrorIfNoOdataCountFound(): void {
+        $this->expectException(GraphException::class);
+        MockHttpClientResponseConfig::configureWithEmptyPayload($this->mockHttpClient);
+        $count = $this->defaultCollectionRequest->count();
     }
 }
