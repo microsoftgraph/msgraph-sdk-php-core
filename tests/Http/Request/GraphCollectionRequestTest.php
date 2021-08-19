@@ -6,8 +6,8 @@ use Microsoft\Graph\Exception\GraphClientException;
 use Microsoft\Graph\Exception\GraphException;
 use Microsoft\Graph\Http\GraphCollectionRequest;
 use Microsoft\Graph\Http\GraphRequestUtil;
+use Microsoft\Graph\Task\PageIterator;
 use Microsoft\Graph\Test\Http\SampleGraphResponsePayload;
-use Microsoft\Graph\Test\Http\TestModel;
 use Microsoft\Graph\Test\TestData\Model\User;
 
 class GraphCollectionRequestTest extends BaseGraphRequestTest
@@ -71,5 +71,29 @@ class GraphCollectionRequestTest extends BaseGraphRequestTest
         $this->expectException(GraphException::class);
         MockHttpClientResponseConfig::configureWithEmptyPayload($this->mockHttpClient);
         $count = $this->defaultCollectionRequest->count();
+    }
+
+    public function testPageIteratorReturnsValidPageIterator() {
+        MockHttpClientResponseConfig::configureWithCollectionPayload($this->mockHttpClient);
+        $numEntitiesProcessed = 0;
+        $callback = function ($entity) use (&$numEntitiesProcessed) {
+            $numEntitiesProcessed ++;
+            return true;
+        };
+        $pageIterator = $this->defaultCollectionRequest->pageIterator($callback);
+        $this->assertInstanceOf(PageIterator::class, $pageIterator);
+    }
+
+    public function testPageIteratorInitialisesUsingFirstPageOfResults() {
+        MockHttpClientResponseConfig::configureWithCollectionPayload($this->mockHttpClient);
+        $numEntitiesProcessed = 0;
+        $callback = function ($entity) use (&$numEntitiesProcessed) {
+            $numEntitiesProcessed ++;
+            return true;
+        };
+        $pageIterator = $this->defaultCollectionRequest->pageIterator($callback);
+        $promise = $pageIterator->iterate();
+        $promise->wait();
+        $this->assertTrue($numEntitiesProcessed >= sizeof(SampleGraphResponsePayload::COLLECTION_PAYLOAD["value"]));
     }
 }

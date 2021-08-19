@@ -8,7 +8,6 @@
 namespace Microsoft\Graph\Http;
 
 use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\Psr7\Utils;
 use Http\Client\HttpAsyncClient;
 use Http\Promise\Promise;
