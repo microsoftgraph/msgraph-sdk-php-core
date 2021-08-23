@@ -11,7 +11,6 @@ namespace Microsoft\Graph\Task;
 use Http\Promise\FulfilledPromise;
 use Http\Promise\Promise;
 use Microsoft\Graph\Exception\GraphClientException;
-use Microsoft\Graph\Exception\GraphException;
 use Microsoft\Graph\Http\AbstractGraphClient;
 use Microsoft\Graph\Http\GraphResponse;
 use Microsoft\Graph\Http\RequestOptions;
@@ -159,6 +158,17 @@ class PageIterator
      */
     public function resume(): Promise {
         return $this->iterate();
+    }
+
+    /**
+     * Updates the access token
+     *
+     * @param string $token
+     * @return $this
+     */
+    public function setAccessToken(string $token): self {
+        $this->graphClient->setAccessToken($token);
+        return $this;
     }
 
     /**

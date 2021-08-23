@@ -10,8 +10,8 @@ namespace Microsoft\Graph\Test\Task;
 
 
 use GuzzleHttp\Psr7\Utils;
-use Hoa\Iterator\Mock;
 use Microsoft\Graph\Exception\GraphClientException;
+use Microsoft\Graph\Http\AbstractGraphClient;
 use Microsoft\Graph\Http\GraphCollectionRequest;
 use Microsoft\Graph\Http\GraphResponse;
 use Microsoft\Graph\Http\RequestOptions;
@@ -218,6 +218,15 @@ class PageIteratorTest extends BaseGraphRequestTest
         $promise = $this->defaultPageIterator->iterate();
         $promise->wait();
         $this->assertNull($this->defaultPageIterator->getDeltaLink());
+    }
+
+    public function testSetAccessToken() {
+        $token = "new token";
+        $this->mockGraphClient->expects($this->once())
+                                ->method("setAccessToken")
+                                ->with($token);
+        $instance = $this->defaultPageIterator->setAccessToken($token);
+        $this->assertInstanceOf(PageIterator::class, $instance);
     }
 
     private function createCollectionResponse(array $payload): GraphResponse {
