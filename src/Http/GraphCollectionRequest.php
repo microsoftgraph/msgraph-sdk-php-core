@@ -11,6 +11,7 @@ use GuzzleHttp\Psr7\Uri;
 use Microsoft\Graph\Core\GraphConstants;
 use Microsoft\Graph\Exception\GraphClientException;
 use Microsoft\Graph\Exception\GraphException;
+use Microsoft\Graph\Exception\GraphServiceException;
 use Microsoft\Graph\Task\PageIterator;
 use Psr\Http\Client\ClientExceptionInterface;
 
@@ -85,9 +86,11 @@ class GraphCollectionRequest extends GraphRequest
 	 * Gets the number of entries in the collection
 	 *
 	 * @return int the number of entries
-     * @throws ClientExceptionInterface|GraphClientException
+     * @throws ClientExceptionInterface
+     * @throws  GraphClientException if @odata.count is not present in the response
+     * @throws GraphServiceException if 4xx or 5xx response is returned
      */
-    public function count()
+    public function count(): int
     {
         $query = '$count=true';
         $requestUri = $this->getRequestUri();
@@ -130,6 +133,7 @@ class GraphCollectionRequest extends GraphRequest
      *
      * @return GraphResponse|array of objects of class $returnType| GraphResponse if no $returnType
      * @throws ClientExceptionInterface
+     * @throws GraphServiceException if 4xx or 5xx response is returned
      */
     public function getPage()
     {

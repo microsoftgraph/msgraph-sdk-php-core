@@ -8,12 +8,14 @@
 namespace Microsoft\Graph\Http;
 
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use Http\Client\HttpAsyncClient;
 use Http\Promise\Promise;
 use Microsoft\Graph\Core\GraphConstants;
 use Microsoft\Graph\Core\NationalCloud;
 use Microsoft\Graph\Exception\GraphClientException;
+use Microsoft\Graph\Exception\GraphServiceException;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\StreamInterface;
@@ -101,7 +103,7 @@ class GraphRequest
         $this->graphClient = $graphClient;
         $baseUrl = ($baseUrl) ?: $graphClient->getNationalCloud();
         $this->initRequestUri($baseUrl, $endpoint);
-        $this->initHeaders($baseUrl);
+        $this->initHeaders();
         $this->initPsr7HttpRequest();
     }
 
@@ -233,6 +235,7 @@ class GraphRequest
      * @param ClientInterface|null $client (optional) When null, uses $graphClient's http client
      * @return array|GraphResponse|StreamInterface|object Graph Response object or response body cast to $returnType
      * @throws ClientExceptionInterface
+     * @throws GraphServiceException if 4xx or 5xx response is returned. Exception contains the error payload
      */
     public function execute(?ClientInterface $client = null)
     {
@@ -241,6 +244,7 @@ class GraphRequest
         }
 
         $result = $client->sendRequest($this->httpRequest);
+        $this->handleErrorResponse($result);
 
         // Check to see if returnType is a stream, if so return it immediately
         if($this->returnsStream) {
@@ -269,7 +273,9 @@ class GraphRequest
      *
      * @param HttpAsyncClient|null $client (optional) When null, uses $graphClient's http client
      * @return Promise Resolves to GraphResponse object|response body cast to $returnType. Fails throwing the exception
-     * @throws \Exception when promise fails
+     * @throws GraphServiceException if 4xx or 5xx response is returned. Exception contains the error payload
+     * @throws ClientExceptionInterface if there are any errors while making the HTTP request
+     * @throws \Exception
      */
     public function executeAsync(?HttpAsyncClient $client = null): Promise
     {
@@ -280,6 +286,7 @@ class GraphRequest
         return $client->sendAsyncRequest($this->httpRequest)->then(
             // On success, return the result/response
             function ($result) {
+                $this->handleErrorResponse($result);
 
                 // Check to see if returnType is a stream, if so return it immediately
                 if($this->returnsStream) {
@@ -312,7 +319,9 @@ class GraphRequest
      *
      * @param string $path path to download the file contents to
      * @param ClientInterface|null $client (optional) When null, defaults to $graphClient's http client
-     * @throws ClientExceptionInterface|GraphClientException when unable to open $path for writing
+     * @throws ClientExceptionInterface
+     * @throws GraphClientException when unable to open $path for writing
+     * @throws GraphServiceException if 4xx or 5xx response is returned. Error payload is accessible from the exception
      */
     public function download(string $path, ?ClientInterface $client = null): void
     {
@@ -323,6 +332,7 @@ class GraphRequest
             $resource = Utils::tryFopen($path, 'w');
             $stream = Utils::streamFor($resource);
             $response = $client->sendRequest($this->httpRequest);
+            $this->handleErrorResponse($response);
             $stream->write($response->getBody()->getContents());
             $stream->close();
         } catch (\RuntimeException $ex) {
@@ -336,7 +346,9 @@ class GraphRequest
      * @param string $path path of file to be uploaded
      * @param ClientInterface|null $client (optional)
      * @return array|GraphResponse|StreamInterface|object Graph Response object or response body cast to $returnType
-     * @throws ClientExceptionInterface|GraphClientException if $path cannot be opened for reading
+     * @throws ClientExceptionInterface
+     * @throws  GraphClientException if $path cannot be opened for reading
+     * @throws GraphServiceException if 4xx or 5xx response is returned. Error payload is accessible from the exception
      */
     public function upload(string $path, ?ClientInterface $client = null)
     {
@@ -356,7 +368,7 @@ class GraphRequest
     /**
      * Sets default headers based on baseUrl being a Graph endpoint or not
      */
-    private function initHeaders(string $baseUrl): void
+    private function initHeaders(): void
     {
         $coreSdkVersion = "graph-php-core/".GraphConstants::SDK_VERSION;
         if ($this->graphClient->getApiVersion() === GraphConstants::BETA_API_VERSION) {
@@ -394,5 +406,32 @@ class GraphRequest
 
     protected function initPsr7HttpRequest(): void {
         $this->httpRequest = new Request($this->requestType, $this->requestUri, $this->headers, $this->requestBody);
+    }
+
+    /**
+     * Check if response status code is 4xx or 5xx
+     *
+     * @param int $httpStatusCode
+     * @return bool
+     */
+    private function isErrorResponse(int $httpStatusCode): bool {
+        return ($httpStatusCode >=400 && $httpStatusCode <= 599);
+    }
+
+    /**
+     * Determines whether to throw GraphServiceException or not
+     *
+     * @param Response $httpResponse
+     * @throws GraphServiceException
+     */
+    private function handleErrorResponse(Response $httpResponse) {
+        if ($this->isErrorResponse($httpResponse->getStatusCode())) {
+            throw new GraphServiceException(
+                $this,
+                $httpResponse->getStatusCode(),
+                json_decode($httpResponse->getBody(), true),
+                $httpResponse->getHeaders()
+            );
+        }
     }
 }
