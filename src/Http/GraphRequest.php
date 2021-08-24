@@ -105,13 +105,32 @@ class GraphRequest
         $this->initPsr7HttpRequest();
     }
 
+    /**
+     * Sets the request URI and updates the Psr7 request with the new URI
+     *
+     * @param UriInterface $uri
+     */
     protected function setRequestUri(UriInterface $uri): void {
         $this->requestUri = $uri;
         $this->httpRequest = $this->httpRequest->withUri($uri);
     }
 
+    /**
+     * Returns the final request URI after resolving $endpoint to base URL
+     *
+     * @return UriInterface
+     */
     public function getRequestUri(): UriInterface {
         return $this->requestUri;
+    }
+
+    /**
+     * ReturnS the HTTP method used
+     *
+     * @return string
+     */
+    public function getRequestType(): string {
+        return $this->requestType;
     }
 
     /**

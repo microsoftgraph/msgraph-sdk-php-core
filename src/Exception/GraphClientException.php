@@ -9,6 +9,9 @@ namespace Microsoft\Graph\Exception;
 
 /**
  * Class GraphClientException
+ *
+ * Thrown when there are SDK-level errors (mostly validation errors)
+ *
  * @package Microsoft\Graph\Exception
  * @copyright 2021 Microsoft Corporation
  * @license https://opensource.org/licenses/MIT MIT License
