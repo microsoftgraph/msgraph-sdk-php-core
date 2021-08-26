@@ -3,6 +3,7 @@
 namespace Microsoft\Graph\Test\Http\Request;
 
 use Microsoft\Graph\Exception\GraphClientException;
+use Microsoft\Graph\Exception\GraphServiceException;
 use Microsoft\Graph\Test\Http\SampleGraphResponsePayload;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamFile;
@@ -35,6 +36,16 @@ class GraphRequestStreamTest extends BaseGraphRequestTest
         $this->defaultGraphRequest->upload($file->url());
     }
 
+    public function testUploadThrowsExceptionForErrorResponse()
+    {
+        $this->expectException(GraphServiceException::class);
+        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient);
+        $file = vfsStream::newFile('foo.txt')
+            ->withContent("content")
+            ->at($this->rootDir);
+        $this->defaultGraphRequest->upload($file->url());
+    }
+
     public function testDownload()
     {
         $file = new VfsStreamFile('foo.txt');
@@ -49,6 +60,15 @@ class GraphRequestStreamTest extends BaseGraphRequestTest
     {
         $this->expectException(GraphClientException::class);
         $file = new VfsStreamFile('foo.txt', 0000);
+        $this->rootDir->addChild($file);
+        $this->defaultGraphRequest->download($file->url());
+    }
+
+    public function testDownloadThrowsExceptionForErrorResponse()
+    {
+        $this->expectException(GraphServiceException::class);
+        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient);
+        $file = new VfsStreamFile('foo.txt');
         $this->rootDir->addChild($file);
         $this->defaultGraphRequest->download($file->url());
     }

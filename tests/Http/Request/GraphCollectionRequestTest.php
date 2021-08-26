@@ -4,6 +4,7 @@ namespace Microsoft\Graph\Test\Http\Request;
 use Microsoft\Graph\Core\GraphConstants;
 use Microsoft\Graph\Exception\GraphClientException;
 use Microsoft\Graph\Exception\GraphException;
+use Microsoft\Graph\Exception\GraphServiceException;
 use Microsoft\Graph\Http\GraphCollectionRequest;
 use Microsoft\Graph\Http\GraphRequestUtil;
 use Microsoft\Graph\Task\PageIterator;
@@ -61,6 +62,12 @@ class GraphCollectionRequestTest extends BaseGraphRequestTest
         $this->defaultCollectionRequest->getPage();
     }
 
+    public function testGetPageThrowsExceptionOnErrorResponse(): void {
+        $this->expectException(GraphServiceException::class);
+        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient, 500);
+        $this->defaultCollectionRequest->getPage();
+    }
+
     public function testCount(): void {
         MockHttpClientResponseConfig::configureWithCollectionPayload($this->mockHttpClient);
         $count = $this->defaultCollectionRequest->count();
@@ -71,6 +78,12 @@ class GraphCollectionRequestTest extends BaseGraphRequestTest
         $this->expectException(GraphException::class);
         MockHttpClientResponseConfig::configureWithEmptyPayload($this->mockHttpClient);
         $count = $this->defaultCollectionRequest->count();
+    }
+
+    public function testCountThrowsExceptionOnErrorResponse(): void {
+        $this->expectException(GraphServiceException::class);
+        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient, 404);
+        $this->defaultCollectionRequest->count();
     }
 
     public function testPageIteratorReturnsValidPageIterator() {
@@ -95,5 +108,11 @@ class GraphCollectionRequestTest extends BaseGraphRequestTest
         $promise = $pageIterator->iterate();
         $promise->wait();
         $this->assertTrue($numEntitiesProcessed >= sizeof(SampleGraphResponsePayload::COLLECTION_PAYLOAD["value"]));
+    }
+
+    public function testPageIteratorThrowsExceptionIfFirstPageRequestGetsErrorResponse(): void {
+        $this->expectException(GraphServiceException::class);
+        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient, 500);
+        $this->defaultCollectionRequest->pageIterator(function () {});
     }
 }

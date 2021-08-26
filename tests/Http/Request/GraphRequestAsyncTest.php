@@ -9,9 +9,9 @@
 namespace Microsoft\Graph\Test\Http\Request;
 
 
-use GuzzleHttp\Psr7\Stream;
 use Http\Client\HttpAsyncClient;
 use Http\Promise\Promise;
+use Microsoft\Graph\Exception\GraphServiceException;
 use Microsoft\Graph\Http\GraphResponse;
 use Microsoft\Graph\Test\Http\SampleGraphResponsePayload;
 use Microsoft\Graph\Test\Http\TestModel;
@@ -62,17 +62,18 @@ class GraphRequestAsyncTest extends BaseGraphRequestTest
         $this->assertInstanceOf(GraphResponse::class, $promise->wait());
     }
 
-    public function testExecuteAsyncPromiseResolvesToGraphResponseForErrorPayload(): void {
+    public function testExecuteAsyncPromiseThrowsExceptionForErrorResponse(): void {
+        $this->expectException(GraphServiceException::class);
         MockHttpClientAsyncResponseConfig::statusCode(400)::configureWithFulfilledPromise(
             $this->mockHttpClient,
             SampleGraphResponsePayload::ERROR_PAYLOAD
         );
         $promise = $this->defaultGraphRequest->executeAsync();
-        $this->assertInstanceOf(GraphResponse::class, $promise->wait());
+        $promise->wait();
     }
 
     public function testExecuteAsyncResolvesToModelForModelReturnType(): void {
-        MockHttpClientAsyncResponseConfig::configureWithFulfilledPromise(
+        MockHttpClientAsyncResponseConfig::statusCode()::configureWithFulfilledPromise(
             $this->mockHttpClient,
             SampleGraphResponsePayload::ENTITY_PAYLOAD
         );
@@ -81,7 +82,7 @@ class GraphRequestAsyncTest extends BaseGraphRequestTest
     }
 
     public function testExecuteAsyncResolvesToModelArrayForCollectionRequest(): void {
-        MockHttpClientAsyncResponseConfig::configureWithFulfilledPromise(
+        MockHttpClientAsyncResponseConfig::statusCode()::configureWithFulfilledPromise(
             $this->mockHttpClient,
             SampleGraphResponsePayload::COLLECTION_PAYLOAD
         );

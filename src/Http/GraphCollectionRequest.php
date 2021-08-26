@@ -244,6 +244,7 @@ class GraphCollectionRequest extends GraphRequest
      * @return PageIterator call iterate() to start the iterator
      * @throws ClientExceptionInterface
      * @throws GraphClientException
+     * @throws GraphServiceException if 4xx or 5xx is returned when fetching the initial collection
      */
     public function pageIterator(callable $callback): PageIterator {
         // temporarily disable return type in order to get first page as GraphResponse object

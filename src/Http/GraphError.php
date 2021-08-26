@@ -27,7 +27,7 @@ class GraphError
      *
      * @return string|null
      */
-    public function code(): ?string {
+    public function getCode(): ?string {
         if (array_key_exists("code", $this->propDict)) {
             return $this->propDict["code"];
         }
@@ -39,7 +39,7 @@ class GraphError
      *
      * @return string|null
      */
-    public function message(): ?string {
+    public function getMessage(): ?string {
         if (array_key_exists("message", $this->propDict)) {
             return $this->propDict["message"];
         }
@@ -51,7 +51,7 @@ class GraphError
      *
      * @return GraphError|null
      */
-    public function innerError(): ?GraphError {
+    public function getInnerError(): ?GraphError {
         if (array_key_exists("innerError", $this->propDict)) {
             return new GraphError($this->propDict["innerError"]);
         }
@@ -63,7 +63,7 @@ class GraphError
      *
      * @return string|null
      */
-    public function clientRequestId(): ?string {
+    public function getClientRequestId(): ?string {
         if (array_key_exists("client-request-id", $this->propDict)) {
             return $this->propDict["client-request-id"];
         }
@@ -75,7 +75,7 @@ class GraphError
      *
      * @return string|null
      */
-    public function requestId(): ?string {
+    public function getRequestId(): ?string {
         if (array_key_exists("request-id", $this->propDict)) {
             return $this->propDict["request-id"];
         }
@@ -87,7 +87,7 @@ class GraphError
      *
      * @return string|null
      */
-    public function date(): ?string {
+    public function getDate(): ?string {
         if (array_key_exists("date", $this->propDict)) {
             return $this->propDict["date"];
         }

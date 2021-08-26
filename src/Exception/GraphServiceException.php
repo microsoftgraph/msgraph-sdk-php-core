@@ -10,6 +10,7 @@ namespace Microsoft\Graph\Exception;
 
 use Microsoft\Graph\Http\GraphError;
 use Microsoft\Graph\Http\GraphRequest;
+use Microsoft\Graph\Http\GraphRequestUtil;
 
 /**
  * Class GraphServiceException
@@ -66,7 +67,7 @@ class GraphServiceException extends GraphException
         $this->responseStatusCode = $responseStatusCode;
         $this->responseBody = $responseBody;
         $this->responseHeaders = $responseHeaders;
-        $message = "'".$graphRequest->getRequestType()."' request to ".$graphRequest->getRequestUri()." returned ".$responseStatusCode."\n".$responseBody;
+        $message = "'".$graphRequest->getRequestType()."' request to ".$graphRequest->getRequestUri()." returned ".$responseStatusCode."\n".json_encode($responseBody);
         parent::__construct($message, $responseStatusCode);
     }
 
