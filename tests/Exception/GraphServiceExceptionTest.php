@@ -9,32 +9,33 @@
 namespace Microsoft\Graph\Test\Exception;
 
 
+use GuzzleHttp\Psr7\Response;
 use Microsoft\Graph\Exception\GraphServiceException;
-use Microsoft\Graph\Http\GraphError;
+use Microsoft\Graph\Exception\ODataError;
 use Microsoft\Graph\Http\GraphRequest;
 use Microsoft\Graph\Test\Http\SampleGraphResponsePayload;
 
 class GraphServiceExceptionTest extends \PHPUnit\Framework\TestCase
 {
     private $mockGraphRequest;
-    private $responseStatusCode;
+    private $responseStatusCode = 404;
     private $responseBody = SampleGraphResponsePayload::ERROR_PAYLOAD;
-    private $responseHeaders;
+    private $responseHeaders = [
+        "Content-Type" => "application/json",
+        "request-id" => "2f91ee0a-e013-425b-a5bf-b1f251163969",
+        "client-request-id" => "2f91ee0a-e013-425b-a5bf-b1f251163969",
+    ];
     private $defaultException;
+    private $psr7Response;
 
     protected function setUp(): void {
         $this->mockGraphRequest = $this->createMock(GraphRequest::class);
-        $this->responseStatusCode = 404;
-        $this->responseHeaders = [
-            "Content-Type" => "application/json",
-            "request-id" => "2f91ee0a-e013-425b-a5bf-b1f251163969",
-            "client-request-id" => "2f91ee0a-e013-425b-a5bf-b1f251163969",
-        ];
+        $this->psr7Response = new Response($this->responseStatusCode, $this->responseHeaders, json_encode($this->responseBody));
         $this->defaultException = new GraphServiceException(
             $this->mockGraphRequest,
-            $this->responseStatusCode,
-            $this->responseBody,
-            $this->responseHeaders
+            $this->psr7Response->getStatusCode(),
+            json_decode($this->psr7Response->getBody(), true),
+            $this->psr7Response->getHeaders()
         );
     }
 
@@ -46,7 +47,29 @@ class GraphServiceExceptionTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($this->mockGraphRequest, $this->defaultException->getRequest());
         $this->assertEquals($this->responseStatusCode, $this->defaultException->getResponseStatusCode());
         $this->assertEquals($this->responseBody, $this->defaultException->getRawResponseBody());
-        $this->assertEquals($this->responseHeaders, $this->defaultException->getResponseHeaders());
-        $this->assertInstanceOf(GraphError::class, $this->defaultException->getError());
+        $this->assertEquals($this->psr7Response->getHeaders(), $this->defaultException->getResponseHeaders());
+        $this->assertInstanceOf(ODataError::class, $this->defaultException->getError());
+    }
+
+    public function testGetClientRequestId(): void {
+        $headerName = "client-request-id";
+        $this->assertEquals(
+            $this->responseHeaders[$headerName],
+            $this->defaultException->getClientRequestId()
+        );
+        unset($this->responseHeaders[$headerName]);
+        $this->setUp();
+        $this->assertNull($this->defaultException->getClientRequestId());
+    }
+
+    public function testGetRequestId(): void {
+        $headerName = "request-id";
+        $this->assertEquals(
+            $this->responseHeaders[$headerName],
+            $this->defaultException->getRequestId()
+        );
+        unset($this->responseHeaders[$headerName]);
+        $this->setUp();
+        $this->assertNull($this->defaultException->getRequestId());
     }
 }

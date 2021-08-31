@@ -127,7 +127,7 @@ class GraphRequest
     }
 
     /**
-     * ReturnS the HTTP method used
+     * Returns the HTTP method used
      *
      * @return string
      */

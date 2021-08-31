@@ -8,9 +8,7 @@
 
 namespace Microsoft\Graph\Exception;
 
-use Microsoft\Graph\Http\GraphError;
 use Microsoft\Graph\Http\GraphRequest;
-use Microsoft\Graph\Http\GraphRequestUtil;
 
 /**
  * Class GraphServiceException
@@ -74,7 +72,7 @@ class GraphServiceException extends GraphException
     /**
      * Returns HTTP headers in the response from the Graph
      *
-     * @return array
+     * @return array<string, string[]>
      */
     public function getResponseHeaders(): array {
         return $this->responseHeaders;
@@ -99,13 +97,13 @@ class GraphServiceException extends GraphException
     }
 
     /**
-     * Returns the error object of the payload as a model
+     * Returns the error object of the payload
      *
-     * @return GraphError|null
+     * @return ODataError|null
      */
-    public function getError(): ?GraphError {
+    public function getError(): ?ODataError {
         if (array_key_exists("error", $this->responseBody)) {
-            return new GraphError($this->responseBody["error"]);
+            return new ODataError($this->responseBody["error"]);
         }
         return null;
     }
@@ -117,5 +115,33 @@ class GraphServiceException extends GraphException
      */
     public function getRequest(): GraphRequest {
         return $this->graphRequest;
+    }
+
+    /**
+     * Returns the client request Id
+     *
+     * @return string|null
+     */
+    public function getClientRequestId(): ?string {
+        $headerName = "client-request-id";
+        if (array_key_exists($headerName, $this->responseHeaders)
+            && !empty($this->responseHeaders[$headerName])) {
+            return $this->responseHeaders[$headerName][0];
+        }
+        return null;
+    }
+
+    /**
+     * Returns the request Id
+     *
+     * @return string|null
+     */
+    public function getRequestId(): ?string {
+        $headerName = "request-id";
+        if (array_key_exists($headerName, $this->responseHeaders)
+            && !empty($this->responseHeaders[$headerName])) {
+            return $this->responseHeaders[$headerName][0];
+        }
+        return null;
     }
 }

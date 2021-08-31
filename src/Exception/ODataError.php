@@ -1,0 +1,86 @@
+<?php
+/**
+ * Copyright (c) Microsoft Corporation.  All Rights Reserved.
+ * Licensed under the MIT License.  See License in the project root
+ * for license information.
+ */
+
+
+namespace Microsoft\Graph\Exception;
+
+/**
+ * Class ODataError
+ *
+ * Defines error structure of an OData v4 Error based on http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#_Toc31358908
+ *
+ * @package Microsoft\Graph\Exception
+ * @copyright 2021 Microsoft Corporation
+ * @license https://opensource.org/licenses/MIT MIT License
+ * @link https://developer.microsoft.com/graph
+ */
+class ODataError extends BaseError
+{
+    /**
+     * Get error code returned by the Graph
+     *
+     * @return string|null
+     */
+    public function getCode(): ?string {
+        return $this->getProperty("code");
+    }
+
+    /**
+     * Get error message returned by the Graph
+     *
+     * @return string|null
+     */
+    public function getMessage(): ?string {
+        return $this->getProperty("message");
+    }
+
+    /**
+     * Returns the target of the error
+     *
+     * @return string|null
+     */
+    public function getTarget(): ?string {
+        return $this->getProperty("target");
+    }
+
+    /**
+     * Returns the error details containing a code, message and target
+     *
+     * @return ODataError[]|null
+     */
+    public function getDetails(): ?array {
+        $details = $this->getProperty("details");
+        if ($details) {
+            return array_map(function ($detail) { return new ODataError($detail); }, $details);
+        }
+        return null;
+    }
+
+    /**
+     * Get the Graph-specific error info
+     *
+     * @return GraphError|null
+     */
+    public function getInnerError(): ?GraphError {
+        $innerError = $this->getProperty("innerError");
+        return ($innerError) ? new GraphError($innerError) : null;
+    }
+
+    /**
+     * Returns error as a string
+     *
+     * @return string
+     */
+    public function __toString(): string {
+        $errorString = ($this->getCode()) ? "Code: ".$this->getCode() : "";
+        $errorString .= ($this->getMessage()) ? "\nMessage: ".$this->getMessage() : "";
+        $errorString .= ($this->getTarget()) ? "\nTarget: ".$this->getTarget() : "";
+        $errorString .= ($this->getDetails()) ? "\nDetails: ".$this->getDetails() : "";
+        $errorString .= ($this->getInnerError()) ? "\nInner Error: ".$this->getInnerError() : "";
+        return $errorString;
+    }
+}
