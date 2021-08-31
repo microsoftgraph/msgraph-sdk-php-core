@@ -91,12 +91,24 @@ class GraphRequestTest extends BaseGraphRequestTest
     public function testConstructorSetsExpectedHeadersGivenValidGraphBaseUrl(): void {
         $expectedHeaders = [
             'Content-Type' => ['application/json'],
-            'SdkVersion' => ["graph-php-core/".GraphConstants::SDK_VERSION.", Graph-php-".$this->mockGraphClient->getSdkVersion()],
+            'SdkVersion' => ["graph-php-core/".GraphConstants::SDK_VERSION.", graph-php/".$this->mockGraphClient->getSdkVersion()],
             'Authorization' => ['Bearer ' . $this->mockGraphClient->getAccessToken()],
             'Host' => [substr($this->mockGraphClient->getNationalCloud(), strlen("https://"))]
         ];
         $request = new GraphRequest("GET", "/me", $this->mockGraphClient);
         $this->assertEquals($expectedHeaders, $request->getHeaders());
+    }
+
+    public function testConstructorSetsExpectedBetaSdkVersionHeader(): void {
+        $graphClient = $this->createMock(AbstractGraphClient::class);
+        $graphClient->method('getAccessToken')->willReturn("abc");
+        $graphClient->method('getNationalCloud')->willReturn(NationalCloud::GLOBAL);
+        $graphClient->method('getSdkVersion')->willReturn('2.0.0');
+        $graphClient->method('getApiVersion')->willReturn(GraphConstants::BETA_API_VERSION);
+
+        $request = new GraphRequest("GET", "/me", $graphClient);
+        $expected = ["graph-php-core/".GraphConstants::SDK_VERSION.", graph-php-beta/".$graphClient->getSdkVersion()];
+        $this->assertEquals($expected, $request->getHeaders()["SdkVersion"]);
     }
 
     public function testConstructorSetsExpectedHeadersGivenValidCustomBaseUrl(): void {
@@ -113,7 +125,7 @@ class GraphRequestTest extends BaseGraphRequestTest
         $endpoint = "https://graph.microsoft.com/v1.0/me/users\$skip=10&\$top=5";
         $expectedHeaders = [
             'Content-Type' => ['application/json'],
-            'SdkVersion' => ["graph-php-core/".GraphConstants::SDK_VERSION.", Graph-php-".$this->mockGraphClient->getSdkVersion()],
+            'SdkVersion' => ["graph-php-core/".GraphConstants::SDK_VERSION.", graph-php/".$this->mockGraphClient->getSdkVersion()],
             'Authorization' => ['Bearer ' . $this->mockGraphClient->getAccessToken()],
             'Host' => [substr($this->mockGraphClient->getNationalCloud(), strlen("https://"))]
         ];

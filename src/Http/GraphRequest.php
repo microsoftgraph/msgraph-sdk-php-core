@@ -344,7 +344,11 @@ class GraphRequest
     private function initHeaders(string $baseUrl): void
     {
         $coreSdkVersion = "graph-php-core/".GraphConstants::SDK_VERSION;
-        $serviceLibSdkVersion = "Graph-php-".$this->graphClient->getSdkVersion();
+        if ($this->graphClient->getApiVersion() === GraphConstants::BETA_API_VERSION) {
+            $serviceLibSdkVersion = "graph-php-beta/".$this->graphClient->getSdkVersion();
+        } else {
+            $serviceLibSdkVersion = "graph-php/".$this->graphClient->getSdkVersion();
+        }
         if (NationalCloud::containsNationalCloudHost($this->requestUri)) {
             $this->headers = [
                 'Content-Type' => 'application/json',
