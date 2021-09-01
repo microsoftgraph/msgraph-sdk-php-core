@@ -6,31 +6,31 @@ This guide highlights backward compatibility breaking changes introduced during 
 ## 1.x to 2.0
 
 Version `2.0` highlights:
-- Support for National Clouds
-- Changes in creating a Graph client
-- Changes in configuring your HTTP client (including support for PSR-18 and HTTPlug's HttpAsyncClient implementations)
-- Introducing standardised Graph exception types `GraphClientException` and `GraphServiceException` as more specific `GraphException` types
-- Deprecates support for Guzzle `^6.0`
-- Strongly typed method parameters and return type declarations where possible
-- Psr compliance & other standardisation efforts in request classes and methods
-    - Throwing `Psr\Http\Client\ClientExceptionInterface` instead of `\GuzzleHttp\Exception\GuzzleException` in request methods
-    - Accepting and returning `Psr\Http\Message\StreamInterface` request bodies instead of `GuzzleHttp\Psr7\Stream`
-    - Allow overwriting the default Guzzle client with `Psr\Http\Client\ClientExceptionInterface` for synchronous requests
-    - Allow overwriting the default Guzzle client with HTTPlug's `Http\Client\HttpAsyncClient` for asynchronous requests
+- Support for National Clouds.
+- Changes in creating a Graph client.
+- Changes in configuring your HTTP client (including support for PSR-18 and HTTPlug's HttpAsyncClient implementations).
+- Introducing standardised Graph exception types `GraphClientException` and `GraphServiceException` as more specific `GraphException` types.
+- Deprecates support for Guzzle `^6.0`.
+- Strongly typed method parameters and return type declarations where possible.
+- PSR compliance & other standardisation efforts in request classes and methods.
+    - Throwing `Psr\Http\Client\ClientExceptionInterface` instead of `\GuzzleHttp\Exception\GuzzleException` in request methods.
+    - Accepting and returning `Psr\Http\Message\StreamInterface` request bodies instead of `GuzzleHttp\Psr7\Stream`.
+    - Allow overwriting the default Guzzle client with `Psr\Http\Client\ClientExceptionInterface` for synchronous requests.
+    - Allow overwriting the default Guzzle client with HTTPlug's `Http\Client\HttpAsyncClient` for asynchronous requests.
 - Introduces a `PageIterator` that pages through a collection response while running a custom callback function against each entity.
 It automatically fetches the nextPage until the end of the collection and allows you to pause and resume processing.
 
 ### Support for National Clouds
 We have introduced `NationalCloud` containing Microsoft Graph API endpoint constants to enable you to easily
-set base URLs and in future authenticate against the various supported National Clouds
+set base URLs and in future authenticate against the various supported National Clouds.
 
 
 ### Creating a Graph client
-- Version 2 deprecates setting HTTP-specific config via methods e.g. `setProxyPort()`
+- Version 2 deprecates setting HTTP-specific config via methods e.g. `setProxyPort()`.
 - Deprecates `setBaseUrl()` and `setApiVersion()` in favour of passing these into the constructor.
-The National Cloud set will be used as the base URL.
+  The public cloud endpoint, `https://graph.microsoft.com`, will be set as the default base URL.
 - By default, the SDK will create a Guzzle HTTP client using our default config.
-The HTTP client can be customised as shown in the next section
+The HTTP client can be customised as shown in the next section.
 
 
 ```php
@@ -73,11 +73,11 @@ $graphClient = new Graph(NationalCloud::GLOBAL); // creates & uses a default Guz
 
 #### 2. Configure any other HTTP client
 ----------------------------------------
-Implement the `Microsoft\Graph\Http\HttpClientInterface` and pass your implementation to the `Graph` constructor
+Implement the `Microsoft\Graph\Http\HttpClientInterface` and pass your implementation to the `Graph` constructor.
 
 #### 3. Overwrite the HTTP client while making synchronous requests
 --------------------------------------------------------------------
-The SDK supports use of any PSR-18 compliant client for synchronous requests
+The SDK supports use of any PSR-18 compliant client for synchronous requests.
 
 ```php
 $customPsr18Client = new Psr18Client();
@@ -100,7 +100,7 @@ $response = $graphClient->setAccessToken("abc")
 
 
 ### Introducing the `GraphClientException`
-This will be the exception type thrown going forward with regard to Graph client and GraphRequest configuration issues
+This will be the exception type thrown going forward with regard to Graph client and GraphRequest configuration issues.
 
 
 ### Introducing the `GraphServiceException`
@@ -111,10 +111,10 @@ This is the new standard exception to be thrown for `4xx` and `5xx` responses fr
 #### 1. Deprecated functionality
 ---------------------------------
 - Deprecates Guzzle-specific config and methods. We recommend using `HttpClientFactory` to configure your client:
-  - Deprecated `setHttpErrors()`, `setTimeout()`
-  - Deprecated `proxyPort` and `proxyVerifySSL`
+  - Deprecated `setHttpErrors()`, `setTimeout()`.
+  - Deprecated `proxyPort` and `proxyVerifySSL`.
 - `$headers` and `$requestBody` are no longer `protected` attributes. Now `private`.
-- Deprecates some getters: `getBaseUrl()`, `getApiVersion()`, `getReturnsStream()`
+- Deprecates some getters: `getBaseUrl()`, `getApiVersion()`, `getReturnsStream()`.
 
 
 #### 2. Setting return type
@@ -126,39 +126,39 @@ to make the SDK PSR compliant.
 
 #### 3. Headers
 ----------------
-- `getHeaders()` now returns `array<string, string[]` instead of previous `array<string, string>`
-- `addHeaders()` also supports passing `array<string, string|string[]>`
-- `addHeaders()` throws a `GraphClientException` if you attempt to overwrite the SDK Version header
+- `getHeaders()` now returns `array<string, string[]` instead of previous `array<string, string>`.
+- `addHeaders()` also supports passing `array<string, string|string[]>`.
+- `addHeaders()` throws a `GraphClientException` if you attempt to overwrite the SDK Version header.
 - Extra layer of security by preventing sending your authorization tokens to non-Graph endpoints.
 
 #### 4. Request Body
 ----------------------
-- Supports passing any PSR-7 `StreamInterface` implementation to `attachBody()`
+- Supports passing any PSR-7 `StreamInterface` implementation to `attachBody()`.
 
 
 #### 5. Making Requests
 -------------------------
-- `execute()`, `download()` and `upload()` all accept any PSR-18 `ClientInterface` implementation to overwrite the SDK's default Guzzle client
-- `execute()` now throws PSR-18 `ClientExceptionInterface` as opposed to `\GuzzleHttp\Exception\GuzzleException`
-- `executeAsync()` now returns a HTTPlug `Http\Promise\Promise` instead of the previous Guzzle `GuzzleHttp\Promise\PromiseInterface`
-- `executeAsync()` fails with a PSR-18 `ClientExceptionInterface` for HTTP client issues or `GraphServiceException` for 4xx/5xx response
-- `download()` throws a `Psr\Http\Client\ClientExceptionInterface` as opposed to the previous `GuzzleHttp\Exception\GuzzleException`
+- `execute()`, `download()` and `upload()` all accept any PSR-18 `ClientInterface` implementation to overwrite the SDK's default Guzzle client.
+- `execute()` now throws PSR-18 `ClientExceptionInterface` as opposed to `\GuzzleHttp\Exception\GuzzleException`.
+- `executeAsync()` now returns a HTTPlug `Http\Promise\Promise` instead of the previous Guzzle `GuzzleHttp\Promise\PromiseInterface`.
+- `executeAsync()` fails with a PSR-18 `ClientExceptionInterface` for HTTP client issues or `GraphServiceException` for 4xx/5xx response.
+- `download()` throws a `Psr\Http\Client\ClientExceptionInterface` as opposed to the previous `GuzzleHttp\Exception\GuzzleException`.
 - `download()` and `upload()` now throw a `GraphClientException` if the SDK is unable to open the file path given and read/write to it.
 
 
 #### 6. Handling responses
 ----------------------------
-- For `4xx` and `5xx` responses, the SDK will throw a `GraphServiceException` which contains the error payload.
-- The status code is now an `int` from the previous `string` i.e. `getStatus()`
+- For `4xx` and `5xx` responses, the SDK will throw a `GraphServiceException` which contains the error payload via `getError()`.
+- The status code is now an `int` from the previous `string` i.e. `getStatus()`.
 
 ### `GraphCollectionRequest` changes
-- Executing `count()` requests now throws PSR-18 `ClientExceptionInterface` in case of any HTTP related issues & a `GraphClientException` if the `@odata.count` does not exist in the payload
-- `setPageSize()` throws a `GraphClientException` from the previous `GraphException`
-- `getPage()` throws `Psr\Http\Client\ClientExceptionInterface` from previous `GuzzleHttp\Exception\GuzzleException`
+- Executing `count()` requests now throws PSR-18 `ClientExceptionInterface` in case of any HTTP related issues & a `GraphClientException` if the `@odata.count` does not exist in the payload.
+- `setPageSize()` throws a `GraphClientException` from the previous `GraphException`.
+- `getPage()` throws `Psr\Http\Client\ClientExceptionInterface` from previous `GuzzleHttp\Exception\GuzzleException`.
 - `getPage()` has been aligned to `execute()` to return a `GraphResponse` object if no return type is specified from previous JSON-decoded payload array.
   You can call `getBody()` on the `GraphResponse` returned to get the JSON-decoded array. If a return type is specified, `getPage()`
   still returns the deserialized response body.
-- makes `setPageCallInfo()` and `processPageCallReturn()` `private` as these methods provide low level implementation detail
+- makes `setPageCallInfo()` and `processPageCallReturn()` `private` as these methods provide low level implementation detail.
 - See `GraphRequest` changes above as well.
 
 ### Introducing the `PageIterator`
