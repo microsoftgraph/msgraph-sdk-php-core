@@ -144,11 +144,7 @@ class GraphRequest
             throw new GraphClientException("Return type specified does not match an existing class definition");
         }
         $this->returnType = $returnClass;
-        if ($this->returnType == StreamInterface::class) {
-            $this->returnsStream  = true;
-        } else {
-            $this->returnsStream = false;
-        }
+        $this->returnsStream = ($returnClass === StreamInterface::class);
         return $this;
     }
 
@@ -165,6 +161,7 @@ class GraphRequest
         if (array_key_exists("SdkVersion", $headers)) {
             throw new GraphClientException("Cannot overwrite SdkVersion header");
         }
+        // Recursive merge to support appending values to multi-value headers
         $this->headers = array_merge_recursive($this->headers, $headers);
         $this->initPsr7HttpRequest();
         return $this;

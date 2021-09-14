@@ -44,7 +44,7 @@ class GraphRequestUtil
                 throw new \InvalidArgumentException("Invalid baseUrl=".$baseUrl.". Ensure URL has scheme and host");
             }
             $relativeUrl = (NationalCloud::containsNationalCloudHostFromUrlParts($baseUrlParts)) ? "/".$apiVersion : "";
-            $relativeUrl .= (substr($endpoint, 0, 1) == "/") ? $endpoint : "/".$endpoint;
+            $relativeUrl .= (substr($endpoint, 0, 1) === "/") ? $endpoint : "/".$endpoint;
             return UriResolver::resolve(new Uri($baseUrl), new Uri($relativeUrl));
         }
         throw new \InvalidArgumentException("Unable to create uri with empty baseUrl and endpoint=".$endpoint);
