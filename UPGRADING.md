@@ -6,19 +6,19 @@ This guide highlights backward compatibility breaking changes introduced during 
 ## 1.x to 2.0
 
 Version `2.0` highlights:
-- Support for National Clouds.
-- Changes in creating a Graph client.
-- Changes in configuring your HTTP client (including support for PSR-18 and HTTPlug's HttpAsyncClient implementations).
-- Introducing standardised Graph exception types `GraphClientException` and `GraphServiceException` as more specific `GraphException` types.
+- [Support for National Clouds.](#support-for-national-clouds)
+- Changes in [creating a Graph client.](#creating-a-graph-client)
+- Changes in [configuring your HTTP client](#configuring-http-clients-for-use-with-the-graph-api) (including support for PSR-18 and HTTPlug's HttpAsyncClient implementations).
+- Introducing standardised Graph exception types [`GraphClientException`](#introducing-the-graphclientexception) and [`GraphServiceException`](#introducing-the-graphserviceexception) as more specific `GraphException` types.
+- [`GraphRequest`](#graphrequest-changes) and [`GraphCollectionRequest`](#graphcollectionrequest-changes):
+    - PSR compliance & other standardisation efforts in request classes and methods.
+        - Throwing `Psr\Http\Client\ClientExceptionInterface` instead of `\GuzzleHttp\Exception\GuzzleException` in request methods.
+        - Accepting and returning `Psr\Http\Message\StreamInterface` request bodies instead of `GuzzleHttp\Psr7\Stream`.
+        - Allow overwriting the default Guzzle client with `Psr\Http\Client\ClientExceptionInterface` for synchronous requests.
+        - Allow overwriting the default Guzzle client with HTTPlug's `Http\Client\HttpAsyncClient` for asynchronous requests.
+- [Introduces a resumable `PageIterator`](#introducing-the-pageiterator) that asynchronously pages through a collection response payload while running a custom callback function against each entity.
 - Deprecates support for Guzzle `^6.0`.
 - Strongly typed method parameters and return type declarations where possible.
-- PSR compliance & other standardisation efforts in request classes and methods.
-    - Throwing `Psr\Http\Client\ClientExceptionInterface` instead of `\GuzzleHttp\Exception\GuzzleException` in request methods.
-    - Accepting and returning `Psr\Http\Message\StreamInterface` request bodies instead of `GuzzleHttp\Psr7\Stream`.
-    - Allow overwriting the default Guzzle client with `Psr\Http\Client\ClientExceptionInterface` for synchronous requests.
-    - Allow overwriting the default Guzzle client with HTTPlug's `Http\Client\HttpAsyncClient` for asynchronous requests.
-- Introduces a `PageIterator` that pages through a collection response while running a custom callback function against each entity.
-It automatically fetches the nextPage until the end of the collection and allows you to pause and resume processing.
 
 ### Support for National Clouds
 We have introduced `NationalCloud` containing Microsoft Graph API endpoint constants to enable you to easily
@@ -55,7 +55,7 @@ $graphClient = new Graph(NationalCloud::GLOBAL); // creates & uses a default Guz
   To configure a Guzzle client to use with the SDK
   ```php
   $config = []; // your desired Guzzle client config
-  $httpClient = HttpClientFactory::clientConfig($config)::createAdapter();
+  $httpClient = HttpClientFactory::setClientConfig($config)::createAdapter();
   $graphClient = new Graph(NationalCloud::GLOBAL, $httpClient);
   ```
 
@@ -64,7 +64,7 @@ $graphClient = new Graph(NationalCloud::GLOBAL); // creates & uses a default Guz
   $config = [
   // custom request options
   ];
-  $guzzleClient = HttpClientFactory::clientConfig($config)::create();
+  $guzzleClient = HttpClientFactory::setClientConfig($config)::create();
   $response = $guzzleClient->get("/users/me");
   ```
 
@@ -162,15 +162,20 @@ to make the SDK PSR compliant.
 - See `GraphRequest` changes above as well.
 
 ### Introducing the `PageIterator`
-The `PageIterator` allows you to now easily process each entity in a paged collection response without having to fetch each page manually via `getPage()`.
-In addition, you control when to pause processing and resume from the last entity processed using the callback's return value.
-If the callback returns `true`, iteration continues. If it returns `false` the iterator pauses.
-The `PageIterator` returns a promise which resolves to `true` and throws exceptions should any be encountered.
-Should your access token expire during iteration you can `setAccessToken()` then `resume()`.
+- The `PageIterator` allows you to now asynchronously process each entity in a paged collection response without having to fetch each page synchronously via `getPage()`.
+- A callback function that processes each entity is required. Note that the type of the object passed to your callback is matches the return type set on the request.
+  If no return type is specified, a JSON-decoded entity array will be passed to your callback.
+- You control when to pause processing and resume from the last entity processed using the callback's return value. If the callback returns `true`, iteration continues. If it returns `false` the iterator pauses.
+- Calling `resume()` continues iteration from the next entity in the collection.
+- The `PageIterator` returns a promise which resolves to `true` and throws exceptions should any be encountered.
+- Should your access token expire during iteration you can `setAccessToken()` then `resume()`.
 
 ```php
-$callback = function () {}; // your callback
+$callback = function (\Microsoft\Graph\Model\Message $message) {
+    // your logic
+};
 $iterator = $graphClient->createCollectionRequest("GET", "/me/messages")
+                        ->setReturnType(\Microsoft\Graph\Model\Message::class)
                         ->pageIterator($callback);
 $promise = $iterator->iterate();
 
