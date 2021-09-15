@@ -11,6 +11,7 @@ namespace Microsoft\Graph\Task;
 use Http\Promise\FulfilledPromise;
 use Http\Promise\Promise;
 use Microsoft\Graph\Exception\GraphClientException;
+use Microsoft\Graph\Exception\GraphServiceException;
 use Microsoft\Graph\Http\AbstractGraphClient;
 use Microsoft\Graph\Http\GraphResponse;
 use Microsoft\Graph\Http\RequestOptions;
@@ -117,7 +118,7 @@ class PageIterator
      *
      * @return Promise that resolves to true on completion and throws error on rejection
      *
-     * @throws \Exception if promise is rejected
+     * @throws ClientExceptionInterface|GraphClientException|GraphServiceException if promise is rejected
      */
     public function iterate(): Promise {
         $promise = new FulfilledPromise(false);
@@ -155,7 +156,7 @@ class PageIterator
      * Resume iteration after $callback returning false
      *
      * @return Promise
-     * @throws \Exception if promise is rejected
+     * @throws ClientExceptionInterface|GraphClientException|GraphServiceException if promise is rejected
      */
     public function resume(): Promise {
         return $this->iterate();
@@ -204,8 +205,8 @@ class PageIterator
     /**
      * Fetches the next page of results
      *
-     * @throws GraphClientException
      * @throws ClientExceptionInterface
+     * @throws GraphServiceException
      */
     private function getNextPage(): void {
         $nextLink = $this->getNextLink();
@@ -214,7 +215,7 @@ class PageIterator
             $request = $request->addHeaders($this->requestOptions->getHeaders());
         }
         $this->collectionResponse = $request->execute();
-        if (!$this->collectionResponse || empty($this->collectionResponse->getBody())) {
+        if (!$this->collectionResponse || empty($this->collectionResponse->getBody()) || !array_key_exists("value", $this->collectionResponse->getBody())) {
             $this->entityCollection = [];
             return;
         }
@@ -223,7 +224,6 @@ class PageIterator
                 $this->entityCollection = $this->collectionResponse->getBody()["value"];
                 return;
             }
-            throw new GraphClientException("No 'value' attribute found in payload after requesting ".$nextLink);
         }
         $this->entityCollection = $this->collectionResponse->getResponseAsObject($this->returnType);
     }

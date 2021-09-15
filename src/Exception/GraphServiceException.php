@@ -13,7 +13,7 @@ use Microsoft\Graph\Http\GraphRequest;
 /**
  * Class GraphServiceException
  *
- * Thrown when the Graph API returns 4xx or 5xx responses
+ * Thrown when the Graph API returns 5xx responses
  *
  * @package Microsoft\Graph\Exception
  * @copyright 2021 Microsoft Corporation

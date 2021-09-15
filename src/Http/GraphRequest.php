@@ -89,15 +89,15 @@ class GraphRequest
      * @param string $endpoint The url path on the host to be called-
      * @param AbstractGraphClient $graphClient The Graph client to use
      * @param string $baseUrl (optional) If empty, it's set to $client's national cloud
-     * @throws GraphClientException
+     * @throws \InvalidArgumentException
      */
     public function __construct(string $requestType, string $endpoint, AbstractGraphClient $graphClient, string $baseUrl = "")
     {
         if (!$requestType || !$endpoint || !$graphClient) {
-            throw new GraphClientException("Request type, endpoint and client cannot be null or empty");
+            throw new \InvalidArgumentException("Request type, endpoint and client cannot be null or empty");
         }
         if (!$graphClient->getAccessToken()) {
-            throw new GraphClientException(GraphConstants::NO_ACCESS_TOKEN);
+            throw new \InvalidArgumentException(GraphConstants::NO_ACCESS_TOKEN);
         }
         $this->requestType = $requestType;
         $this->graphClient = $graphClient;
@@ -156,12 +156,12 @@ class GraphRequest
      * @param string $returnClass The class name to use
      *
      * @return $this object
-     * @throws GraphClientException when $returnClass is not an existing class
+     * @throws \InvalidArgumentException when $returnClass is not an existing class
      */
     public function setReturnType(string $returnClass): self
     {
         if (!class_exists($returnClass) && !interface_exists($returnClass)) {
-            throw new GraphClientException("Return type specified does not match an existing class definition");
+            throw new \InvalidArgumentException("Return type specified does not match an existing class definition");
         }
         $this->returnType = $returnClass;
         $this->returnsStream = ($returnClass === StreamInterface::class);
@@ -174,12 +174,12 @@ class GraphRequest
      * @param array<string, string|string[]> $headers An array of custom headers
      *
      * @return GraphRequest object
-     * @throws GraphClientException if attempting to overwrite SdkVersion header
+     * @throws \InvalidArgumentException if attempting to overwrite SdkVersion header
      */
     public function addHeaders(array $headers): self
     {
         if (array_key_exists("SdkVersion", $headers)) {
-            throw new GraphClientException("Cannot overwrite SdkVersion header");
+            throw new \InvalidArgumentException("Cannot overwrite SdkVersion header");
         }
         // Recursive merge to support appending values to multi-value headers
         $this->headers = array_merge_recursive($this->headers, $headers);
@@ -320,7 +320,7 @@ class GraphRequest
      * @param string $path path to download the file contents to
      * @param ClientInterface|null $client (optional) When null, defaults to $graphClient's http client
      * @throws ClientExceptionInterface
-     * @throws GraphClientException when unable to open $path for writing
+     * @throws \RuntimeException when unable to open $path for writing
      * @throws GraphServiceException if 4xx or 5xx response is returned. Error payload is accessible from the exception
      */
     public function download(string $path, ?ClientInterface $client = null): void
@@ -328,16 +328,13 @@ class GraphRequest
         if (is_null($client)) {
             $client = $this->graphClient->getHttpClient();
         }
-        try {
-            $resource = Utils::tryFopen($path, 'w');
-            $stream = Utils::streamFor($resource);
-            $response = $client->sendRequest($this->httpRequest);
-            $this->handleErrorResponse($response);
-            $stream->write($response->getBody()->getContents());
-            $stream->close();
-        } catch (\RuntimeException $ex) {
-            throw new GraphClientException(GraphConstants::INVALID_FILE, $ex->getCode(), $ex);
-        }
+
+        $resource = Utils::tryFopen($path, 'w');
+        $stream = Utils::streamFor($resource);
+        $response = $client->sendRequest($this->httpRequest);
+        $this->handleErrorResponse($response);
+        $stream->write($response->getBody()->getContents());
+        $stream->close();
     }
 
     /**
@@ -347,7 +344,7 @@ class GraphRequest
      * @param ClientInterface|null $client (optional)
      * @return array|GraphResponse|StreamInterface|object Graph Response object or response body cast to $returnType
      * @throws ClientExceptionInterface
-     * @throws  GraphClientException if $path cannot be opened for reading
+     * @throws  \RuntimeException if $path cannot be opened for reading
      * @throws GraphServiceException if 4xx or 5xx response is returned. Error payload is accessible from the exception
      */
     public function upload(string $path, ?ClientInterface $client = null)
@@ -355,14 +352,10 @@ class GraphRequest
         if (is_null($client)) {
             $client = $this->graphClient->getHttpClient();
         }
-        try {
-            $resource = Utils::tryFopen($path, 'r');
-            $stream = Utils::streamFor($resource);
-            $this->attachBody($stream);
-            return $this->execute($client);
-        } catch(\RuntimeException $e) {
-            throw new GraphClientException(GraphConstants::INVALID_FILE, $e->getCode(), $e->getPrevious());
-        }
+        $resource = Utils::tryFopen($path, 'r');
+        $stream = Utils::streamFor($resource);
+        $this->attachBody($stream);
+        return $this->execute($client);
     }
 
     /**
@@ -394,14 +387,10 @@ class GraphRequest
      *
      * @param string $baseUrl
      * @param string $endpoint
-     * @throws GraphClientException
+     * @throws \InvalidArgumentException
      */
     protected function initRequestUri(string $baseUrl, string $endpoint): void {
-        try {
-            $this->requestUri = GraphRequestUtil::getRequestUri($baseUrl, $endpoint, $this->graphClient->getApiVersion());
-        } catch (\InvalidArgumentException $ex) {
-            throw new GraphClientException($ex->getMessage(), 0, $ex);
-        }
+        $this->requestUri = GraphRequestUtil::getRequestUri($baseUrl, $endpoint, $this->graphClient->getApiVersion());
     }
 
     protected function initPsr7HttpRequest(): void {

@@ -10,7 +10,6 @@ namespace Microsoft\Graph\Http;
 use GuzzleHttp\Psr7\Uri;
 use Microsoft\Graph\Core\GraphConstants;
 use Microsoft\Graph\Exception\GraphClientException;
-use Microsoft\Graph\Exception\GraphException;
 use Microsoft\Graph\Exception\GraphServiceException;
 use Microsoft\Graph\Task\PageIterator;
 use Psr\Http\Client\ClientExceptionInterface;
@@ -68,7 +67,7 @@ class GraphCollectionRequest extends GraphRequest
      * @param string $endpoint The URI of the endpoint to hit
      * @param AbstractGraphClient $graphClient
      * @param string $baseUrl (optional) If empty, it's set to $client's national cloud
-     * @throws GraphClientException
+     * @throws \InvalidArgumentException
      */
     public function __construct(string $requestType, string $endpoint, AbstractGraphClient $graphClient, string $baseUrl = "")
     {
@@ -85,12 +84,11 @@ class GraphCollectionRequest extends GraphRequest
 	/**
 	 * Gets the number of entries in the collection
 	 *
-	 * @return int the number of entries
+	 * @return int|null the number of entries | null if @odata.count doesn't exist for that collection
      * @throws ClientExceptionInterface
-     * @throws  GraphClientException if @odata.count is not present in the response
      * @throws GraphServiceException if 4xx or 5xx response is returned
      */
-    public function count(): int
+    public function count(): ?int
     {
         $query = '$count=true';
         $requestUri = $this->getRequestUri();
@@ -99,14 +97,8 @@ class GraphCollectionRequest extends GraphRequest
         $this->originalReturnType = $this->returnType;
         $this->returnType = null;
         $result = $this->execute();
-
-        if (is_a($result, GraphResponse::class) &&  $result->getCount()) {
-            return $result->getCount();
-        }
-
-        /* The $count query parameter for the Graph API
-           is available on several models but not all */
-        throw new GraphClientException('Count unavailable for this collection');
+        $this->returnType = $this->originalReturnType;
+        return ($result->getCount()) ?: null;
     }
 
     /**
@@ -115,14 +107,13 @@ class GraphCollectionRequest extends GraphRequest
     *
     * @param int $pageSize The page size
     *
-     * @throws GraphClientException if the requested page size exceeds
-     *         the Graph's defined page size limit
+    * @throws \InvalidArgumentException if the requested page size exceeds Graph's defined page size limit
     * @return GraphCollectionRequest object
     */
     public function setPageSize(int $pageSize): self
     {
         if ($pageSize > GraphConstants::MAX_PAGE_SIZE) {
-            throw new GraphClientException(GraphConstants::MAX_PAGE_SIZE_ERROR);
+            throw new \InvalidArgumentException(GraphConstants::MAX_PAGE_SIZE_ERROR);
         }
         $this->pageSize = $pageSize;
         return $this;
@@ -146,9 +137,9 @@ class GraphCollectionRequest extends GraphRequest
     /**
      * Sets the required query information to get a new page
      *
-     * @return GraphCollectionRequest
+     * @return void
      */
-    private function setPageCallInfo(): self
+    private function setPageCallInfo(): void
     {
         // Store these to add temporary query data to request
         $this->originalReturnType = $this->returnType;
@@ -171,7 +162,6 @@ class GraphCollectionRequest extends GraphRequest
                 $this->setRequestUri(new Uri( $requestUri . GraphRequestUtil::getQueryParamConcatenator($requestUri) . $query));
             }
         }
-        return $this;
     }
 
     /**

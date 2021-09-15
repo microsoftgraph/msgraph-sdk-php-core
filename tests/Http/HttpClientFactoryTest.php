@@ -12,12 +12,12 @@ use Microsoft\Graph\Http\HttpClientInterface;
 class HttpClientFactoryTest extends \PHPUnit\Framework\TestCase
 {
     function testNationalCloudWithEmptyString() {
-        $this->expectException(GraphClientException::class);
+        $this->expectException(\InvalidArgumentException::class);
         HttpClientFactory::setNationalCloud("");
     }
 
     function testNationalCloudWithInvalidUrl() {
-        $this->expectException(GraphClientException::class);
+        $this->expectException(\InvalidArgumentException::class);
         HttpClientFactory::setNationalCloud("https://www.microsoft.com");
     }
 

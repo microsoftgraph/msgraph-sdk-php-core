@@ -30,7 +30,7 @@ class GraphRequestStreamTest extends BaseGraphRequestTest
 
     public function testInvalidUpload()
     {
-        $this->expectException(GraphClientException::class);
+        $this->expectException(\RuntimeException::class);
         $file = new VfsStreamFile('foo.txt', 0000);
         $this->rootDir->addChild($file);
         $this->defaultGraphRequest->upload($file->url());
@@ -58,7 +58,7 @@ class GraphRequestStreamTest extends BaseGraphRequestTest
 
     public function testInvalidDownload()
     {
-        $this->expectException(GraphClientException::class);
+        $this->expectException(\RuntimeException::class);
         $file = new VfsStreamFile('foo.txt', 0000);
         $this->rootDir->addChild($file);
         $this->defaultGraphRequest->download($file->url());

@@ -9,10 +9,8 @@
 namespace Microsoft\Graph\Test\Http\Request;
 
 
-use GuzzleHttp\Psr7\Stream;
 use Microsoft\Graph\Exception\GraphServiceException;
 use Microsoft\Graph\Http\GraphResponse;
-use Microsoft\Graph\Test\Http\TestModel;
 use Microsoft\Graph\Test\TestData\Model\User;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;

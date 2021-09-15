@@ -30,7 +30,7 @@ class GraphCollectionRequestTest extends BaseGraphRequestTest
     }
 
     public function testSetPageSizeExceedingMaxSizeThrowsException(): void {
-        $this->expectException(GraphClientException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->defaultCollectionRequest->setPageSize(GraphConstants::MAX_PAGE_SIZE + 1);
     }
 
@@ -74,10 +74,9 @@ class GraphCollectionRequestTest extends BaseGraphRequestTest
         $this->assertEquals(SampleGraphResponsePayload::COLLECTION_PAYLOAD["@odata.count"], $count);
     }
 
-    public function testCountThrowsErrorIfNoOdataCountFound(): void {
-        $this->expectException(GraphException::class);
+    public function testCountReturnsNullIfNoOdataCountFound(): void {
         MockHttpClientResponseConfig::configureWithEmptyPayload($this->mockHttpClient);
-        $count = $this->defaultCollectionRequest->count();
+        $this->assertNull($this->defaultCollectionRequest->count());
     }
 
     public function testCountThrowsExceptionOnErrorResponse(): void {
