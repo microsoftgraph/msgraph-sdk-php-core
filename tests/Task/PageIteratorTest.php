@@ -74,11 +74,11 @@ class PageIteratorTest extends BaseGraphRequestTest
         $this->assertInstanceOf(PageIterator::class, $pageIterator);
     }
 
-    public function testConstructorThrowsExceptionIfNoNextLink() {
+    public function testConstructorThrowsExceptionIfGraphResponseIsNotACollection() {
         $this->expectException(GraphClientException::class);
         $pageIterator = new PageIterator(
             $this->mockGraphClient,
-            $this->createCollectionResponse(SampleGraphResponsePayload::LAST_PAGE_COLLECTION_PAYLOAD),
+            $this->createCollectionResponse(SampleGraphResponsePayload::ENTITY_PAYLOAD),
             $this->defaultCallback
         );
     }
