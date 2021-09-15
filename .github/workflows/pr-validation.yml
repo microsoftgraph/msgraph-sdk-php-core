@@ -23,7 +23,7 @@ jobs:
     - name: Setup PHP and Xdebug for Code Coverage report
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '7.x'
+        php-version: '7.3'
         coverage: xdebug
     - name: Validate composer file
       run: |

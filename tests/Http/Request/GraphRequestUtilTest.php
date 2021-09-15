@@ -31,7 +31,7 @@ class GraphRequestUtilTest extends \PHPUnit\Framework\TestCase
     }
 
     function testGetRequestUriWithFullNationalCloudEndpointUrlReturnsUri() {
-        $endpoint = NationalCloud::GLOBAL."/me/events?\$skip=100&\$top=10";
+        $endpoint = NationalCloud::GLOBAL.'/me/events?$skip=100&$top=10';
         $result = GraphRequestUtil::getRequestUri("", $endpoint, $this->apiVersion);
         self::assertEquals($endpoint, strval($result));
     }
@@ -76,12 +76,12 @@ class GraphRequestUtilTest extends \PHPUnit\Framework\TestCase
 
     function testGetRequestUriWithInvalidFullEndpointUrlThrowsException() {
         $this->expectException(\InvalidArgumentException::class);
-        $endpoint = "http/microsoft.com:localhost\$endpoint";
+        $endpoint = 'http/microsoft.com:localhost$endpoint';
         $uri = GraphRequestUtil::getRequestUri("", $endpoint, $this->apiVersion);
     }
 
     function testGetQueryParamConcatenatorWithExistingQueryParams() {
-        $uri = new Uri("https://graph.microsoft.com?\$skip=10");
+        $uri = new Uri('https://graph.microsoft.com?$skip=10');
         $result = GraphRequestUtil::getQueryParamConcatenator($uri);
         self::assertEquals("&", $result);
     }

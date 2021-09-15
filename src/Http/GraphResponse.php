@@ -113,7 +113,7 @@ class GraphResponse
     */
     public function getRawBody()
     {
-        return (is_null($this->_body)) ? null : $this->_body->getContents();
+        return ($this->_body) ?: $this->_body->getContents();
     }
 
     /**

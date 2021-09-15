@@ -143,11 +143,7 @@ class GraphRequest
             throw new GraphClientException("Return type specified does not match an existing class definition");
         }
         $this->returnType = $returnClass;
-        if ($this->returnType == StreamInterface::class) {
-            $this->returnsStream  = true;
-        } else {
-            $this->returnsStream = false;
-        }
+        $this->returnsStream = ($returnClass === StreamInterface::class);
         return $this;
     }
 
@@ -164,6 +160,7 @@ class GraphRequest
         if (array_key_exists("SdkVersion", $headers)) {
             throw new GraphClientException("Cannot overwrite SdkVersion header");
         }
+        // Recursive merge to support appending values to multi-value headers
         $this->headers = array_merge_recursive($this->headers, $headers);
         $this->initPsr7HttpRequest();
         return $this;
@@ -343,7 +340,11 @@ class GraphRequest
     private function initHeaders(string $baseUrl): void
     {
         $coreSdkVersion = "graph-php-core/".GraphConstants::SDK_VERSION;
-        $serviceLibSdkVersion = "Graph-php-".$this->graphClient->getSdkVersion();
+        if ($this->graphClient->getApiVersion() === GraphConstants::BETA_API_VERSION) {
+            $serviceLibSdkVersion = "graph-php-beta/".$this->graphClient->getSdkVersion();
+        } else {
+            $serviceLibSdkVersion = "graph-php/".$this->graphClient->getSdkVersion();
+        }
         if (NationalCloud::containsNationalCloudHost($this->requestUri)) {
             $this->headers = [
                 'Content-Type' => 'application/json',

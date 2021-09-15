@@ -22,8 +22,7 @@ class SampleGraphResponsePayload
 
     const COLLECTION_PAYLOAD = [
         "@odata.count" => 2,
-        "@odata.nextLink" => "https://graph.microsoft.com/me/users?\$skip=2&\$top=2",
-        "@odata.deltaLink" => "https://graph.microsoft.com/123123-asfd-212412-adfsdf",
+        "@odata.nextLink" => 'https://graph.microsoft.com/me/users?$skip=2&$top=2',
         "value" => [
             [
                 "id" => 1,

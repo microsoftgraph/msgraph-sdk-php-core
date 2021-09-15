@@ -77,7 +77,7 @@ final class HttpClientFactory
      * @return $this
      * @throws GraphClientException if $nationalCloud is empty or an invalid national cloud Host
      */
-    public static function nationalCloud(string $nationalCloud = NationalCloud::GLOBAL): HttpClientFactory {
+    public static function setNationalCloud(string $nationalCloud = NationalCloud::GLOBAL): HttpClientFactory {
         if (!$nationalCloud || !NationalCloud::containsNationalCloudHost($nationalCloud)) {
             throw new GraphClientException("Invalid national cloud passed. See https://docs.microsoft.com/en-us/graph/deployments#microsoft-graph-and-graph-explorer-service-root-endpoints.");
         }
@@ -91,7 +91,7 @@ final class HttpClientFactory
      * @param array $config
      * @return $this
      */
-    public static function clientConfig(array $config): HttpClientFactory {
+    public static function setClientConfig(array $config): HttpClientFactory {
         self::$clientConfig = $config;
         return self::getInstance();
     }

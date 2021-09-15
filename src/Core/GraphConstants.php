@@ -18,6 +18,9 @@ namespace Microsoft\Graph\Core;
 
 final class GraphConstants
 {
+    const BETA_API_VERSION = "beta";
+    const V1_API_VERSION = "v1.0";
+
     // These can be overwritten in setters in the Graph object
     const REST_ENDPOINT = "https://graph.microsoft.com/";
 
