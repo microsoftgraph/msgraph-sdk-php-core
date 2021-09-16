@@ -85,8 +85,9 @@ class GraphCollectionRequest extends GraphRequest
 	 * Gets the number of entries in the collection
 	 *
 	 * @return int|null the number of entries | null if @odata.count doesn't exist for that collection
-     * @throws ClientExceptionInterface
-     * @throws GraphServiceException if 4xx or 5xx response is returned
+     * @throws ClientExceptionInterface if an errors occurs while making the request
+     * @throws GraphClientException containing error payload if 4xx response is returned.
+     * @throws GraphServiceException containing error payload if 5xx response is returned.
      */
     public function count(): ?int
     {
@@ -106,9 +107,8 @@ class GraphCollectionRequest extends GraphRequest
     * to "getPage()"
     *
     * @param int $pageSize The page size
-    *
-    * @throws \InvalidArgumentException if the requested page size exceeds Graph's defined page size limit
-    * @return GraphCollectionRequest object
+     * @return GraphCollectionRequest object
+     * @throws \InvalidArgumentException if the requested page size exceeds Graph's defined page size limit
     */
     public function setPageSize(int $pageSize): self
     {
@@ -123,8 +123,9 @@ class GraphCollectionRequest extends GraphRequest
      * Gets the next page of results
      *
      * @return GraphResponse|array of objects of class $returnType| GraphResponse if no $returnType
-     * @throws ClientExceptionInterface
-     * @throws GraphServiceException if 4xx or 5xx response is returned
+     * @throws ClientExceptionInterface if an error occurs while making the request
+     * @throws GraphClientException containing error payload if 4xx response is returned.
+     * @throws GraphServiceException containing error payload if 5xx response is returned.
      */
     public function getPage()
     {
@@ -232,9 +233,9 @@ class GraphCollectionRequest extends GraphRequest
      *
      * @param callable(): bool $callback function to execute against each element of $entityCollection. Must return boolean which determines if iteration should pause/proceed
      * @return PageIterator call iterate() to start the iterator
-     * @throws ClientExceptionInterface
-     * @throws GraphClientException
-     * @throws GraphServiceException if 4xx or 5xx is returned when fetching the initial collection
+     * @throws ClientExceptionInterface if error occurs while making the request
+     * @throws GraphClientException containing error payload if 4xx is returned while fetching the initial page
+     * @throws GraphServiceException containing error payload if 5xx is returned while fetching the initial page
      */
     public function pageIterator(callable $callback): PageIterator {
         // temporarily disable return type in order to get first page as GraphResponse object

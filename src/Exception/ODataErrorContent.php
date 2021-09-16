@@ -18,7 +18,7 @@ namespace Microsoft\Graph\Exception;
  * @license https://opensource.org/licenses/MIT MIT License
  * @link https://developer.microsoft.com/graph
  */
-class ODataError extends BaseError
+class ODataErrorContent extends BaseErrorContent
 {
     /**
      * Get error code returned by the Graph
@@ -50,12 +50,12 @@ class ODataError extends BaseError
     /**
      * Returns the error details containing a code, message and target
      *
-     * @return ODataError[]|null
+     * @return ODataErrorContent[]|null
      */
     public function getDetails(): ?array {
         $details = $this->getProperty("details");
         if ($details) {
-            return array_map(function ($detail) { return new ODataError($detail); }, $details);
+            return array_map(function ($detail) { return new ODataErrorContent($detail); }, $details);
         }
         return null;
     }
@@ -63,11 +63,11 @@ class ODataError extends BaseError
     /**
      * Get the Graph-specific error info
      *
-     * @return GraphError|null
+     * @return GraphErrorContent|null
      */
-    public function getInnerError(): ?GraphError {
+    public function getInnerError(): ?GraphErrorContent {
         $innerError = $this->getProperty("innerError");
-        return ($innerError) ? new GraphError($innerError) : null;
+        return ($innerError) ? new GraphErrorContent($innerError) : null;
     }
 
     /**

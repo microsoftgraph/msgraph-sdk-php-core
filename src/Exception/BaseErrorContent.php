@@ -18,7 +18,7 @@ namespace Microsoft\Graph\Exception;
  * @license https://opensource.org/licenses/MIT MIT License
  * @link https://developer.microsoft.com/graph
  */
-class BaseError
+class BaseErrorContent
 {
     /**
      * Contains all properties of the error response

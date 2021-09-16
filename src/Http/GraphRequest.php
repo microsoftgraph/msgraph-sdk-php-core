@@ -234,8 +234,9 @@ class GraphRequest
      *
      * @param ClientInterface|null $client (optional) When null, uses $graphClient's http client
      * @return array|GraphResponse|StreamInterface|object Graph Response object or response body cast to $returnType
-     * @throws ClientExceptionInterface
-     * @throws GraphServiceException if 4xx or 5xx response is returned. Exception contains the error payload
+     * @throws ClientExceptionInterface if an error occurs while making the request
+     * @throws GraphClientException containing error payload if 4xx response is returned.
+     * @throws GraphServiceException containing error payload if 5xx response is returned.
      */
     public function execute(?ClientInterface $client = null)
     {
@@ -273,8 +274,9 @@ class GraphRequest
      *
      * @param HttpAsyncClient|null $client (optional) When null, uses $graphClient's http client
      * @return Promise Resolves to GraphResponse object|response body cast to $returnType. Fails throwing the exception
-     * @throws GraphServiceException if 4xx or 5xx response is returned. Exception contains the error payload
      * @throws ClientExceptionInterface if there are any errors while making the HTTP request
+     * @throws GraphClientException containing error payload if 4xx is returned
+     * @throws GraphServiceException containing error payload if 5xx is returned
      * @throws \Exception
      */
     public function executeAsync(?HttpAsyncClient $client = null): Promise
@@ -319,9 +321,10 @@ class GraphRequest
      *
      * @param string $path path to download the file contents to
      * @param ClientInterface|null $client (optional) When null, defaults to $graphClient's http client
-     * @throws ClientExceptionInterface
      * @throws \RuntimeException when unable to open $path for writing
-     * @throws GraphServiceException if 4xx or 5xx response is returned. Error payload is accessible from the exception
+     * @throws ClientExceptionInterface if an error occurs while making the request
+     * @throws GraphClientException containing error payload if 4xx is returned
+     * @throws GraphServiceException containing error payload if 5xx is returned
      */
     public function download(string $path, ?ClientInterface $client = null): void
     {
@@ -343,9 +346,10 @@ class GraphRequest
      * @param string $path path of file to be uploaded
      * @param ClientInterface|null $client (optional)
      * @return array|GraphResponse|StreamInterface|object Graph Response object or response body cast to $returnType
-     * @throws ClientExceptionInterface
+     * @throws ClientExceptionInterface if an error occurs while making the request
      * @throws  \RuntimeException if $path cannot be opened for reading
-     * @throws GraphServiceException if 4xx or 5xx response is returned. Error payload is accessible from the exception
+     * @throws GraphClientException containing error payload if 4xx is returned
+     * @throws GraphServiceException containing error payload if 5xx is returned
      */
     public function upload(string $path, ?ClientInterface $client = null)
     {
@@ -393,29 +397,51 @@ class GraphRequest
         $this->requestUri = GraphRequestUtil::getRequestUri($baseUrl, $endpoint, $this->graphClient->getApiVersion());
     }
 
+    /**
+     * Initialises a PSR-7 Http Request object
+     */
     protected function initPsr7HttpRequest(): void {
         $this->httpRequest = new Request($this->requestType, $this->requestUri, $this->headers, $this->requestBody);
     }
 
     /**
-     * Check if response status code is 4xx or 5xx
+     * Check if response status code is a client error
      *
      * @param int $httpStatusCode
      * @return bool
      */
-    private function isErrorResponse(int $httpStatusCode): bool {
-        return ($httpStatusCode >=400 && $httpStatusCode <= 599);
+    private function is4xx(int $httpStatusCode): bool {
+        return ($httpStatusCode >= 400 && $httpStatusCode < 500);
     }
 
     /**
-     * Determines whether to throw GraphServiceException or not
+     * Check if response status code is a server error
+     *
+     * @param int $httpStatusCode
+     * @return bool
+     */
+    private function is5xx(int $httpStatusCode): bool {
+        return ($httpStatusCode >= 500 && $httpStatusCode < 600);
+    }
+
+    /**
+     * Throws appropriate exception type
      *
      * @param Response $httpResponse
-     * @throws GraphServiceException
+     * @throws GraphServiceException for server errors
+     * @throws GraphClientException for client errors
      */
     private function handleErrorResponse(Response $httpResponse) {
-        if ($this->isErrorResponse($httpResponse->getStatusCode())) {
+        if ($this->is5xx($httpResponse->getStatusCode())) {
             throw new GraphServiceException(
+                $this,
+                $httpResponse->getStatusCode(),
+                json_decode($httpResponse->getBody(), true),
+                $httpResponse->getHeaders()
+            );
+        }
+        if ($this->is4xx($httpResponse->getStatusCode())) {
+            throw new GraphClientException(
                 $this,
                 $httpResponse->getStatusCode(),
                 json_decode($httpResponse->getBody(), true),

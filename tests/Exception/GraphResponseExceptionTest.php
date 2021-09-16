@@ -10,12 +10,12 @@ namespace Microsoft\Graph\Test\Exception;
 
 
 use GuzzleHttp\Psr7\Response;
-use Microsoft\Graph\Exception\GraphServiceException;
-use Microsoft\Graph\Exception\ODataError;
+use Microsoft\Graph\Exception\GraphResponseException;
+use Microsoft\Graph\Exception\ODataErrorContent;
 use Microsoft\Graph\Http\GraphRequest;
 use Microsoft\Graph\Test\Http\SampleGraphResponsePayload;
 
-class GraphServiceExceptionTest extends \PHPUnit\Framework\TestCase
+class GraphResponseExceptionTest extends \PHPUnit\Framework\TestCase
 {
     private $mockGraphRequest;
     private $responseStatusCode = 404;
@@ -31,7 +31,7 @@ class GraphServiceExceptionTest extends \PHPUnit\Framework\TestCase
     protected function setUp(): void {
         $this->mockGraphRequest = $this->createMock(GraphRequest::class);
         $this->psr7Response = new Response($this->responseStatusCode, $this->responseHeaders, json_encode($this->responseBody));
-        $this->defaultException = new GraphServiceException(
+        $this->defaultException = new GraphResponseException(
             $this->mockGraphRequest,
             $this->psr7Response->getStatusCode(),
             json_decode($this->psr7Response->getBody(), true),
@@ -48,7 +48,7 @@ class GraphServiceExceptionTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($this->responseStatusCode, $this->defaultException->getResponseStatusCode());
         $this->assertEquals($this->responseBody, $this->defaultException->getRawResponseBody());
         $this->assertEquals($this->psr7Response->getHeaders(), $this->defaultException->getResponseHeaders());
-        $this->assertInstanceOf(ODataError::class, $this->defaultException->getError());
+        $this->assertInstanceOf(ODataErrorContent::class, $this->defaultException->getError());
     }
 
     public function testGetClientRequestId(): void {

@@ -36,10 +36,20 @@ class GraphRequestStreamTest extends BaseGraphRequestTest
         $this->defaultGraphRequest->upload($file->url());
     }
 
-    public function testUploadThrowsExceptionForErrorResponse()
+    public function testUploadThrowsExceptionFor4xxResponse()
+    {
+        $this->expectException(GraphClientException::class);
+        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient, 400);
+        $file = vfsStream::newFile('foo.txt')
+            ->withContent("content")
+            ->at($this->rootDir);
+        $this->defaultGraphRequest->upload($file->url());
+    }
+
+    public function testUploadThrowsExceptionFor5xxResponse()
     {
         $this->expectException(GraphServiceException::class);
-        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient);
+        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient, 500);
         $file = vfsStream::newFile('foo.txt')
             ->withContent("content")
             ->at($this->rootDir);
@@ -64,10 +74,19 @@ class GraphRequestStreamTest extends BaseGraphRequestTest
         $this->defaultGraphRequest->download($file->url());
     }
 
-    public function testDownloadThrowsExceptionForErrorResponse()
+    public function testDownloadThrowsExceptionFor4xxResponse()
+    {
+        $this->expectException(GraphClientException::class);
+        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient, 400);
+        $file = new VfsStreamFile('foo.txt');
+        $this->rootDir->addChild($file);
+        $this->defaultGraphRequest->download($file->url());
+    }
+
+    public function testDownloadThrowsExceptionFor5xxResponse()
     {
         $this->expectException(GraphServiceException::class);
-        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient);
+        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient, 500);
         $file = new VfsStreamFile('foo.txt');
         $this->rootDir->addChild($file);
         $this->defaultGraphRequest->download($file->url());

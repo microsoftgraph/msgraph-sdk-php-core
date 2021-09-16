@@ -9,6 +9,7 @@
 namespace Microsoft\Graph\Test\Http\Request;
 
 
+use Microsoft\Graph\Exception\GraphClientException;
 use Microsoft\Graph\Exception\GraphServiceException;
 use Microsoft\Graph\Http\GraphResponse;
 use Microsoft\Graph\Test\TestData\Model\User;
@@ -53,9 +54,15 @@ class GraphRequestSyncTest extends BaseGraphRequestTest
         $this->assertInstanceOf(GraphResponse::class, $response);
     }
 
-    public function testExecuteWithoutReturnTypeThrowsExceptionForErrorPayload(): void {
+    public function testExecuteWithoutReturnTypeThrowsExceptionFor4xxPayload(): void {
+        $this->expectException(GraphClientException::class);
+        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient, 400);
+        $response = $this->defaultGraphRequest->execute();
+    }
+
+    public function testExecuteWithoutReturnTypeThrowsExceptionFor5xxPayload(): void {
         $this->expectException(GraphServiceException::class);
-        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient);
+        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient, 500);
         $response = $this->defaultGraphRequest->execute();
     }
 
@@ -83,9 +90,15 @@ class GraphRequestSyncTest extends BaseGraphRequestTest
         $this->assertInstanceOf(User::class, $response);
     }
 
-    public function testExecuteWithModelReturnTypeThrowsExceptionForErrorPayload(): void {
+    public function testExecuteWithModelReturnTypeThrowsExceptionFor4xxPayload(): void {
+        $this->expectException(GraphClientException::class);
+        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient, 400);
+        $response = $this->defaultGraphRequest->setReturnType(User::class)->execute();
+    }
+
+    public function testExecuteWithModelReturnTypeThrowsExceptionFor5xxPayload(): void {
         $this->expectException(GraphServiceException::class);
-        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient);
+        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient, 500);
         $response = $this->defaultGraphRequest->setReturnType(User::class)->execute();
     }
 
@@ -115,9 +128,15 @@ class GraphRequestSyncTest extends BaseGraphRequestTest
         $this->assertInstanceOf(StreamInterface::class, $response);
     }
 
-    public function testExecuteWithStreamReturnTypeThrowsExceptionForErrorPayload(): void {
+    public function testExecuteWithStreamReturnTypeThrowsExceptionFor4xxPayload(): void {
+        $this->expectException(GraphClientException::class);
+        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient, 400);
+        $response = $this->defaultGraphRequest->setReturnType(StreamInterface::class)->execute();
+    }
+
+    public function testExecuteWithStreamReturnTypeThrowsExceptionFor5xxPayload(): void {
         $this->expectException(GraphServiceException::class);
-        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient);
+        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient, 500);
         $response = $this->defaultGraphRequest->setReturnType(StreamInterface::class)->execute();
     }
 

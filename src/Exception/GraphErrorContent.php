@@ -18,7 +18,7 @@ namespace Microsoft\Graph\Exception;
  * @license https://opensource.org/licenses/MIT MIT License
  * @link https://developer.microsoft.com/graph
  */
-class GraphError extends ODataError
+class GraphErrorContent extends ODataErrorContent
 {
     /**
      * Returns the date of the request
