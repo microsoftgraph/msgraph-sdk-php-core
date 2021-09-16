@@ -39,7 +39,7 @@ class GraphResponseExceptionTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    public function testGraphServiceExceptionIsThrowable(): void {
+    public function testGraphResponseExceptionIsThrowable(): void {
         $this->assertInstanceOf(\Throwable::class, $this->defaultException);
     }
 

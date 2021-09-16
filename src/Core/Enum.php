@@ -16,8 +16,6 @@
 */
 namespace Microsoft\Graph\Core;
 
-use Microsoft\Graph\Exception\GraphException;
-
 /**
  * Class Enum
  *
@@ -41,12 +39,12 @@ abstract class Enum
     *
     * @param string $value The value of the enum
      *
-     * @throws GraphException if enum value is invalid
+     * @throws \InvalidArgumentException if enum value is invalid
     */
     public function __construct($value)
     {
         if (!self::has($value)) {
-            throw new GraphException("Invalid enum value $value");
+            throw new \InvalidArgumentException("Invalid enum value $value");
         }
         $this->_value = $value;
     }
