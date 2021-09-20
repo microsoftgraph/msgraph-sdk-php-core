@@ -46,6 +46,16 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Microsoft-Graph-Core-GraphConstants.html"
         },                {
+            "fqsen": "\\Microsoft\\Graph\\Core\\GraphConstants\u003A\u003ABETA_API_VERSION",
+            "name": "BETA_API_VERSION",
+            "summary": "",
+            "url": "classes/Microsoft-Graph-Core-GraphConstants.html#constant_BETA_API_VERSION"
+        },                {
+            "fqsen": "\\Microsoft\\Graph\\Core\\GraphConstants\u003A\u003AV1_API_VERSION",
+            "name": "V1_API_VERSION",
+            "summary": "",
+            "url": "classes/Microsoft-Graph-Core-GraphConstants.html#constant_V1_API_VERSION"
+        },                {
             "fqsen": "\\Microsoft\\Graph\\Core\\GraphConstants\u003A\u003AREST_ENDPOINT",
             "name": "REST_ENDPOINT",
             "summary": "",
@@ -121,6 +131,11 @@ Search.appendIndex(
             "summary": "Checks\u0020if\u0020url\u0020contains\u0020a\u0020valid\u0020National\u0020Cloud\u0020host",
             "url": "classes/Microsoft-Graph-Core-NationalCloud.html#method_containsNationalCloudHost"
         },                {
+            "fqsen": "\\Microsoft\\Graph\\Core\\NationalCloud\u003A\u003AcontainsNationalCloudHostFromUrlParts\u0028\u0029",
+            "name": "containsNationalCloudHostFromUrlParts",
+            "summary": "Checks\u0020if\u0020\u0024urlParts\u0020contain\u0020a\u0020valid\u0020National\u0020Cloud\u0020host",
+            "url": "classes/Microsoft-Graph-Core-NationalCloud.html#method_containsNationalCloudHostFromUrlParts"
+        },                {
             "fqsen": "\\Microsoft\\Graph\\Core\\NationalCloud\u003A\u003AinitHosts\u0028\u0029",
             "name": "initHosts",
             "summary": "Extracts\u0020hostnames\u0020from\u0020constant\u0020values\u0020to\u0020an\u0020array\u0020with\u0020unique\u0020keys\u0020for\u0020optimal\u0020lookup",
@@ -158,7 +173,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Microsoft\\Graph\\Exception\\GraphClientException",
             "name": "GraphClientException",
-            "summary": "Class\u0020ClientInitialisationException",
+            "summary": "Class\u0020GraphClientException",
             "url": "classes/Microsoft-Graph-Exception-GraphClientException.html"
         },                {
             "fqsen": "\\Microsoft\\Graph\\Exception\\GraphException",
@@ -286,6 +301,11 @@ Search.appendIndex(
             "summary": "Gets\u0020a\u0020delta\u0020link\u0020to\u0020use\u0020with\u0020subsequent\ncalls\u0020to\u0020\/delta",
             "url": "classes/Microsoft-Graph-Http-GraphCollectionRequest.html#method_getDeltaLink"
         },                {
+            "fqsen": "\\Microsoft\\Graph\\Http\\GraphCollectionRequest\u003A\u003AgetPageSize\u0028\u0029",
+            "name": "getPageSize",
+            "summary": "Get\u0020page\u0020size",
+            "url": "classes/Microsoft-Graph-Http-GraphCollectionRequest.html#method_getPageSize"
+        },                {
             "fqsen": "\\Microsoft\\Graph\\Http\\GraphCollectionRequest\u003A\u003A\u0024pageSize",
             "name": "pageSize",
             "summary": "The\u0020size\u0020of\u0020page\u0020to\u0020divide\u0020the\u0020collection\u0020into",
@@ -321,11 +341,6 @@ Search.appendIndex(
             "summary": "GraphRequest\u0020constructor.",
             "url": "classes/Microsoft-Graph-Http-GraphRequest.html#method___construct"
         },                {
-            "fqsen": "\\Microsoft\\Graph\\Http\\GraphRequest\u003A\u003AgetHttpRequest\u0028\u0029",
-            "name": "getHttpRequest",
-            "summary": "",
-            "url": "classes/Microsoft-Graph-Http-GraphRequest.html#method_getHttpRequest"
-        },                {
             "fqsen": "\\Microsoft\\Graph\\Http\\GraphRequest\u003A\u003AsetRequestUri\u0028\u0029",
             "name": "setRequestUri",
             "summary": "",
@@ -336,11 +351,6 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Microsoft-Graph-Http-GraphRequest.html#method_getRequestUri"
         },                {
-            "fqsen": "\\Microsoft\\Graph\\Http\\GraphRequest\u003A\u003AgetReturnsStream\u0028\u0029",
-            "name": "getReturnsStream",
-            "summary": "Gets\u0020whether\u0020request\u0020returns\u0020a\u0020stream\u0020or\u0020not",
-            "url": "classes/Microsoft-Graph-Http-GraphRequest.html#method_getReturnsStream"
-        },                {
             "fqsen": "\\Microsoft\\Graph\\Http\\GraphRequest\u003A\u003AsetAccessToken\u0028\u0029",
             "name": "setAccessToken",
             "summary": "Sets\u0020a\u0020new\u0020accessToken",
@@ -348,7 +358,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Microsoft\\Graph\\Http\\GraphRequest\u003A\u003AsetReturnType\u0028\u0029",
             "name": "setReturnType",
-            "summary": "Sets\u0020the\u0020return\u0020type\u0020of\u0020the\u0020response\u0020object",
+            "summary": "Sets\u0020the\u0020return\u0020type\u0020of\u0020the\u0020response\u0020object\nCan\u0020be\u0020set\u0020to\u0020a\u0020model\u0020or\u0020\\Psr\\Http\\Message\\StreamInterface",
             "url": "classes/Microsoft-Graph-Http-GraphRequest.html#method_setReturnType"
         },                {
             "fqsen": "\\Microsoft\\Graph\\Http\\GraphRequest\u003A\u003AaddHeaders\u0028\u0029",
@@ -456,6 +466,11 @@ Search.appendIndex(
             "summary": "Returns\u0020full\u0020request\u0020URI\u0020by\u0020resolving\u0020\u0024baseUrl\u0020and\u0020\u0024endpoint\u0020based\u0020on\u0020RFC\u00203986\nPrepends\u0020\u0024apiVersion\u0020to\u0020\u0024endpoint\u0020if\u0020\u0024baseUrl\u0020contains\u0020a\u0020national\u0020cloud\u0020host\n\u0024endpoint\u0020can\u0020be\u0020a\u0020full\u0020URI\u0020with\u0020a\u0020national\u0020cloud\u0020host",
             "url": "classes/Microsoft-Graph-Http-GraphRequestUtil.html#method_getRequestUri"
         },                {
+            "fqsen": "\\Microsoft\\Graph\\Http\\GraphRequestUtil\u003A\u003AisValidBaseUrl\u0028\u0029",
+            "name": "isValidBaseUrl",
+            "summary": "Check\u0020whether\u0020\u0024urlParts\u0020meet\u0020criteria\u0020for\u0020a\u0020valid\u0020base\u0020url",
+            "url": "classes/Microsoft-Graph-Http-GraphRequestUtil.html#method_isValidBaseUrl"
+        },                {
             "fqsen": "\\Microsoft\\Graph\\Http\\GraphRequestUtil\u003A\u003AgetQueryParamConcatenator\u0028\u0029",
             "name": "getQueryParamConcatenator",
             "summary": "Determine\u0020correct\u0020symbol\u0020to\u0020add\u0020before\u0020concatenating\u0020query\u0020parameters\u0020to\u0020\u0024url",
@@ -511,6 +526,11 @@ Search.appendIndex(
             "summary": "Gets\u0020the\u0020delta\u0020link\u0020of\u0020a\u0020response\u0020object\u0020from\u0020OData\nIf\u0020the\u0020deltaLink\u0020is\u0020null,\u0020there\u0020are\u0020more\u0020pages\u0020in\u0020the\u0020collection\u003B\nuse\u0020nextLink\u0020to\u0020obtain\u0020more",
             "url": "classes/Microsoft-Graph-Http-GraphResponse.html#method_getDeltaLink"
         },                {
+            "fqsen": "\\Microsoft\\Graph\\Http\\GraphResponse\u003A\u003AgetCount\u0028\u0029",
+            "name": "getCount",
+            "summary": "Gets\u0020the\u0020number\u0020of\u0020items\u0020in\u0020the\u0020response\u0020payload",
+            "url": "classes/Microsoft-Graph-Http-GraphResponse.html#method_getCount"
+        },                {
             "fqsen": "\\Microsoft\\Graph\\Http\\GraphResponse\u003A\u003A\u0024_request",
             "name": "_request",
             "summary": "The\u0020request\u0020object",
@@ -546,15 +566,20 @@ Search.appendIndex(
             "summary": "HttpClientFactory\u0020constructor.",
             "url": "classes/Microsoft-Graph-Http-HttpClientFactory.html#method___construct"
         },                {
-            "fqsen": "\\Microsoft\\Graph\\Http\\HttpClientFactory\u003A\u003A\u0024nationalCloud",
-            "name": "nationalCloud",
-            "summary": "",
-            "url": "classes/Microsoft-Graph-Http-HttpClientFactory.html#property_nationalCloud"
+            "fqsen": "\\Microsoft\\Graph\\Http\\HttpClientFactory\u003A\u003AgetInstance\u0028\u0029",
+            "name": "getInstance",
+            "summary": "Returns\u0020singleton\u0020instance",
+            "url": "classes/Microsoft-Graph-Http-HttpClientFactory.html#method_getInstance"
         },                {
-            "fqsen": "\\Microsoft\\Graph\\Http\\HttpClientFactory\u003A\u003A\u0024clientConfig",
-            "name": "clientConfig",
-            "summary": "",
-            "url": "classes/Microsoft-Graph-Http-HttpClientFactory.html#property_clientConfig"
+            "fqsen": "\\Microsoft\\Graph\\Http\\HttpClientFactory\u003A\u003AsetNationalCloud\u0028\u0029",
+            "name": "setNationalCloud",
+            "summary": "Set\u0020national\u0020cloud\u0020to\u0020be\u0020used\u0020as\u0020the\u0020base\u0020URL",
+            "url": "classes/Microsoft-Graph-Http-HttpClientFactory.html#method_setNationalCloud"
+        },                {
+            "fqsen": "\\Microsoft\\Graph\\Http\\HttpClientFactory\u003A\u003AsetClientConfig\u0028\u0029",
+            "name": "setClientConfig",
+            "summary": "Set\u0020configuration\u0020options\u0020for\u0020the\u0020Guzzle\u0020client",
+            "url": "classes/Microsoft-Graph-Http-HttpClientFactory.html#method_setClientConfig"
         },                {
             "fqsen": "\\Microsoft\\Graph\\Http\\HttpClientFactory\u003A\u003Acreate\u0028\u0029",
             "name": "create",
@@ -585,6 +610,16 @@ Search.appendIndex(
             "name": "REQUEST_TIMEOUT_SEC",
             "summary": "",
             "url": "classes/Microsoft-Graph-Http-HttpClientFactory.html#constant_REQUEST_TIMEOUT_SEC"
+        },                {
+            "fqsen": "\\Microsoft\\Graph\\Http\\HttpClientFactory\u003A\u003A\u0024nationalCloud",
+            "name": "nationalCloud",
+            "summary": "",
+            "url": "classes/Microsoft-Graph-Http-HttpClientFactory.html#property_nationalCloud"
+        },                {
+            "fqsen": "\\Microsoft\\Graph\\Http\\HttpClientFactory\u003A\u003A\u0024clientConfig",
+            "name": "clientConfig",
+            "summary": "",
+            "url": "classes/Microsoft-Graph-Http-HttpClientFactory.html#property_clientConfig"
         },                {
             "fqsen": "\\Microsoft\\Graph\\Http\\HttpClientFactory\u003A\u003A\u0024instance",
             "name": "instance",

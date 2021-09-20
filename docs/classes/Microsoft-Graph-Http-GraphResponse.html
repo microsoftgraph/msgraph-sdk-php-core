@@ -159,7 +159,7 @@
                 <dt class="phpdocumentor-table-of-contents__entry -property -private">
     <a href="classes/Microsoft-Graph-Http-GraphResponse.html#property__body">$_body</a>
     <span>
-                &nbsp;: string            </span>
+                &nbsp;: <abbr title="\Psr\Http\Message\StreamInterface">StreamInterface</abbr>            </span>
 </dt>
 <dd>The body of the response</dd>
 
@@ -181,7 +181,7 @@ decoded into an array</dd>
             <dt class="phpdocumentor-table-of-contents__entry -property -private">
     <a href="classes/Microsoft-Graph-Http-GraphResponse.html#property__httpStatusCode">$_httpStatusCode</a>
     <span>
-                &nbsp;: string            </span>
+                &nbsp;: int            </span>
 </dt>
 <dd>The status code of the response</dd>
 
@@ -205,6 +205,13 @@ decoded into an array</dd>
                         &nbsp;: array&lt;string|int, mixed&gt;    </span>
 </dt>
 <dd>Get the decoded body of the HTTP response</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a href="classes/Microsoft-Graph-Http-GraphResponse.html#method_getCount">getCount()</a>
+    <span>
+                        &nbsp;: int|null    </span>
+</dt>
+<dd>Gets the number of items in the response payload</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Microsoft-Graph-Http-GraphResponse.html#method_getDeltaLink">getDeltaLink()</a>
@@ -247,7 +254,7 @@ If the nextLink is null, there are no more pages</dd>
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Microsoft-Graph-Http-GraphResponse.html#method_getStatus">getStatus()</a>
     <span>
-                        &nbsp;: string|null    </span>
+                        &nbsp;: int    </span>
 </dt>
 <dd>Get the status of the HTTP response</dd>
 
@@ -293,7 +300,7 @@ If the nextLink is null, there are no more pages</dd>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
-        <span class="phpdocumentor-signature__type">string</span>
+        <span class="phpdocumentor-signature__type"><abbr title="\Psr\Http\Message\StreamInterface">StreamInterface</abbr></span>
     <span class="phpdocumentor-signature__name">$_body</span>
     </code>
 
@@ -390,7 +397,7 @@ decoded into an array</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
-        <span class="phpdocumentor-signature__type">string</span>
+        <span class="phpdocumentor-signature__type">int</span>
     <span class="phpdocumentor-signature__name">$_httpStatusCode</span>
     </code>
 
@@ -458,7 +465,7 @@ decoded into an array</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">object&nbsp;</span><span class="phpdocumentor-signature__argument__name">$request</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$body</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$httpStatusCode</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$headers</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type"><a href="classes/Microsoft-Graph-Http-GraphRequest.html"><abbr title="\Microsoft\Graph\Http\GraphRequest">GraphRequest</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$request</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__return-type"><abbr title="\Psr\Http\Message\StreamInterface">StreamInterface</abbr>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$body</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$httpStatusCode</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$headers</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">[]</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
         <section class="phpdocumentor-description"></section>
 
@@ -466,7 +473,7 @@ decoded into an array</p>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$request</span>
-                : <span class="phpdocumentor-signature__argument__return-type">object</span>
+                : <span class="phpdocumentor-signature__argument__return-type"><a href="classes/Microsoft-Graph-Http-GraphRequest.html"><abbr title="\Microsoft\Graph\Http\GraphRequest">GraphRequest</abbr></a></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>The request</p>
@@ -475,7 +482,7 @@ decoded into an array</p>
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$body</span>
-                : <span class="phpdocumentor-signature__argument__return-type">string</span>
+                : <span class="phpdocumentor-signature__argument__return-type"><abbr title="\Psr\Http\Message\StreamInterface">StreamInterface</abbr>|null</span>
                  = <span class="phpdocumentor-signature__argument__default-value">null</span>            </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>The body of the response</p>
@@ -484,8 +491,8 @@ decoded into an array</p>
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$httpStatusCode</span>
-                : <span class="phpdocumentor-signature__argument__return-type">string</span>
-                 = <span class="phpdocumentor-signature__argument__default-value">null</span>            </dt>
+                : <span class="phpdocumentor-signature__argument__return-type">int</span>
+                            </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>The returned status code</p>
 </section>
@@ -494,7 +501,7 @@ decoded into an array</p>
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$headers</span>
                 : <span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;</span>
-                 = <span class="phpdocumentor-signature__argument__default-value">null</span>            </dt>
+                 = <span class="phpdocumentor-signature__argument__default-value">[]</span>            </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>The returned headers</p>
 </section>
@@ -524,7 +531,7 @@ decoded into an array</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Http/GraphResponse.php"><a href="files/src-http-graphresponse.html"><abbr title="src/Http/GraphResponse.php">GraphResponse.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">102</span>
+    <span class="phpdocumentor-element-found-in__line">105</span>
 </aside>
 
         <p class="phpdocumentor-summary">Get the decoded body of the HTTP response</p>
@@ -552,6 +559,40 @@ decoded into an array</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_getCount">
+        getCount()
+        <a href="classes/Microsoft-Graph-Http-GraphResponse.html#method_getCount" class="headerlink"><i class="fas fa-link"></i></a>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Http/GraphResponse.php"><a href="files/src-http-graphresponse.html"><abbr title="src/Http/GraphResponse.php">GraphResponse.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">203</span>
+</aside>
+
+        <p class="phpdocumentor-summary">Gets the number of items in the response payload</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                <span class="phpdocumentor-signature__name">getCount</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int|null</span></code>
+
+        <section class="phpdocumentor-description"></section>
+
+    
+    
+
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+    <span class="phpdocumentor-signature__response_type">int|null</span>
+            &mdash;
+            <section class="phpdocumentor-description"></section>
+
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_getDeltaLink">
         getDeltaLink()
         <a href="classes/Microsoft-Graph-Http-GraphResponse.html#method_getDeltaLink" class="headerlink"><i class="fas fa-link"></i></a>
@@ -559,7 +600,7 @@ decoded into an array</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Http/GraphResponse.php"><a href="files/src-http-graphresponse.html"><abbr title="src/Http/GraphResponse.php">GraphResponse.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">188</span>
+    <span class="phpdocumentor-element-found-in__line">190</span>
 </aside>
 
         <p class="phpdocumentor-summary">Gets the delta link of a response object from OData
@@ -596,7 +637,7 @@ use nextLink to obtain more</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Http/GraphResponse.php"><a href="files/src-http-graphresponse.html"><abbr title="src/Http/GraphResponse.php">GraphResponse.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">132</span>
+    <span class="phpdocumentor-element-found-in__line">135</span>
 </aside>
 
         <p class="phpdocumentor-summary">Get the headers of the response</p>
@@ -631,7 +672,7 @@ use nextLink to obtain more</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Http/GraphResponse.php"><a href="files/src-http-graphresponse.html"><abbr title="src/Http/GraphResponse.php">GraphResponse.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">172</span>
+    <span class="phpdocumentor-element-found-in__line">175</span>
 </aside>
 
         <p class="phpdocumentor-summary">Gets the next link of a response object from OData
@@ -667,7 +708,7 @@ If the nextLink is null, there are no more pages</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Http/GraphResponse.php"><a href="files/src-http-graphresponse.html"><abbr title="src/Http/GraphResponse.php">GraphResponse.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">112</span>
+    <span class="phpdocumentor-element-found-in__line">115</span>
 </aside>
 
         <p class="phpdocumentor-summary">Get the undecoded body of the HTTP response</p>
@@ -702,7 +743,7 @@ If the nextLink is null, there are no more pages</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Http/GraphResponse.php"><a href="files/src-http-graphresponse.html"><abbr title="src/Http/GraphResponse.php">GraphResponse.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">144</span>
+    <span class="phpdocumentor-element-found-in__line">147</span>
 </aside>
 
         <p class="phpdocumentor-summary">Converts the response JSON object to a Graph SDK object</p>
@@ -720,7 +761,8 @@ If the nextLink is null, there are no more pages</p>
                 : <span class="phpdocumentor-signature__argument__return-type">mixed</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The type to convert the object(s) to</p>
+                    <section class="phpdocumentor-description"><p>The type to convert the object(s) to
+//    *</p>
 </section>
 
             </dd>
@@ -749,14 +791,14 @@ If the nextLink is null, there are no more pages</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Http/GraphResponse.php"><a href="files/src-http-graphresponse.html"><abbr title="src/Http/GraphResponse.php">GraphResponse.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">122</span>
+    <span class="phpdocumentor-element-found-in__line">125</span>
 </aside>
 
         <p class="phpdocumentor-summary">Get the status of the HTTP response</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                <span class="phpdocumentor-signature__name">getStatus</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string|null</span></code>
+                <span class="phpdocumentor-signature__name">getStatus</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int</span></code>
 
         <section class="phpdocumentor-description"></section>
 
@@ -764,7 +806,7 @@ If the nextLink is null, there are no more pages</p>
     
 
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-    <span class="phpdocumentor-signature__response_type">string|null</span>
+    <span class="phpdocumentor-signature__response_type">int</span>
             &mdash;
             <section class="phpdocumentor-description"><p>The HTTP status</p>
 </section>

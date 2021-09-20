@@ -207,6 +207,13 @@
 </dt>
 <dd>Checks if url contains a valid National Cloud host</dd>
 
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a href="classes/Microsoft-Graph-Core-NationalCloud.html#method_containsNationalCloudHostFromUrlParts">containsNationalCloudHostFromUrlParts()</a>
+    <span>
+                        &nbsp;: bool    </span>
+</dt>
+<dd>Checks if $urlParts contain a valid National Cloud host</dd>
+
             <dt class="phpdocumentor-table-of-contents__entry -method -private">
     <a href="classes/Microsoft-Graph-Core-NationalCloud.html#method_initHosts">initHosts()</a>
     <span>
@@ -444,6 +451,52 @@
                     <article
         class="phpdocumentor-element
             -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_containsNationalCloudHostFromUrlParts">
+        containsNationalCloudHostFromUrlParts()
+        <a href="classes/Microsoft-Graph-Core-NationalCloud.html#method_containsNationalCloudHostFromUrlParts" class="headerlink"><i class="fas fa-link"></i></a>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Core/NationalCloud.php"><a href="files/src-core-nationalcloud.html"><abbr title="src/Core/NationalCloud.php">NationalCloud.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">52</span>
+</aside>
+
+        <p class="phpdocumentor-summary">Checks if $urlParts contain a valid National Cloud host</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>    <span class="phpdocumentor-signature__name">containsNationalCloudHostFromUrlParts</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">array&lt;string, string&gt;|false&nbsp;</span><span class="phpdocumentor-signature__argument__name">$urlParts</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+        <section class="phpdocumentor-description"></section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-signature__argument__name">$urlParts</span>
+                : <span class="phpdocumentor-signature__argument__return-type">array&lt;string, string&gt;|false</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>return value of parse_url()</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+    <span class="phpdocumentor-signature__response_type">bool</span>
+            &mdash;
+            <section class="phpdocumentor-description"></section>
+
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
             -private
                                     -static                    "
 >
@@ -454,7 +507,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Core/NationalCloud.php"><a href="files/src-core-nationalcloud.html"><abbr title="src/Core/NationalCloud.php">NationalCloud.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">54</span>
+    <span class="phpdocumentor-element-found-in__line">64</span>
 </aside>
 
         <p class="phpdocumentor-summary">Extracts hostnames from constant values to an array with unique keys for optimal lookup</p>
