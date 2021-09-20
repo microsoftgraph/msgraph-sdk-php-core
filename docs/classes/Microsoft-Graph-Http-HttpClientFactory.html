@@ -194,13 +194,6 @@
 <dd></dd>
 
                 <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Microsoft-Graph-Http-HttpClientFactory.html#method_clientConfig">clientConfig()</a>
-    <span>
-                        &nbsp;: $this    </span>
-</dt>
-<dd>Set configuration options for the Guzzle client</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Microsoft-Graph-Http-HttpClientFactory.html#method_create">create()</a>
     <span>
                         &nbsp;: <abbr title="\GuzzleHttp\Client">Client</abbr>    </span>
@@ -216,7 +209,14 @@ Creates default Guzzle client if no custom configs were passed</dd>
 <dd>Creates an HttpClientInterface implementation that wraps around a Guzzle client</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Microsoft-Graph-Http-HttpClientFactory.html#method_nationalCloud">nationalCloud()</a>
+    <a href="classes/Microsoft-Graph-Http-HttpClientFactory.html#method_setClientConfig">setClientConfig()</a>
+    <span>
+                        &nbsp;: $this    </span>
+</dt>
+<dd>Set configuration options for the Guzzle client</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a href="classes/Microsoft-Graph-Http-HttpClientFactory.html#method_setNationalCloud">setNationalCloud()</a>
     <span>
                         &nbsp;: $this    </span>
 </dt>
@@ -235,6 +235,13 @@ Creates default Guzzle client if no custom configs were passed</dd>
                         &nbsp;: array&lt;string|int, mixed&gt;    </span>
 </dt>
 <dd>Returns Graph-specific config for Guzzle</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -private">
+    <a href="classes/Microsoft-Graph-Http-HttpClientFactory.html#method_getInstance">getInstance()</a>
+    <span>
+                        &nbsp;: <a href="classes/Microsoft-Graph-Http-HttpClientFactory.html"><abbr title="\Microsoft\Graph\Http\HttpClientFactory">HttpClientFactory</abbr></a>    </span>
+</dt>
+<dd>Returns singleton instance</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -private">
     <a href="classes/Microsoft-Graph-Http-HttpClientFactory.html#method_mergeConfig">mergeConfig()</a>
@@ -419,51 +426,6 @@ Creates default Guzzle client if no custom configs were passed</dd>
             -public
                                     -static                    "
 >
-    <h4 class="phpdocumentor-element__name" id="method_clientConfig">
-        clientConfig()
-        <a href="classes/Microsoft-Graph-Http-HttpClientFactory.html#method_clientConfig" class="headerlink"><i class="fas fa-link"></i></a>
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Http/HttpClientFactory.php"><a href="files/src-http-httpclientfactory.html"><abbr title="src/Http/HttpClientFactory.php">HttpClientFactory.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">88</span>
-</aside>
-
-        <p class="phpdocumentor-summary">Set configuration options for the Guzzle client</p>
-
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-            <span class="phpdocumentor-signature__static">static</span>    <span class="phpdocumentor-signature__name">clientConfig</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">$this</span></code>
-
-        <section class="phpdocumentor-description"></section>
-
-        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
-    <dl class="phpdocumentor-argument-list">
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-signature__argument__name">$config</span>
-                : <span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"></section>
-
-            </dd>
-            </dl>
-
-    
-
-        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-    <span class="phpdocumentor-signature__response_type">$this</span>
-            &mdash;
-            <section class="phpdocumentor-description"></section>
-
-    
-</article>
-                    <article
-        class="phpdocumentor-element
-            -method
-            -public
-                                    -static                    "
->
     <h4 class="phpdocumentor-element__name" id="method_create">
         create()
         <a href="classes/Microsoft-Graph-Http-HttpClientFactory.html#method_create" class="headerlink"><i class="fas fa-link"></i></a>
@@ -471,7 +433,7 @@ Creates default Guzzle client if no custom configs were passed</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Http/HttpClientFactory.php"><a href="files/src-http-httpclientfactory.html"><abbr title="src/Http/HttpClientFactory.php">HttpClientFactory.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">99</span>
+    <span class="phpdocumentor-element-found-in__line">105</span>
 </aside>
 
         <p class="phpdocumentor-summary">Creates a Guzzle client with the custom configs provided or a default client if no config was given
@@ -506,7 +468,7 @@ Creates default Guzzle client if no custom configs were passed</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Http/HttpClientFactory.php"><a href="files/src-http-httpclientfactory.html"><abbr title="src/Http/HttpClientFactory.php">HttpClientFactory.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">112</span>
+    <span class="phpdocumentor-element-found-in__line">118</span>
 </aside>
 
         <p class="phpdocumentor-summary">Creates an HttpClientInterface implementation that wraps around a Guzzle client</p>
@@ -533,21 +495,66 @@ Creates default Guzzle client if no custom configs were passed</p>
             -public
                                     -static                    "
 >
-    <h4 class="phpdocumentor-element__name" id="method_nationalCloud">
-        nationalCloud()
-        <a href="classes/Microsoft-Graph-Http-HttpClientFactory.html#method_nationalCloud" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_setClientConfig">
+        setClientConfig()
+        <a href="classes/Microsoft-Graph-Http-HttpClientFactory.html#method_setClientConfig" class="headerlink"><i class="fas fa-link"></i></a>
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Http/HttpClientFactory.php"><a href="files/src-http-httpclientfactory.html"><abbr title="src/Http/HttpClientFactory.php">HttpClientFactory.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">74</span>
+    <span class="phpdocumentor-element-found-in__line">94</span>
+</aside>
+
+        <p class="phpdocumentor-summary">Set configuration options for the Guzzle client</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>    <span class="phpdocumentor-signature__name">setClientConfig</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">$this</span></code>
+
+        <section class="phpdocumentor-description"></section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-signature__argument__name">$config</span>
+                : <span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"></section>
+
+            </dd>
+            </dl>
+
+    
+
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+    <span class="phpdocumentor-signature__response_type">$this</span>
+            &mdash;
+            <section class="phpdocumentor-description"></section>
+
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_setNationalCloud">
+        setNationalCloud()
+        <a href="classes/Microsoft-Graph-Http-HttpClientFactory.html#method_setNationalCloud" class="headerlink"><i class="fas fa-link"></i></a>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Http/HttpClientFactory.php"><a href="files/src-http-httpclientfactory.html"><abbr title="src/Http/HttpClientFactory.php">HttpClientFactory.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">80</span>
 </aside>
 
         <p class="phpdocumentor-summary">Set national cloud to be used as the base URL</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-            <span class="phpdocumentor-signature__static">static</span>    <span class="phpdocumentor-signature__name">nationalCloud</span><span>(</span><span class="phpdocumentor-signature__argument"><span>[</span><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$nationalCloud</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">NationalCloud::GLOBAL</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">$this</span></code>
+            <span class="phpdocumentor-signature__static">static</span>    <span class="phpdocumentor-signature__name">setNationalCloud</span><span>(</span><span class="phpdocumentor-signature__argument"><span>[</span><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$nationalCloud</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">NationalCloud::GLOBAL</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">$this</span></code>
 
         <section class="phpdocumentor-description"></section>
 
@@ -601,7 +608,7 @@ Creates default Guzzle client if no custom configs were passed</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Http/HttpClientFactory.php"><a href="files/src-http-httpclientfactory.html"><abbr title="src/Http/HttpClientFactory.php">HttpClientFactory.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">60</span>
+    <span class="phpdocumentor-element-found-in__line">59</span>
 </aside>
 
         <p class="phpdocumentor-summary">HttpClientFactory constructor.</p>
@@ -610,8 +617,7 @@ Creates default Guzzle client if no custom configs were passed</p>
     <span class="phpdocumentor-signature__visibility">private</span>
                 <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
-        <section class="phpdocumentor-description"><p>Creates only one instance to be reused in the static methods</p>
-</section>
+        <section class="phpdocumentor-description"></section>
 
     
     
@@ -636,7 +642,7 @@ Creates default Guzzle client if no custom configs were passed</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Http/HttpClientFactory.php"><a href="files/src-http-httpclientfactory.html"><abbr title="src/Http/HttpClientFactory.php">HttpClientFactory.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">135</span>
+    <span class="phpdocumentor-element-found-in__line">141</span>
 </aside>
 
         <p class="phpdocumentor-summary">Returns Graph-specific config for Guzzle</p>
@@ -663,6 +669,40 @@ Creates default Guzzle client if no custom configs were passed</p>
             -private
                                     -static                    "
 >
+    <h4 class="phpdocumentor-element__name" id="method_getInstance">
+        getInstance()
+        <a href="classes/Microsoft-Graph-Http-HttpClientFactory.html#method_getInstance" class="headerlink"><i class="fas fa-link"></i></a>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Http/HttpClientFactory.php"><a href="files/src-http-httpclientfactory.html"><abbr title="src/Http/HttpClientFactory.php">HttpClientFactory.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">66</span>
+</aside>
+
+        <p class="phpdocumentor-summary">Returns singleton instance</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">private</span>
+            <span class="phpdocumentor-signature__static">static</span>    <span class="phpdocumentor-signature__name">getInstance</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Microsoft-Graph-Http-HttpClientFactory.html"><abbr title="\Microsoft\Graph\Http\HttpClientFactory">HttpClientFactory</abbr></a></span></code>
+
+        <section class="phpdocumentor-description"></section>
+
+    
+    
+
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+    <span class="phpdocumentor-signature__response_type"><a href="classes/Microsoft-Graph-Http-HttpClientFactory.html"><abbr title="\Microsoft\Graph\Http\HttpClientFactory">HttpClientFactory</abbr></a></span>
+            &mdash;
+            <section class="phpdocumentor-description"></section>
+
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -private
+                                    -static                    "
+>
     <h4 class="phpdocumentor-element__name" id="method_mergeConfig">
         mergeConfig()
         <a href="classes/Microsoft-Graph-Http-HttpClientFactory.html#method_mergeConfig" class="headerlink"><i class="fas fa-link"></i></a>
@@ -670,7 +710,7 @@ Creates default Guzzle client if no custom configs were passed</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Http/HttpClientFactory.php"><a href="files/src-http-httpclientfactory.html"><abbr title="src/Http/HttpClientFactory.php">HttpClientFactory.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">152</span>
+    <span class="phpdocumentor-element-found-in__line">158</span>
 </aside>
 
         <p class="phpdocumentor-summary">Merges client defined config array with Graph&#039;s default config.</p>
