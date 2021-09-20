@@ -55,9 +55,15 @@ final class HttpClientFactory
 
     /**
      * HttpClientFactory constructor.
-     * Creates only one instance to be reused in the static methods
      */
-    private function __construct() {
+    private function __construct() {}
+
+    /**
+     * Returns singleton instance
+     *
+     * @return HttpClientFactory
+     */
+    private static function getInstance(): HttpClientFactory {
         if (!self::$instance) {
             self::$instance = new HttpClientFactory();
         }
@@ -71,12 +77,12 @@ final class HttpClientFactory
      * @return $this
      * @throws GraphClientException if $nationalCloud is empty or an invalid national cloud Host
      */
-    public static function nationalCloud(string $nationalCloud = NationalCloud::GLOBAL): HttpClientFactory {
+    public static function setNationalCloud(string $nationalCloud = NationalCloud::GLOBAL): HttpClientFactory {
         if (!$nationalCloud || !NationalCloud::containsNationalCloudHost($nationalCloud)) {
             throw new GraphClientException("Invalid national cloud passed. See https://docs.microsoft.com/en-us/graph/deployments#microsoft-graph-and-graph-explorer-service-root-endpoints.");
         }
         self::$nationalCloud = $nationalCloud;
-        return new HttpClientFactory();
+        return self::getInstance();
     }
 
     /**
@@ -85,9 +91,9 @@ final class HttpClientFactory
      * @param array $config
      * @return $this
      */
-    public static function clientConfig(array $config): HttpClientFactory {
+    public static function setClientConfig(array $config): HttpClientFactory {
         self::$clientConfig = $config;
-        return new HttpClientFactory();
+        return self::getInstance();
     }
 
     /**

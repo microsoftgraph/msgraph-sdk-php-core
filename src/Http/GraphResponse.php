@@ -17,8 +17,8 @@
 
 namespace Microsoft\Graph\Http;
 
-use Microsoft\Graph\Exception\GraphException;
-use Microsoft\Graph\Core\GraphConstants;
+use GuzzleHttp\Psr7\Utils;
+use Psr\Http\Message\StreamInterface;
 
 /**
  * Class GraphResponse
@@ -40,7 +40,7 @@ class GraphResponse
     /**
     * The body of the response
     *
-    * @var string
+    * @var StreamInterface
     */
     private $_body;
     /**
@@ -59,19 +59,19 @@ class GraphResponse
     /**
     * The status code of the response
     *
-    * @var string
+    * @var int
     */
     private $_httpStatusCode;
 
     /**
     * Creates a new Graph HTTP response entity
     *
-    * @param object $request        The request
-    * @param string $body           The body of the response
-    * @param string $httpStatusCode The returned status code
+    * @param GraphRequest $request  The request
+    * @param ?StreamInterface $body  The body of the response
+    * @param int $httpStatusCode The returned status code
     * @param array  $headers        The returned headers
     */
-    public function __construct($request, $body = null, $httpStatusCode = null, $headers = null)
+    public function __construct(GraphRequest $request, ?StreamInterface $body = null, int $httpStatusCode = 0, array $headers = [])
     {
         $this->_request = $request;
         $this->_body = $body;
@@ -88,6 +88,9 @@ class GraphResponse
     private function _decodeBody()
     {
         $decodedBody = json_decode($this->_body, true);
+        if ($this->_body) {
+            $this->_body->rewind(); //rewind stream so that it can be read again
+        }
         if ($decodedBody === null) {
             $decodedBody = array();
         }
@@ -111,15 +114,15 @@ class GraphResponse
     */
     public function getRawBody()
     {
-        return $this->_body;
+        return ($this->_body) ?: $this->_body->getContents();
     }
 
     /**
     * Get the status of the HTTP response
     *
-    * @return string|null The HTTP status
+    * @return int The HTTP status
     */
-    public function getStatus()
+    public function getStatus(): int
     {
         return $this->_httpStatusCode;
     }
@@ -138,7 +141,7 @@ class GraphResponse
     * Converts the response JSON object to a Graph SDK object
     *
     * @param mixed $returnType The type to convert the object(s) to
-    *
+//    *
     * @return mixed object or array of objects of type $returnType
     */
     public function getResponseAsObject($returnType)
@@ -169,11 +172,10 @@ class GraphResponse
     *
     * @return string|null nextLink, if provided
     */
-    public function getNextLink()
+    public function getNextLink(): ?string
     {
         if (array_key_exists("@odata.nextLink", $this->getBody())) {
-            $nextLink = $this->getBody()['@odata.nextLink'];
-            return $nextLink;
+            return $this->getBody()['@odata.nextLink'];
         }
         return null;
     }
@@ -185,11 +187,23 @@ class GraphResponse
     *
     * @return string|null deltaLink
     */
-    public function getDeltaLink()
+    public function getDeltaLink(): ?string
     {
         if (array_key_exists("@odata.deltaLink", $this->getBody())) {
-            $deltaLink = $this->getBody()['@odata.deltaLink'];
-            return $deltaLink;
+            return $this->getBody()['@odata.deltaLink'];
+        }
+        return null;
+    }
+
+    /**
+     * Gets the number of items in the response payload
+     *
+     * @return int|null
+     */
+    public function getCount(): ?int
+    {
+        if (array_key_exists("@odata.count", $this->getBody())) {
+            return $this->getBody()["@odata.count"];
         }
         return null;
     }

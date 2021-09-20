@@ -15,10 +15,10 @@ use Http\Promise\Promise;
 use Microsoft\Graph\Core\GraphConstants;
 use Microsoft\Graph\Core\NationalCloud;
 use Microsoft\Graph\Exception\GraphClientException;
-use Microsoft\Graph\Exception\GraphException;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\UriInterface;
 
 /**
  * Class GraphRequest
@@ -32,13 +32,13 @@ class GraphRequest
     /**
     * An array of headers to send with the request
     *
-    * @var array(string => string)
+    * @var array<string, string|string[]>
     */
     private $headers;
     /**
     * The body of the request (optional)
     *
-    * @var string
+    * @var StreamInterface|string
     */
     private $requestBody = null;
     /**
@@ -57,7 +57,7 @@ class GraphRequest
     /**
     * The object type to cast the response to
     *
-    * @var string
+    * @var string|null
     */
     protected $returnType;
     /**
@@ -75,7 +75,7 @@ class GraphRequest
     /**
      * Full Request URI (base URL + endpoint)
      *
-     * @var Uri
+     * @var UriInterface
      */
     private $requestUri;
 
@@ -106,28 +106,13 @@ class GraphRequest
         $this->initPsr7HttpRequest();
     }
 
-    public function getHttpRequest(): Request
-    {
-        return $this->httpRequest;
-    }
-
-    protected function setRequestUri(Uri $uri): void {
+    protected function setRequestUri(UriInterface $uri): void {
         $this->requestUri = $uri;
-        $this->initPsr7HttpRequest();
+        $this->httpRequest = $this->httpRequest->withUri($uri);
     }
 
-    protected function getRequestUri(): Uri {
+    public function getRequestUri(): UriInterface {
         return $this->requestUri;
-    }
-
-    /**
-     * Gets whether request returns a stream or not
-     *
-     * @return boolean
-     */
-    public function getReturnsStream()
-    {
-        return $this->returnsStream;
     }
 
     /**
@@ -139,37 +124,44 @@ class GraphRequest
     */
     public function setAccessToken(string $accessToken): self
     {
+        unset($this->headers['Authorization']); // Prevents appending new token
         $this->addHeaders(['Authorization' => 'Bearer '.$accessToken]);
         return $this;
     }
 
     /**
-    * Sets the return type of the response object
-    *
-    * @param string $returnClass The class name to use
-    *
-    * @return $this object
-    */
+     * Sets the return type of the response object
+     * Can be set to a model or \Psr\Http\Message\StreamInterface
+     *
+     * @param string $returnClass The class name to use
+     *
+     * @return $this object
+     * @throws GraphClientException when $returnClass is not an existing class
+     */
     public function setReturnType(string $returnClass): self
     {
-        $this->returnType = $returnClass;
-        if ($this->returnType == "GuzzleHttp\Psr7\Stream") {
-            $this->returnsStream  = true;
-        } else {
-            $this->returnsStream = false;
+        if (!class_exists($returnClass) && !interface_exists($returnClass)) {
+            throw new GraphClientException("Return type specified does not match an existing class definition");
         }
+        $this->returnType = $returnClass;
+        $this->returnsStream = ($returnClass === StreamInterface::class);
         return $this;
     }
 
     /**
-    * Adds custom headers to the request
-    *
-    * @param array $headers An array of custom headers
-    *
-    * @return GraphRequest object
-    */
+     * Adds custom headers to the request
+     *
+     * @param array<string, string|string[]> $headers An array of custom headers
+     *
+     * @return GraphRequest object
+     * @throws GraphClientException if attempting to overwrite SdkVersion header
+     */
     public function addHeaders(array $headers): self
     {
+        if (array_key_exists("SdkVersion", $headers)) {
+            throw new GraphClientException("Cannot overwrite SdkVersion header");
+        }
+        // Recursive merge to support appending values to multi-value headers
         $this->headers = array_merge_recursive($this->headers, $headers);
         $this->initPsr7HttpRequest();
         return $this;
@@ -178,30 +170,30 @@ class GraphRequest
     /**
     * Get the request headers
     *
-    * @return array of headers
+    * @return array<string, string[]> of headers
     */
     public function getHeaders(): array
     {
-        return $this->headers;
+        return $this->httpRequest->getHeaders();
     }
 
     /**
     * Attach a body to the request. Will JSON encode
     * any Microsoft\Graph\Model objects as well as arrays
     *
-    * @param string|StreamInterface|object $obj The object to include in the request
+    * @param string|StreamInterface|object|array $body The payload to include in the request
     *
     * @return $this object
     */
-    public function attachBody($obj): self
+    public function attachBody($body): self
     {
         // Attach streams & JSON automatically
-        if (is_string($obj) || is_a($obj, StreamInterface::class)) {
-            $this->requestBody = $obj;
+        if (is_string($body) || is_a($body, StreamInterface::class)) {
+            $this->requestBody = $body;
         }
         // By default, JSON-encode
         else {
-            $this->requestBody = json_encode($obj);
+            $this->requestBody = json_encode($body);
         }
         $this->initPsr7HttpRequest();
         return $this;
@@ -313,7 +305,7 @@ class GraphRequest
             $resource = Utils::tryFopen($path, 'w');
             $stream = Utils::streamFor($resource);
             $response = $client->sendRequest($this->httpRequest);
-            $stream->write($response->getBody());
+            $stream->write($response->getBody()->getContents());
             $stream->close();
         } catch (\RuntimeException $ex) {
             throw new GraphClientException(GraphConstants::INVALID_FILE, $ex->getCode(), $ex);
@@ -349,8 +341,12 @@ class GraphRequest
     private function initHeaders(string $baseUrl): void
     {
         $coreSdkVersion = "graph-php-core/".GraphConstants::SDK_VERSION;
-        $serviceLibSdkVersion = "Graph-php-".$this->graphClient->getSdkVersion();
-        if (NationalCloud::containsNationalCloudHost($baseUrl)) {
+        if ($this->graphClient->getApiVersion() === GraphConstants::BETA_API_VERSION) {
+            $serviceLibSdkVersion = "graph-php-beta/".$this->graphClient->getSdkVersion();
+        } else {
+            $serviceLibSdkVersion = "graph-php/".$this->graphClient->getSdkVersion();
+        }
+        if (NationalCloud::containsNationalCloudHost($this->requestUri)) {
             $this->headers = [
                 'Content-Type' => 'application/json',
                 'SdkVersion' => $coreSdkVersion.", ".$serviceLibSdkVersion,
@@ -367,18 +363,14 @@ class GraphRequest
      * Creates full request URI by resolving $baseUrl and $endpoint based on RFC 3986
      *
      * @param string $baseUrl
-     * @param $endpoint
+     * @param string $endpoint
      * @throws GraphClientException
      */
-    protected function initRequestUri(string $baseUrl, $endpoint): void {
+    protected function initRequestUri(string $baseUrl, string $endpoint): void {
         try {
             $this->requestUri = GraphRequestUtil::getRequestUri($baseUrl, $endpoint, $this->graphClient->getApiVersion());
-            if (!$this->requestUri) {
-                // $endpoint is a full URL but doesn't meet criteria
-                throw new GraphClientException("Endpoint is not a valid URL. Must contain national cloud host.");
-            }
         } catch (\InvalidArgumentException $ex) {
-            throw new GraphClientException("Unable to resolve base URL=".$baseUrl."\" with endpoint=".$endpoint."\"", 0, $ex);
+            throw new GraphClientException($ex->getMessage(), 0, $ex);
         }
     }
 

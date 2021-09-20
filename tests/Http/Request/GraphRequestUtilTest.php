@@ -5,7 +5,7 @@
  * for license information.
  */
 
-namespace Http;
+namespace Microsoft\Graph\Test\Http\Request;
 
 
 use GuzzleHttp\Psr7\Uri;
@@ -31,15 +31,15 @@ class GraphRequestUtilTest extends \PHPUnit\Framework\TestCase
     }
 
     function testGetRequestUriWithFullNationalCloudEndpointUrlReturnsUri() {
-        $endpoint = NationalCloud::GLOBAL."/me/events?\$skip=100&\$top=10";
+        $endpoint = NationalCloud::GLOBAL.'/me/events?$skip=100&$top=10';
         $result = GraphRequestUtil::getRequestUri("", $endpoint, $this->apiVersion);
         self::assertEquals($endpoint, strval($result));
     }
 
-    function testGetRequestUriWithFullNonNationalCloudEndpointReturnsNull() {
+    function testGetRequestUriWithFullNonNationalCloudEndpointReturnsUri() {
         $endpoint = "https://www.outlook.com/mail?user=me";
         $uri = GraphRequestUtil::getRequestUri("", $endpoint, $this->apiVersion);
-        self::assertNull($uri);
+        $this->assertEquals($endpoint, strval($uri));
     }
 
     function testGetRequestUriWithValidBaseUrlResolvesCorrectly() {
@@ -59,17 +59,14 @@ class GraphRequestUtilTest extends \PHPUnit\Framework\TestCase
         }
     }
 
-    function testGetRequestUriWithEmptyBaseUriUsesNationalCloudByDefault() {
-        $endpoints= ["/me/events", "me/events"];
-        $expected = "https://graph.microsoft.com/v1.0/me/events";
-        foreach ($endpoints as $endpoint) {
-            $uri = GraphRequestUtil::getRequestUri("", $endpoint, $this->apiVersion);
-            self::assertEquals($expected, strval($uri));
-        }
+    function testGetRequestUriWithEmptyBaseUriThrowsException() {
+        $this->expectException(\InvalidArgumentException::class);
+        $endpoint= "/me/events";
+        GraphRequestUtil::getRequestUri("", $endpoint);
     }
 
     function testGetRequestUriWithoutNationalCloudHostDoesntSetApiVersion() {
-        $baseUrl = "https://outlook.microsoft.com/mail/";
+        $baseUrl = "https://outlook.microsoft.com/";
         $endpoint = "?startDate=2020-10-02&sort=desc";
         $expected = $baseUrl.$endpoint;
         $uri = GraphRequestUtil::getRequestUri($baseUrl, $endpoint, $this->apiVersion);
@@ -79,19 +76,12 @@ class GraphRequestUtilTest extends \PHPUnit\Framework\TestCase
 
     function testGetRequestUriWithInvalidFullEndpointUrlThrowsException() {
         $this->expectException(\InvalidArgumentException::class);
-        $endpoint = "http:/microsoft.com:localhost\$endpoint";
+        $endpoint = 'http/microsoft.com:localhost$endpoint';
         $uri = GraphRequestUtil::getRequestUri("", $endpoint, $this->apiVersion);
     }
 
-    function testGetRequestUrlWithInvalidBaseUrlAndEndpointThrowsException() {
-        $this->expectException(\InvalidArgumentException::class);
-        $baseUrl = "https://graph.microsoft.com";
-        $endpoint = "http:/microsoft.com:localhost\$endpoint";
-        $uri = GraphRequestUtil::getRequestUri($baseUrl, $endpoint, $this->apiVersion);
-    }
-
     function testGetQueryParamConcatenatorWithExistingQueryParams() {
-        $uri = new Uri("https://graph.microsoft.com?\$skip=10");
+        $uri = new Uri('https://graph.microsoft.com?$skip=10');
         $result = GraphRequestUtil::getQueryParamConcatenator($uri);
         self::assertEquals("&", $result);
     }

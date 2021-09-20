@@ -8,9 +8,10 @@
 namespace Microsoft\Graph\Http;
 
 use GuzzleHttp\Psr7\Uri;
+use Microsoft\Graph\Core\GraphConstants;
 use Microsoft\Graph\Exception\GraphClientException;
 use Microsoft\Graph\Exception\GraphException;
-use Microsoft\Graph\Core\GraphConstants;
+use Psr\Http\Client\ClientExceptionInterface;
 
 /**
  * Class GraphCollectionRequest
@@ -48,7 +49,7 @@ class GraphCollectionRequest extends GraphRequest
     /**
      * The return type that the user specified
      *
-     * @var object
+     * @var string
      */
     protected $originalReturnType;
 
@@ -76,22 +77,25 @@ class GraphCollectionRequest extends GraphRequest
 	 * Gets the number of entries in the collection
 	 *
 	 * @return int the number of entries
-     * @throws \Psr\Http\Client\ClientExceptionInterface
+     * @throws ClientExceptionInterface|GraphClientException
      */
     public function count()
     {
         $query = '$count=true';
         $requestUri = $this->getRequestUri();
         $this->setRequestUri(new Uri( $requestUri . GraphRequestUtil::getQueryParamConcatenator($requestUri) . $query));
-        $result = $this->execute()->getBody();
+        // Temporarily disable returnType in order to get GraphResponse object returned by execute()
+        $this->originalReturnType = $this->returnType;
+        $this->returnType = null;
+        $result = $this->execute();
 
-        if (array_key_exists("@odata.count", $result)) {
-            return $result['@odata.count'];
+        if (is_a($result, GraphResponse::class) &&  $result->getCount()) {
+            return $result->getCount();
         }
 
         /* The $count query parameter for the Graph API
            is available on several models but not all */
-        trigger_error('Count unavailable for this collection');
+        throw new GraphClientException('Count unavailable for this collection');
     }
 
     /**
@@ -117,7 +121,7 @@ class GraphCollectionRequest extends GraphRequest
      * Gets the next page of results
      *
      * @return array of objects of class $returnType
-     * @throws \Psr\Http\Client\ClientExceptionInterface
+     * @throws ClientExceptionInterface
      */
     public function getPage()
     {
@@ -132,7 +136,7 @@ class GraphCollectionRequest extends GraphRequest
      *
      * @return GraphCollectionRequest
      */
-    public function setPageCallInfo(): self
+    private function setPageCallInfo(): self
     {
         // Store these to add temporary query data to request
         $this->originalReturnType = $this->returnType;
@@ -167,7 +171,7 @@ class GraphCollectionRequest extends GraphRequest
     * @return mixed result of the call, formatted according
     *         to the returnType set by the user
     */
-    public function processPageCallReturn(GraphResponse $response)
+    private function processPageCallReturn(GraphResponse $response)
     {
         $this->nextLink = $response->getNextLink();
         $this->deltaLink = $response->getDeltaLink();
@@ -210,5 +214,13 @@ class GraphCollectionRequest extends GraphRequest
     public function getDeltaLink(): ?string
     {
         return $this->deltaLink;
+    }
+
+    /**
+     * Get page size
+     * @return int
+     */
+    public function getPageSize(): int {
+        return $this->pageSize;
     }
 }

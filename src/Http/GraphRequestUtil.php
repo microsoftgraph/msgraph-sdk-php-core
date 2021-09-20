@@ -30,16 +30,36 @@ class GraphRequestUtil
      * @param string $baseUrl if empty, is overwritten with $client's national cloud
      * @param string $endpoint can be a full URL
      * @param string $apiVersion
-     * @return UriInterface|null
+     * @return UriInterface
+     * @throws \InvalidArgumentException
      */
-    public static function getRequestUri(string $baseUrl, string $endpoint, string $apiVersion = "v1.0"): ?UriInterface {
-        // If endpoint is a full url, ensure the host is a national cloud or custom host
+    public static function getRequestUri(string $baseUrl, string $endpoint, string $apiVersion = "v1.0"): UriInterface {
+        // If endpoint is a full url, ensure the host is a national cloud
         if (parse_url($endpoint, PHP_URL_SCHEME)) {
-            return (NationalCloud::containsNationalCloudHost($endpoint)) ? new Uri($endpoint) : null;
+            return new Uri($endpoint);
         }
-        $relativeUrl = (NationalCloud::containsNationalCloudHost($baseUrl)) ? "/".$apiVersion : "";
-        $relativeUrl .= (substr($endpoint, 0, 1) == "/") ? $endpoint : "/".$endpoint;
-        return UriResolver::resolve(new Uri($baseUrl), new Uri($relativeUrl));
+        if ($baseUrl) {
+            $baseUrlParts = parse_url($baseUrl);
+            if (!self::isValidBaseUrl($baseUrlParts)) {
+                throw new \InvalidArgumentException("Invalid baseUrl=".$baseUrl.". Ensure URL has scheme and host");
+            }
+            $relativeUrl = (NationalCloud::containsNationalCloudHostFromUrlParts($baseUrlParts)) ? "/".$apiVersion : "";
+            $relativeUrl .= (substr($endpoint, 0, 1) === "/") ? $endpoint : "/".$endpoint;
+            return UriResolver::resolve(new Uri($baseUrl), new Uri($relativeUrl));
+        }
+        throw new \InvalidArgumentException("Unable to create uri with empty baseUrl and endpoint=".$endpoint);
+    }
+
+    /**
+     * Check whether $urlParts meet criteria for a valid base url
+     *
+     * @param array<string, string>|false $urlParts return value of parse_url()
+     * @return bool
+     */
+    public static function isValidBaseUrl($urlParts): bool {
+        return $urlParts
+                && array_key_exists("scheme", $urlParts)
+                && array_key_exists("host", $urlParts);
     }
 
     /**

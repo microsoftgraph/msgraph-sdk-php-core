@@ -13,12 +13,12 @@ class HttpClientFactoryTest extends \PHPUnit\Framework\TestCase
 {
     function testNationalCloudWithEmptyString() {
         $this->expectException(GraphClientException::class);
-        HttpClientFactory::nationalCloud("");
+        HttpClientFactory::setNationalCloud("");
     }
 
     function testNationalCloudWithInvalidUrl() {
         $this->expectException(GraphClientException::class);
-        HttpClientFactory::nationalCloud("https://www.microsoft.com");
+        HttpClientFactory::setNationalCloud("https://www.microsoft.com");
     }
 
     function testCreateWithNoConfigReturnsDefaultClient() {
@@ -31,12 +31,12 @@ class HttpClientFactoryTest extends \PHPUnit\Framework\TestCase
             "proxy" => "localhost:8000",
             "verify" => false
         ];
-        $client = HttpClientFactory::clientConfig($config)::nationalCloud(NationalCloud::GERMANY)::create();
+        $client = HttpClientFactory::setClientConfig($config)::setNationalCloud(NationalCloud::GERMANY)::create();
         $this->assertInstanceOf(\GuzzleHttp\Client::class, $client);
     }
 
     function testCreateAdapterReturnsHttpClientInterface() {
-        $adapter = HttpClientFactory::nationalCloud(NationalCloud::US_DOD)::createAdapter();
+        $adapter = HttpClientFactory::setNationalCloud(NationalCloud::US_DOD)::createAdapter();
         $this->assertInstanceOf(HttpClientInterface::class, $adapter);
     }
 

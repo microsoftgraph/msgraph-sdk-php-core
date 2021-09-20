@@ -1,9 +1,12 @@
 <?php
+
+namespace Microsoft\Graph\Test\Exception;
+
 use PHPUnit\Framework\TestCase;
 use Microsoft\Graph\Exception\GraphException;
 use Microsoft\Graph\Exception\GraphClientException;
 
-class ExceptionTest extends TestCase
+class GraphExceptionTest extends TestCase
 {
     public function testToString()
     {

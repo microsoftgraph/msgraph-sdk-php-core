@@ -7,10 +7,8 @@
 
 namespace Microsoft\Graph\Http;
 
-use Microsoft\Graph\Core\GraphConstants;
 use Microsoft\Graph\Core\NationalCloud;
 use Microsoft\Graph\Exception\GraphClientException;
-use Microsoft\Graph\Exception\GraphException;
 
 /**
  * Class BaseClient
@@ -58,7 +56,7 @@ abstract class AbstractGraphClient
                                 ?HttpClientInterface  $httpClient = null)
     {
         $this->nationalCloud = ($nationalCloud) ?: NationalCloud::GLOBAL;
-        $this->httpClient = ($httpClient) ?: HttpClientFactory::nationalCloud($nationalCloud)::createAdapter();
+        $this->httpClient = ($httpClient) ?: HttpClientFactory::setNationalCloud($this->nationalCloud)::createAdapter();
     }
 
     /**
@@ -79,7 +77,7 @@ abstract class AbstractGraphClient
     /**
      * @return string
      */
-    public function getAccessToken(): string {
+    public function getAccessToken(): ?string {
         return $this->accessToken;
     }
 
@@ -107,7 +105,7 @@ abstract class AbstractGraphClient
 	 *
 	 * @return GraphRequest The request object, which can be used to
 	 *                      make queries against Graph
-	 * @throws GraphException
+	 * @throws GraphClientException
 	 */
     public function createRequest(string $requestType, string $endpoint): GraphRequest
     {
@@ -127,9 +125,9 @@ abstract class AbstractGraphClient
 	 *
 	 * @return GraphCollectionRequest The request object, which can be
 	 *                                used to make queries against Graph
-	 * @throws GraphException
+	 * @throws GraphClientException
 	 */
-    public function createCollectionRequest(string $requestType, string $endpoint): GraphRequest
+    public function createCollectionRequest(string $requestType, string $endpoint): GraphCollectionRequest
     {
         return new GraphCollectionRequest(
             $requestType,
