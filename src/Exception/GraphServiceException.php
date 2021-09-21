@@ -5,19 +5,20 @@
  * for license information.
  */
 
+
 namespace Microsoft\Graph\Exception;
 
 /**
- * Class GraphClientException
+ * Class GraphServiceException
  *
- * Thrown when the Graph API returns 4xx responses
+ * Thrown when the Graph API returns a 4xx response
  *
  * @package Microsoft\Graph\Exception
  * @copyright 2021 Microsoft Corporation
  * @license https://opensource.org/licenses/MIT MIT License
  * @link https://developer.microsoft.com/graph
  */
-class GraphClientException extends GraphResponseException
+class GraphServiceException extends GraphResponseException
 {
 
 }

@@ -41,7 +41,7 @@ class AbstractGraphClientTest extends TestCase {
     }
 
     public function testConstructorWithInvalidNationalCloud() {
-        $this->expectException(GraphClientException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $graphClient = $this->getMockBuilder(AbstractGraphClient::class)
                             ->setConstructorArgs(["https://www.microsoft.com", null])
                             ->getMockForAbstractClass();
@@ -61,12 +61,12 @@ class AbstractGraphClientTest extends TestCase {
     }
 
     public function testCreateRequestWithoutSettingAccessTokenThrowsException() {
-        $this->expectException(GraphClientException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $request = $this->defaultGraphClient->createRequest("GET", "/");
     }
 
     public function testCreateRequestWithInvalidParamsThrowsException() {
-        $this->expectException(GraphClientException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->defaultGraphClient->createRequest("", "");
     }
 
@@ -77,12 +77,12 @@ class AbstractGraphClientTest extends TestCase {
     }
 
     public function testCreateCollectionRequestWithoutAccessTokenThrowsException() {
-        $this->expectException(GraphClientException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $request = $this->defaultGraphClient->createCollectionRequest("GET", "/me/users");
     }
 
     public function testCreateCollectionRequestWithInvalidParamsThrowsException() {
-        $this->expectException(GraphClientException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->defaultGraphClient->createCollectionRequest("", "");
     }
 }

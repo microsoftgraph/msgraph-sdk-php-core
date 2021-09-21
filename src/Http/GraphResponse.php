@@ -17,7 +17,6 @@
 
 namespace Microsoft\Graph\Http;
 
-use GuzzleHttp\Psr7\Utils;
 use Psr\Http\Message\StreamInterface;
 
 /**
@@ -33,7 +32,7 @@ class GraphResponse
 
     /**
      * The request object
-     * @var object
+     * @var GraphRequest
      */
 
     private $_request;
@@ -206,5 +205,15 @@ class GraphResponse
             return $this->getBody()["@odata.count"];
         }
         return null;
+    }
+
+    /**
+     * Gets the request that triggered the response
+     *
+     * @return GraphRequest
+     */
+    public function getRequest(): GraphRequest
+    {
+        return $this->_request;
     }
 }

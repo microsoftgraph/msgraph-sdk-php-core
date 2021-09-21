@@ -39,12 +39,12 @@ class SampleGraphResponsePayload
         "@odata.count" => 2,
         "value" => [
             [
-                "id" => 1,
-                "givenName" => "user1"
+                "id" => 3,
+                "givenName" => "user3"
             ],
             [
-                "id" => 2,
-                "givenName" => "user2"
+                "id" => 4,
+                "givenName" => "user4"
             ]
         ]
     ];

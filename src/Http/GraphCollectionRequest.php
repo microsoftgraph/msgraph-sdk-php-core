@@ -10,7 +10,8 @@ namespace Microsoft\Graph\Http;
 use GuzzleHttp\Psr7\Uri;
 use Microsoft\Graph\Core\GraphConstants;
 use Microsoft\Graph\Exception\GraphClientException;
-use Microsoft\Graph\Exception\GraphException;
+use Microsoft\Graph\Exception\GraphServiceException;
+use Microsoft\Graph\Task\PageIterator;
 use Psr\Http\Client\ClientExceptionInterface;
 
 /**
@@ -52,6 +53,12 @@ class GraphCollectionRequest extends GraphRequest
      * @var string
      */
     protected $originalReturnType;
+    /**
+     * Graph client to use for the request
+     *
+     * @var AbstractGraphClient
+     */
+    private $graphClient;
 
     /**
      * Constructs a new GraphCollectionRequest object
@@ -60,7 +67,7 @@ class GraphCollectionRequest extends GraphRequest
      * @param string $endpoint The URI of the endpoint to hit
      * @param AbstractGraphClient $graphClient
      * @param string $baseUrl (optional) If empty, it's set to $client's national cloud
-     * @throws GraphClientException
+     * @throws \InvalidArgumentException
      */
     public function __construct(string $requestType, string $endpoint, AbstractGraphClient $graphClient, string $baseUrl = "")
     {
@@ -70,16 +77,19 @@ class GraphCollectionRequest extends GraphRequest
             $graphClient,
             $baseUrl
         );
+        $this->graphClient = $graphClient;
         $this->end = false;
     }
 
 	/**
 	 * Gets the number of entries in the collection
 	 *
-	 * @return int the number of entries
-     * @throws ClientExceptionInterface|GraphClientException
+	 * @return int|null the number of entries | null if @odata.count doesn't exist for that collection
+     * @throws ClientExceptionInterface if an errors occurs while making the request
+     * @throws GraphClientException containing error payload if 4xx response is returned.
+     * @throws GraphServiceException containing error payload if 5xx response is returned.
      */
-    public function count()
+    public function count(): ?int
     {
         $query = '$count=true';
         $requestUri = $this->getRequestUri();
@@ -88,14 +98,8 @@ class GraphCollectionRequest extends GraphRequest
         $this->originalReturnType = $this->returnType;
         $this->returnType = null;
         $result = $this->execute();
-
-        if (is_a($result, GraphResponse::class) &&  $result->getCount()) {
-            return $result->getCount();
-        }
-
-        /* The $count query parameter for the Graph API
-           is available on several models but not all */
-        throw new GraphClientException('Count unavailable for this collection');
+        $this->returnType = $this->originalReturnType;
+        return ($result->getCount()) ?: null;
     }
 
     /**
@@ -103,15 +107,13 @@ class GraphCollectionRequest extends GraphRequest
     * to "getPage()"
     *
     * @param int $pageSize The page size
-    *
-     * @throws GraphClientException if the requested page size exceeds
-     *         the Graph's defined page size limit
-    * @return GraphCollectionRequest object
+     * @return GraphCollectionRequest object
+     * @throws \InvalidArgumentException if the requested page size exceeds Graph's defined page size limit
     */
     public function setPageSize(int $pageSize): self
     {
         if ($pageSize > GraphConstants::MAX_PAGE_SIZE) {
-            throw new GraphClientException(GraphConstants::MAX_PAGE_SIZE_ERROR);
+            throw new \InvalidArgumentException(GraphConstants::MAX_PAGE_SIZE_ERROR);
         }
         $this->pageSize = $pageSize;
         return $this;
@@ -120,8 +122,10 @@ class GraphCollectionRequest extends GraphRequest
     /**
      * Gets the next page of results
      *
-     * @return array of objects of class $returnType
-     * @throws ClientExceptionInterface
+     * @return GraphResponse|array of objects of class $returnType| GraphResponse if no $returnType
+     * @throws ClientExceptionInterface if an error occurs while making the request
+     * @throws GraphClientException containing error payload if 4xx response is returned.
+     * @throws GraphServiceException containing error payload if 5xx response is returned.
      */
     public function getPage()
     {
@@ -134,9 +138,9 @@ class GraphCollectionRequest extends GraphRequest
     /**
      * Sets the required query information to get a new page
      *
-     * @return GraphCollectionRequest
+     * @return void
      */
-    private function setPageCallInfo(): self
+    private function setPageCallInfo(): void
     {
         // Store these to add temporary query data to request
         $this->originalReturnType = $this->returnType;
@@ -159,7 +163,6 @@ class GraphCollectionRequest extends GraphRequest
                 $this->setRequestUri(new Uri( $requestUri . GraphRequestUtil::getQueryParamConcatenator($requestUri) . $query));
             }
         }
-        return $this;
     }
 
     /**
@@ -168,21 +171,22 @@ class GraphCollectionRequest extends GraphRequest
     * @param GraphResponse $response The GraphResponse returned
     *        after making a page call
     *
-    * @return mixed result of the call, formatted according
-    *         to the returnType set by the user
+    * @return GraphResponse|array result of the call, formatted according
+    *         to the returnType set by the user. If no return type, returns GraphResponse
     */
     private function processPageCallReturn(GraphResponse $response)
     {
         $this->nextLink = $response->getNextLink();
         $this->deltaLink = $response->getDeltaLink();
 
-        /* If no skip token is returned, we have reached the end
+        /* If no next link is returned, we have reached the end
            of the collection */
         if (!$this->nextLink) {
             $this->end = true;
         }
 
-        $result = $response->getBody();
+        // Return GraphResponse if no return type
+        $result = $response;
 
         // Cast as user-defined model
         if ($this->originalReturnType) {
@@ -222,5 +226,30 @@ class GraphCollectionRequest extends GraphRequest
      */
     public function getPageSize(): int {
         return $this->pageSize;
+    }
+
+    /**
+     * Creates a page iterator. Initiates its collectionResponse with the result of getPage()
+     *
+     * @param callable(): bool $callback function to execute against each element of $entityCollection. Must return boolean which determines if iteration should pause/proceed
+     * @return PageIterator call iterate() to start the iterator
+     * @throws ClientExceptionInterface if error occurs while making the request
+     * @throws GraphClientException containing error payload if 4xx is returned while fetching the initial page
+     * @throws GraphServiceException containing error payload if 5xx is returned while fetching the initial page
+     */
+    public function pageIterator(callable $callback): PageIterator {
+        // temporarily disable return type in order to get first page as GraphResponse object
+        $returnType = $this->returnType;
+        $this->returnType = null;
+        $collectionResponse = $this->getPage();
+        $this->returnType = $returnType;
+
+        return new PageIterator(
+            $this->graphClient,
+            $collectionResponse,
+            $callback,
+            $this->returnType,
+            new RequestOptions($this->getHeaders())
+        );
     }
 }
