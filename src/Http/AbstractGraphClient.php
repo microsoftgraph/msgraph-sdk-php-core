@@ -50,7 +50,7 @@ abstract class AbstractGraphClient
      *
      * @param string|null $nationalCloud if null defaults to "https://graph.microsoft.com"
      * @param HttpClientInterface|null $httpClient if null creates default Guzzle client
-     * @throws GraphClientException
+     * @throws \InvalidArgumentException
      */
     public function __construct(?string $nationalCloud = NationalCloud::GLOBAL,
                                 ?HttpClientInterface  $httpClient = null)
@@ -105,7 +105,7 @@ abstract class AbstractGraphClient
 	 *
 	 * @return GraphRequest The request object, which can be used to
 	 *                      make queries against Graph
-	 * @throws GraphClientException
+	 * @throws \InvalidArgumentException
 	 */
     public function createRequest(string $requestType, string $endpoint): GraphRequest
     {
@@ -125,7 +125,7 @@ abstract class AbstractGraphClient
 	 *
 	 * @return GraphCollectionRequest The request object, which can be
 	 *                                used to make queries against Graph
-	 * @throws GraphClientException
+	 * @throws \InvalidArgumentException
 	 */
     public function createCollectionRequest(string $requestType, string $endpoint): GraphCollectionRequest
     {

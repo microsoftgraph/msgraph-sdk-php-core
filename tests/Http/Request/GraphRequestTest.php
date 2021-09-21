@@ -4,10 +4,8 @@ namespace Microsoft\Graph\Test\Http\Request;
 
 use Microsoft\Graph\Core\GraphConstants;
 use Microsoft\Graph\Core\NationalCloud;
-use Microsoft\Graph\Exception\GraphClientException;
 use Microsoft\Graph\Http\AbstractGraphClient;
 use Microsoft\Graph\Http\GraphRequest;
-use Microsoft\Graph\Test\Http\TestModel;
 use Microsoft\Graph\Test\TestData\Model\User;
 
 class GraphRequestTest extends BaseGraphRequestTest
@@ -18,18 +16,18 @@ class GraphRequestTest extends BaseGraphRequestTest
     }
 
     public function testConstructorWithEmptyParametersThrowsException(): void {
-        $this->expectException(GraphClientException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $request = new GraphRequest("", "", $this->mockGraphClient);
     }
 
     public function testConstructorWithoutAccessTokenThrowsException(): void {
         $graphClient = $this->getMockForAbstractClass(AbstractGraphClient::class);
-        $this->expectException(GraphClientException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $request = new GraphRequest("GET", "/me", $graphClient);
     }
 
     public function testConstructorWithInvalidCustomBaseUrlThrowsException(): void {
-        $this->expectException(GraphClientException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $baseUrl = "www.outlook.com"; # no scheme
         $request = new GraphRequest("GET", "/me", $this->mockGraphClient, $baseUrl);
     }
@@ -162,7 +160,7 @@ class GraphRequestTest extends BaseGraphRequestTest
     }
 
     public function testSetReturnTypeWithInvalidClassThrowsException(): void {
-        $this->expectException(GraphClientException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->defaultGraphRequest->setReturnType("Model\User");
     }
 
@@ -175,7 +173,7 @@ class GraphRequestTest extends BaseGraphRequestTest
     }
 
     public function testAddHeadersCannotAppendOrOverwriteSdkVersionValue(): void {
-        $this->expectException(GraphClientException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->defaultGraphRequest->addHeaders([
             'SdkVersion' => 'Version1',
             'Content-Encoding' => 'gzip'

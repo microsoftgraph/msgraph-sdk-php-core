@@ -8,12 +8,14 @@
 namespace Microsoft\Graph\Http;
 
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use Http\Client\HttpAsyncClient;
 use Http\Promise\Promise;
 use Microsoft\Graph\Core\GraphConstants;
 use Microsoft\Graph\Core\NationalCloud;
 use Microsoft\Graph\Exception\GraphClientException;
+use Microsoft\Graph\Exception\GraphServiceException;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\StreamInterface;
@@ -87,31 +89,50 @@ class GraphRequest
      * @param string $endpoint The url path on the host to be called-
      * @param AbstractGraphClient $graphClient The Graph client to use
      * @param string $baseUrl (optional) If empty, it's set to $client's national cloud
-     * @throws GraphClientException
+     * @throws \InvalidArgumentException
      */
     public function __construct(string $requestType, string $endpoint, AbstractGraphClient $graphClient, string $baseUrl = "")
     {
         if (!$requestType || !$endpoint || !$graphClient) {
-            throw new GraphClientException("Request type, endpoint and client cannot be null or empty");
+            throw new \InvalidArgumentException("Request type, endpoint and client cannot be null or empty");
         }
         if (!$graphClient->getAccessToken()) {
-            throw new GraphClientException(GraphConstants::NO_ACCESS_TOKEN);
+            throw new \InvalidArgumentException(GraphConstants::NO_ACCESS_TOKEN);
         }
         $this->requestType = $requestType;
         $this->graphClient = $graphClient;
         $baseUrl = ($baseUrl) ?: $graphClient->getNationalCloud();
         $this->initRequestUri($baseUrl, $endpoint);
-        $this->initHeaders($baseUrl);
+        $this->initHeaders();
         $this->initPsr7HttpRequest();
     }
 
+    /**
+     * Sets the request URI and updates the Psr7 request with the new URI
+     *
+     * @param UriInterface $uri
+     */
     protected function setRequestUri(UriInterface $uri): void {
         $this->requestUri = $uri;
         $this->httpRequest = $this->httpRequest->withUri($uri);
     }
 
+    /**
+     * Returns the final request URI after resolving $endpoint to base URL
+     *
+     * @return UriInterface
+     */
     public function getRequestUri(): UriInterface {
         return $this->requestUri;
+    }
+
+    /**
+     * Returns the HTTP method used
+     *
+     * @return string
+     */
+    public function getRequestType(): string {
+        return $this->requestType;
     }
 
     /**
@@ -135,12 +156,12 @@ class GraphRequest
      * @param string $returnClass The class name to use
      *
      * @return $this object
-     * @throws GraphClientException when $returnClass is not an existing class
+     * @throws \InvalidArgumentException when $returnClass is not an existing class
      */
     public function setReturnType(string $returnClass): self
     {
         if (!class_exists($returnClass) && !interface_exists($returnClass)) {
-            throw new GraphClientException("Return type specified does not match an existing class definition");
+            throw new \InvalidArgumentException("Return type specified does not match an existing class definition");
         }
         $this->returnType = $returnClass;
         $this->returnsStream = ($returnClass === StreamInterface::class);
@@ -153,12 +174,12 @@ class GraphRequest
      * @param array<string, string|string[]> $headers An array of custom headers
      *
      * @return GraphRequest object
-     * @throws GraphClientException if attempting to overwrite SdkVersion header
+     * @throws \InvalidArgumentException if attempting to overwrite SdkVersion header
      */
     public function addHeaders(array $headers): self
     {
         if (array_key_exists("SdkVersion", $headers)) {
-            throw new GraphClientException("Cannot overwrite SdkVersion header");
+            throw new \InvalidArgumentException("Cannot overwrite SdkVersion header");
         }
         // Recursive merge to support appending values to multi-value headers
         $this->headers = array_merge_recursive($this->headers, $headers);
@@ -213,7 +234,9 @@ class GraphRequest
      *
      * @param ClientInterface|null $client (optional) When null, uses $graphClient's http client
      * @return array|GraphResponse|StreamInterface|object Graph Response object or response body cast to $returnType
-     * @throws ClientExceptionInterface
+     * @throws ClientExceptionInterface if an error occurs while making the request
+     * @throws GraphClientException containing error payload if 4xx response is returned.
+     * @throws GraphServiceException containing error payload if 5xx response is returned.
      */
     public function execute(?ClientInterface $client = null)
     {
@@ -222,6 +245,7 @@ class GraphRequest
         }
 
         $result = $client->sendRequest($this->httpRequest);
+        $this->handleErrorResponse($result);
 
         // Check to see if returnType is a stream, if so return it immediately
         if($this->returnsStream) {
@@ -250,7 +274,10 @@ class GraphRequest
      *
      * @param HttpAsyncClient|null $client (optional) When null, uses $graphClient's http client
      * @return Promise Resolves to GraphResponse object|response body cast to $returnType. Fails throwing the exception
-     * @throws \Exception when promise fails
+     * @throws ClientExceptionInterface if there are any errors while making the HTTP request
+     * @throws GraphClientException containing error payload if 4xx is returned
+     * @throws GraphServiceException containing error payload if 5xx is returned
+     * @throws \Exception
      */
     public function executeAsync(?HttpAsyncClient $client = null): Promise
     {
@@ -261,6 +288,7 @@ class GraphRequest
         return $client->sendAsyncRequest($this->httpRequest)->then(
             // On success, return the result/response
             function ($result) {
+                $this->handleErrorResponse($result);
 
                 // Check to see if returnType is a stream, if so return it immediately
                 if($this->returnsStream) {
@@ -293,22 +321,23 @@ class GraphRequest
      *
      * @param string $path path to download the file contents to
      * @param ClientInterface|null $client (optional) When null, defaults to $graphClient's http client
-     * @throws ClientExceptionInterface|GraphClientException when unable to open $path for writing
+     * @throws \RuntimeException when unable to open $path for writing
+     * @throws ClientExceptionInterface if an error occurs while making the request
+     * @throws GraphClientException containing error payload if 4xx is returned
+     * @throws GraphServiceException containing error payload if 5xx is returned
      */
     public function download(string $path, ?ClientInterface $client = null): void
     {
         if (is_null($client)) {
             $client = $this->graphClient->getHttpClient();
         }
-        try {
-            $resource = Utils::tryFopen($path, 'w');
-            $stream = Utils::streamFor($resource);
-            $response = $client->sendRequest($this->httpRequest);
-            $stream->write($response->getBody()->getContents());
-            $stream->close();
-        } catch (\RuntimeException $ex) {
-            throw new GraphClientException(GraphConstants::INVALID_FILE, $ex->getCode(), $ex);
-        }
+
+        $resource = Utils::tryFopen($path, 'w');
+        $stream = Utils::streamFor($resource);
+        $response = $client->sendRequest($this->httpRequest);
+        $this->handleErrorResponse($response);
+        $stream->write($response->getBody()->getContents());
+        $stream->close();
     }
 
     /**
@@ -317,27 +346,26 @@ class GraphRequest
      * @param string $path path of file to be uploaded
      * @param ClientInterface|null $client (optional)
      * @return array|GraphResponse|StreamInterface|object Graph Response object or response body cast to $returnType
-     * @throws ClientExceptionInterface|GraphClientException if $path cannot be opened for reading
+     * @throws ClientExceptionInterface if an error occurs while making the request
+     * @throws  \RuntimeException if $path cannot be opened for reading
+     * @throws GraphClientException containing error payload if 4xx is returned
+     * @throws GraphServiceException containing error payload if 5xx is returned
      */
     public function upload(string $path, ?ClientInterface $client = null)
     {
         if (is_null($client)) {
             $client = $this->graphClient->getHttpClient();
         }
-        try {
-            $resource = Utils::tryFopen($path, 'r');
-            $stream = Utils::streamFor($resource);
-            $this->attachBody($stream);
-            return $this->execute($client);
-        } catch(\RuntimeException $e) {
-            throw new GraphClientException(GraphConstants::INVALID_FILE, $e->getCode(), $e->getPrevious());
-        }
+        $resource = Utils::tryFopen($path, 'r');
+        $stream = Utils::streamFor($resource);
+        $this->attachBody($stream);
+        return $this->execute($client);
     }
 
     /**
      * Sets default headers based on baseUrl being a Graph endpoint or not
      */
-    private function initHeaders(string $baseUrl): void
+    private function initHeaders(): void
     {
         $coreSdkVersion = "graph-php-core/".GraphConstants::SDK_VERSION;
         if ($this->graphClient->getApiVersion() === GraphConstants::BETA_API_VERSION) {
@@ -363,17 +391,62 @@ class GraphRequest
      *
      * @param string $baseUrl
      * @param string $endpoint
-     * @throws GraphClientException
+     * @throws \InvalidArgumentException
      */
     protected function initRequestUri(string $baseUrl, string $endpoint): void {
-        try {
-            $this->requestUri = GraphRequestUtil::getRequestUri($baseUrl, $endpoint, $this->graphClient->getApiVersion());
-        } catch (\InvalidArgumentException $ex) {
-            throw new GraphClientException($ex->getMessage(), 0, $ex);
-        }
+        $this->requestUri = GraphRequestUtil::getRequestUri($baseUrl, $endpoint, $this->graphClient->getApiVersion());
     }
 
+    /**
+     * Initialises a PSR-7 Http Request object
+     */
     protected function initPsr7HttpRequest(): void {
         $this->httpRequest = new Request($this->requestType, $this->requestUri, $this->headers, $this->requestBody);
+    }
+
+    /**
+     * Check if response status code is a client error
+     *
+     * @param int $httpStatusCode
+     * @return bool
+     */
+    private function is4xx(int $httpStatusCode): bool {
+        return ($httpStatusCode >= 400 && $httpStatusCode < 500);
+    }
+
+    /**
+     * Check if response status code is a server error
+     *
+     * @param int $httpStatusCode
+     * @return bool
+     */
+    private function is5xx(int $httpStatusCode): bool {
+        return ($httpStatusCode >= 500 && $httpStatusCode < 600);
+    }
+
+    /**
+     * Throws appropriate exception type
+     *
+     * @param Response $httpResponse
+     * @throws GraphServiceException for server errors
+     * @throws GraphClientException for client errors
+     */
+    private function handleErrorResponse(Response $httpResponse) {
+        if ($this->is5xx($httpResponse->getStatusCode())) {
+            throw new GraphServiceException(
+                $this,
+                $httpResponse->getStatusCode(),
+                json_decode($httpResponse->getBody(), true),
+                $httpResponse->getHeaders()
+            );
+        }
+        if ($this->is4xx($httpResponse->getStatusCode())) {
+            throw new GraphClientException(
+                $this,
+                $httpResponse->getStatusCode(),
+                json_decode($httpResponse->getBody(), true),
+                $httpResponse->getHeaders()
+            );
+        }
     }
 }

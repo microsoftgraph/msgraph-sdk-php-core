@@ -3,7 +3,7 @@ namespace Microsoft\Graph\Test\Http\Request;
 
 use Microsoft\Graph\Core\GraphConstants;
 use Microsoft\Graph\Exception\GraphClientException;
-use Microsoft\Graph\Exception\GraphException;
+use Microsoft\Graph\Exception\GraphServiceException;
 use Microsoft\Graph\Http\GraphCollectionRequest;
 use Microsoft\Graph\Http\GraphRequestUtil;
 use Microsoft\Graph\Task\PageIterator;
@@ -29,7 +29,7 @@ class GraphCollectionRequestTest extends BaseGraphRequestTest
     }
 
     public function testSetPageSizeExceedingMaxSizeThrowsException(): void {
-        $this->expectException(GraphClientException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->defaultCollectionRequest->setPageSize(GraphConstants::MAX_PAGE_SIZE + 1);
     }
 
@@ -61,16 +61,39 @@ class GraphCollectionRequestTest extends BaseGraphRequestTest
         $this->defaultCollectionRequest->getPage();
     }
 
+    public function testGetPageThrowsExceptionOn5xxResponse(): void {
+        $this->expectException(GraphServiceException::class);
+        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient, 500);
+        $this->defaultCollectionRequest->getPage();
+    }
+
+    public function testGetPageThrowsExceptionOn4xxResponse(): void {
+        $this->expectException(GraphClientException::class);
+        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient, 400);
+        $this->defaultCollectionRequest->getPage();
+    }
+
     public function testCount(): void {
         MockHttpClientResponseConfig::configureWithCollectionPayload($this->mockHttpClient);
         $count = $this->defaultCollectionRequest->count();
         $this->assertEquals(SampleGraphResponsePayload::COLLECTION_PAYLOAD["@odata.count"], $count);
     }
 
-    public function testCountThrowsErrorIfNoOdataCountFound(): void {
-        $this->expectException(GraphException::class);
+    public function testCountReturnsNullIfNoOdataCountFound(): void {
         MockHttpClientResponseConfig::configureWithEmptyPayload($this->mockHttpClient);
-        $count = $this->defaultCollectionRequest->count();
+        $this->assertNull($this->defaultCollectionRequest->count());
+    }
+
+    public function testCountThrowsExceptionOn5xxResponse(): void {
+        $this->expectException(GraphServiceException::class);
+        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient, 503);
+        $this->defaultCollectionRequest->count();
+    }
+
+    public function testCountThrowsExceptionOn4xxResponse(): void {
+        $this->expectException(GraphClientException::class);
+        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient, 404);
+        $this->defaultCollectionRequest->count();
     }
 
     public function testPageIteratorReturnsValidPageIterator() {
@@ -95,5 +118,17 @@ class GraphCollectionRequestTest extends BaseGraphRequestTest
         $promise = $pageIterator->iterate();
         $promise->wait();
         $this->assertTrue($numEntitiesProcessed >= sizeof(SampleGraphResponsePayload::COLLECTION_PAYLOAD["value"]));
+    }
+
+    public function testPageIteratorThrowsExceptionIfFirstPageRequestGets5xxResponse(): void {
+        $this->expectException(GraphServiceException::class);
+        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient, 500);
+        $this->defaultCollectionRequest->pageIterator(function () {});
+    }
+
+    public function testPageIteratorThrowsExceptionIfFirstPageRequestGets4xxResponse(): void {
+        $this->expectException(GraphClientException::class);
+        MockHttpClientResponseConfig::configureWithErrorPayload($this->mockHttpClient, 400);
+        $this->defaultCollectionRequest->pageIterator(function () {});
     }
 }

@@ -10,8 +10,6 @@ namespace Microsoft\Graph\Test\Task;
 
 
 use GuzzleHttp\Psr7\Utils;
-use Microsoft\Graph\Exception\GraphClientException;
-use Microsoft\Graph\Http\AbstractGraphClient;
 use Microsoft\Graph\Http\GraphCollectionRequest;
 use Microsoft\Graph\Http\GraphResponse;
 use Microsoft\Graph\Http\RequestOptions;
@@ -75,7 +73,7 @@ class PageIteratorTest extends BaseGraphRequestTest
     }
 
     public function testConstructorThrowsExceptionIfGraphResponseIsNotACollection() {
-        $this->expectException(GraphClientException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $pageIterator = new PageIterator(
             $this->mockGraphClient,
             $this->createCollectionResponse(SampleGraphResponsePayload::ENTITY_PAYLOAD),

@@ -11,6 +11,7 @@ namespace Microsoft\Graph\Task;
 use Http\Promise\FulfilledPromise;
 use Http\Promise\Promise;
 use Microsoft\Graph\Exception\GraphClientException;
+use Microsoft\Graph\Exception\GraphServiceException;
 use Microsoft\Graph\Http\AbstractGraphClient;
 use Microsoft\Graph\Http\GraphResponse;
 use Microsoft\Graph\Http\RequestOptions;
@@ -90,7 +91,7 @@ class PageIterator
      *                                 if empty, each entity will be JSON-decoded to an array and passed to $callback
      * @param RequestOptions|null $requestOptions (optional) custom headers/middleware to use for subsequent calls to $entityCollection's nextLink
      *
-     * @throws GraphClientException if GraphResponse does not contain a collection of values
+     * @throws \InvalidArgumentException if GraphResponse does not contain a collection of values
      */
     public function __construct(AbstractGraphClient $graphClient,
                                 GraphResponse $collectionResponse,
@@ -100,7 +101,7 @@ class PageIterator
 
         if (!array_key_exists("value", $collectionResponse->getBody())
             || !is_array($collectionResponse->getBody()["value"])) {
-            throw new GraphClientException("Collection response must contain a collection of values");
+            throw new \InvalidArgumentException("Collection response must contain a collection of values");
         }
 
         $this->graphClient = $graphClient;
@@ -117,7 +118,9 @@ class PageIterator
      *
      * @return Promise that resolves to true on completion and throws error on rejection
      *
-     * @throws \Exception if promise is rejected
+     * @throws ClientExceptionInterface if error occurs while making the request
+     * @throws GraphClientException containing error payload if 4xx is returned
+     * @throws GraphServiceException containing error payload if 5xx is returned
      */
     public function iterate(): Promise {
         $promise = new FulfilledPromise(false);
@@ -155,7 +158,9 @@ class PageIterator
      * Resume iteration after $callback returning false
      *
      * @return Promise
-     * @throws \Exception if promise is rejected
+     * @throws ClientExceptionInterface if error occurs while making the request
+     * @throws GraphClientException containing error payload if 4xx is returned
+     * @throws GraphServiceException containing error payload if 5xx is returned
      */
     public function resume(): Promise {
         return $this->iterate();
@@ -204,8 +209,9 @@ class PageIterator
     /**
      * Fetches the next page of results
      *
-     * @throws GraphClientException
-     * @throws ClientExceptionInterface
+     * @throws ClientExceptionInterface if error occurs while making the request
+     * @throws GraphClientException containing error payload if 4xx is returned
+     * @throws GraphServiceException containing error payload if 5xx is returned
      */
     private function getNextPage(): void {
         $nextLink = $this->getNextLink();
@@ -214,7 +220,7 @@ class PageIterator
             $request = $request->addHeaders($this->requestOptions->getHeaders());
         }
         $this->collectionResponse = $request->execute();
-        if (!$this->collectionResponse || empty($this->collectionResponse->getBody())) {
+        if (!$this->collectionResponse || empty($this->collectionResponse->getBody()) || !array_key_exists("value", $this->collectionResponse->getBody())) {
             $this->entityCollection = [];
             return;
         }
@@ -223,7 +229,6 @@ class PageIterator
                 $this->entityCollection = $this->collectionResponse->getBody()["value"];
                 return;
             }
-            throw new GraphClientException("No 'value' attribute found in payload after requesting ".$nextLink);
         }
         $this->entityCollection = $this->collectionResponse->getResponseAsObject($this->returnType);
     }
