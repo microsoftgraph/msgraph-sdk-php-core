@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-# Adds a tag to main after a PR is merged succesfully.
+# Adds a tag to main after a PR is merged successfully.
 
 name: "tag release"
 
@@ -9,7 +9,6 @@ on:
   push:
     branches:
       - main
-      - v2
 
 defaults:
   run:
@@ -23,7 +22,7 @@ jobs:
 
     - name: Get SDK version and set environment variable
       run: |
-        SDK_VERSION=$(grep 'SDK_VERSION' src/Core/GraphConstants.php |  grep -oE '[0-9]+\.[0-9]+\.([0-9]+|[0-9]+-[a-z]+)')
+        SDK_VERSION=$(grep 'SDK_VERSION' src/Core/GraphConstants.php | grep -oE '[0-9]+\.[0-9]+\.[0-9A-Za-z.\-]+')
         echo "SDK_VERSION=$SDK_VERSION" >> $GITHUB_ENV
 
     - name: Create and publish tag
