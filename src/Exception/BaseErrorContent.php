@@ -43,10 +43,10 @@ class BaseErrorContent
     /**
      * Returns value of $property in $propDict
      *
-     * @param $property
+     * @param string $property
      * @return mixed|null
      */
-    protected function getProperty($property) {
+    protected function getProperty(string $property) {
         if (array_key_exists($property, $this->propDict)) {
             return $this->propDict[$property];
         }

@@ -85,7 +85,7 @@ class GraphCollectionRequest extends GraphRequest
 	 * Gets the number of entries in the collection
 	 *
 	 * @return int|null the number of entries | null if @odata.count doesn't exist for that collection
-     * @throws ClientExceptionInterface if an errors occurs while making the request
+     * @throws ClientExceptionInterface if an error occurs while making the request
      * @throws GraphClientException containing error payload if 4xx response is returned.
      * @throws GraphServiceException containing error payload if 5xx response is returned.
      */
@@ -99,7 +99,7 @@ class GraphCollectionRequest extends GraphRequest
         $this->returnType = null;
         $result = $this->execute();
         $this->returnType = $this->originalReturnType;
-        return ($result->getCount()) ?: null;
+        return ($result->getCount()) ?: null; // @phpstan-ignore-line
     }
 
     /**

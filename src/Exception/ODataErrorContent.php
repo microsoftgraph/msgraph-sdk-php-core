@@ -79,7 +79,10 @@ class ODataErrorContent extends BaseErrorContent
         $errorString = ($this->getCode()) ? "Code: ".$this->getCode() : "";
         $errorString .= ($this->getMessage()) ? "\nMessage: ".$this->getMessage() : "";
         $errorString .= ($this->getTarget()) ? "\nTarget: ".$this->getTarget() : "";
-        $errorString .= ($this->getDetails()) ? "\nDetails: ".$this->getDetails() : "";
+        if ($this->getDetails()) {
+            $details = array_map(function ($detail) { return strval($detail); }, $this->getDetails());
+            $errorString .= implode(",", $details);
+        }
         $errorString .= ($this->getInnerError()) ? "\nInner Error: ".$this->getInnerError() : "";
         return $errorString;
     }
