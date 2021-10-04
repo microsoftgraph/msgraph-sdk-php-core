@@ -12,7 +12,6 @@ use GuzzleHttp\RequestOptions;
 use Http\Adapter\Guzzle7\Client as GuzzleAdapter;
 use Http\Promise\Promise;
 use Microsoft\Graph\Core\NationalCloud;
-use Microsoft\Graph\Exception\GraphClientException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
