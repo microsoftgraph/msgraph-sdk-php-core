@@ -220,16 +220,16 @@ class PageIterator
             $request = $request->addHeaders($this->requestOptions->getHeaders());
         }
         $this->collectionResponse = $request->execute();
-        if (!$this->collectionResponse || empty($this->collectionResponse->getBody()) || !array_key_exists("value", $this->collectionResponse->getBody())) {
+        if (!$this->collectionResponse || empty($this->collectionResponse->getBody()) || !array_key_exists("value", $this->collectionResponse->getBody())) { // @phpstan-ignore-line
             $this->entityCollection = [];
             return;
         }
         if (!$this->returnType) {
-            if (array_key_exists("value", $this->collectionResponse->getBody())) {
-                $this->entityCollection = $this->collectionResponse->getBody()["value"];
+            if (array_key_exists("value", $this->collectionResponse->getBody())) { // @phpstan-ignore-line
+                $this->entityCollection = $this->collectionResponse->getBody()["value"]; // @phpstan-ignore-line
                 return;
             }
         }
-        $this->entityCollection = $this->collectionResponse->getResponseAsObject($this->returnType);
+        $this->entityCollection = $this->collectionResponse->getResponseAsObject($this->returnType); // @phpstan-ignore-line
     }
 }
