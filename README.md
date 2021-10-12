@@ -15,7 +15,7 @@ To install the `microsoft-graph-core` library with Composer, either run `compose
 
 ### 1. Register your application
 
-Register your application to use the Microsoft Graph API by following the steps at [Register an an application with the Microsoft Identity platform](https://docs.microsoft.com/en-us/graph/auth-register-app-v2).
+Register your application to use the Microsoft Graph API by following the steps at [Register an an application with the Microsoft Identity platform](https://aka.ms/registerApplication).
 
 ### 2. Authenticate with the Microsoft Graph service
 
@@ -42,7 +42,7 @@ $accessToken = $token->access_token;
 You can create a Guzzle HTTP client object pre-configured for use with the Graph API using our `HttpClientFactory`. The `HttpClientFactory`
 sets some Guzzle config defaults such as connection and request timeouts, and the `base_uri` to your preferred [National Cloud endpoint](https://docs.microsoft.com/en-us/graph/deployments#microsoft-graph-and-graph-explorer-service-root-endpoints).
 
-In the near future, the `HttpClientFactory` will provide some default middleware to use with teh Graph API such as retry handlers.
+In the near future, the `HttpClientFactory` will provide some default middleware to use with the Graph API such as retry handlers.
 ```php
 use Microsoft\Graph\Http\HttpClientFactory;
 
@@ -82,14 +82,14 @@ class UsageExample
 }
 ```
 
-We provide models that match align with the Microsoft Graph API for easy serialization and deserialization.
+We provide Microsoft Graph models for easy serialization and deserialization.
 
 If you would like to leverage the models we provide, please take a look at the [Microsoft Graph PHP SDK](https://packagist.org/packages/microsoft/microsoft-graph) and for
 beta models - the [Microsoft Graph Beta PHP SDK](https://packagist.org/packages/microsoft/microsoft-graph-beta).
 
 ## Documentation and resources
 
-* [Microsoft Graph website](https://developer.microsoft.com/en-us/graph/)
+* [Microsoft Graph website](https://aka.ms/graph)
 
 ## Develop
 
