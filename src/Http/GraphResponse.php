@@ -111,7 +111,7 @@ class GraphResponse
     *
     * @return string|null The undecoded body
     */
-    public function getRawBody()
+    public function getRawBody() : ?string
     {
         return ($this->_body) ?: $this->_body->getContents();
     }
@@ -129,9 +129,9 @@ class GraphResponse
     /**
     * Get the headers of the response
     *
-    * @return array|null The response headers
+    * @return array<string, string[]> The response headers
     */
-    public function getHeaders()
+    public function getHeaders(): array
     {
         return $this->_headers;
     }

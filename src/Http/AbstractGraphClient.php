@@ -8,7 +8,6 @@
 namespace Microsoft\Graph\Http;
 
 use Microsoft\Graph\Core\NationalCloud;
-use Microsoft\Graph\Exception\GraphClientException;
 
 /**
  * Class BaseClient
