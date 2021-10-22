@@ -1,7 +1,7 @@
 {
 	"name": "microsoft/microsoft-graph-core",
 	"type": "library",
-	"description": "The Microsoft Graph SDK for PHP",
+	"description": "The Microsoft Graph Core SDK for PHP",
 	"homepage": "https://developer.microsoft.com/en-us/graph",
 	"license": "MIT",
 	"authors": [
