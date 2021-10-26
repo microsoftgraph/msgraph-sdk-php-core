@@ -178,7 +178,11 @@ class GraphRequest
      */
     public function addHeaders(array $headers): self
     {
-        if (array_key_exists("SdkVersion", $headers)) {
+        // prevent overwriting Sdk version
+        $sdkVersionHeader = "SdkVersion";
+        if (array_key_exists($sdkVersionHeader, $headers)
+            && array_key_exists($sdkVersionHeader, $this->headers)
+            && $headers[$sdkVersionHeader] !== $this->headers[$sdkVersionHeader]) {
             throw new \InvalidArgumentException("Cannot overwrite SdkVersion header");
         }
         // Recursive merge to support appending values to multi-value headers

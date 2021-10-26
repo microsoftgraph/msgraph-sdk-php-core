@@ -180,6 +180,11 @@ class GraphRequestTest extends BaseGraphRequestTest
         ]);
     }
 
+    public function testAddHeadersAllowsSameSdkVersionHeader(): void {
+        $instance = $this->defaultGraphRequest->addHeaders($this->defaultGraphRequest->getHeaders()["SdkVersion"]);
+        $this->assertInstanceOf(GraphRequest::class, $instance);
+    }
+
     public function testAddHeadersWithStringValueAppendsNewHeader(): void {
         $this->defaultGraphRequest->addHeaders(['Connection' => 'keep-alive']);
         $this->assertEquals(['keep-alive'], $this->defaultGraphRequest->getHeaders()['Connection']);
