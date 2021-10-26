@@ -242,7 +242,7 @@ class GraphCollectionRequest extends GraphRequest
         $returnType = $this->returnType;
         $this->returnType = null;
         $collectionResponse = $this->getPage();
-        $this->returnType = $returnType;
+        $this->returnType = ($returnType) ?: '';
 
         return new PageIterator(
             $this->graphClient,
