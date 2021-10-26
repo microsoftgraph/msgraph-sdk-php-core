@@ -106,7 +106,7 @@ class PageIterator
 
         $this->graphClient = $graphClient;
         $this->collectionResponse = $collectionResponse;
-        $this->entityCollection = $collectionResponse->getBody()["value"];
+        $this->entityCollection =  ($returnType) ? $collectionResponse->getResponseAsObject($returnType) : $collectionResponse->getBody()["value"];
         $this->callback = $callback;
         $this->returnType = $returnType;
         $this->requestOptions = $requestOptions;
