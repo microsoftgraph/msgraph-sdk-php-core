@@ -194,11 +194,11 @@ class GraphRequest
     /**
     * Get the request headers
     *
-    * @return array<string, string[]> of headers
+    * @return array<string, string|string[]> of headers
     */
     public function getHeaders(): array
     {
-        return $this->httpRequest->getHeaders();
+        return $this->headers;
     }
 
     /**

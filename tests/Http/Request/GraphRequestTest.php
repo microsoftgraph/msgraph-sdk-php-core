@@ -88,10 +88,9 @@ class GraphRequestTest extends BaseGraphRequestTest
 
     public function testConstructorSetsExpectedHeadersGivenValidGraphBaseUrl(): void {
         $expectedHeaders = [
-            'Content-Type' => ['application/json'],
-            'SdkVersion' => ["graph-php-core/".GraphConstants::SDK_VERSION.", graph-php/".$this->mockGraphClient->getSdkVersion()],
-            'Authorization' => ['Bearer ' . $this->mockGraphClient->getAccessToken()],
-            'Host' => [substr($this->mockGraphClient->getNationalCloud(), strlen("https://"))]
+            'Content-Type' => 'application/json',
+            'SdkVersion' => "graph-php-core/".GraphConstants::SDK_VERSION.", graph-php/".$this->mockGraphClient->getSdkVersion(),
+            'Authorization' => 'Bearer ' . $this->mockGraphClient->getAccessToken(),
         ];
         $request = new GraphRequest("GET", "/me", $this->mockGraphClient);
         $this->assertEquals($expectedHeaders, $request->getHeaders());
@@ -105,15 +104,14 @@ class GraphRequestTest extends BaseGraphRequestTest
         $graphClient->method('getApiVersion')->willReturn(GraphConstants::BETA_API_VERSION);
 
         $request = new GraphRequest("GET", "/me", $graphClient);
-        $expected = ["graph-php-core/".GraphConstants::SDK_VERSION.", graph-php-beta/".$graphClient->getSdkVersion()];
+        $expected = "graph-php-core/".GraphConstants::SDK_VERSION.", graph-php-beta/".$graphClient->getSdkVersion();
         $this->assertEquals($expected, $request->getHeaders()["SdkVersion"]);
     }
 
     public function testConstructorSetsExpectedHeadersGivenValidCustomBaseUrl(): void {
         $baseUrl = "https://www.outlook.com";
         $expectedHeaders = [
-            'Content-Type' => ['application/json'],
-            'Host' => [substr($baseUrl, strlen("https://"))]
+            'Content-Type' => 'application/json',
         ];
         $request = new GraphRequest("GET", "/me", $this->mockGraphClient, $baseUrl);
         $this->assertEquals($expectedHeaders, $request->getHeaders());
@@ -122,10 +120,9 @@ class GraphRequestTest extends BaseGraphRequestTest
     public function testConstructorSetsExpectedHeadersGivenGraphEndpointUrl(): void {
         $endpoint = "https://graph.microsoft.com/v1.0/me/users\$skip=10&\$top=5";
         $expectedHeaders = [
-            'Content-Type' => ['application/json'],
-            'SdkVersion' => ["graph-php-core/".GraphConstants::SDK_VERSION.", graph-php/".$this->mockGraphClient->getSdkVersion()],
-            'Authorization' => ['Bearer ' . $this->mockGraphClient->getAccessToken()],
-            'Host' => [substr($this->mockGraphClient->getNationalCloud(), strlen("https://"))]
+            'Content-Type' => 'application/json',
+            'SdkVersion' => "graph-php-core/".GraphConstants::SDK_VERSION.", graph-php/".$this->mockGraphClient->getSdkVersion(),
+            'Authorization' => 'Bearer ' . $this->mockGraphClient->getAccessToken(),
         ];
         $request = new GraphRequest("GET", $endpoint, $this->mockGraphClient);
         $this->assertEquals($expectedHeaders, $request->getHeaders());
@@ -135,8 +132,7 @@ class GraphRequestTest extends BaseGraphRequestTest
     public function testConstructorSetsExpectedHeadersGivenNonGraphEndpointUrl(): void {
         $endpoint = "https://www.outlook.com/messages";
         $expectedHeaders = [
-            'Content-Type' => ['application/json'],
-            'Host' => ["www.outlook.com"]
+            'Content-Type' => 'application/json',
         ];
         $request = new GraphRequest("GET", $endpoint, $this->mockGraphClient);
         $this->assertEquals($expectedHeaders, $request->getHeaders());
@@ -151,8 +147,7 @@ class GraphRequestTest extends BaseGraphRequestTest
         $this->defaultGraphRequest->setAccessToken($accessToken);
         $expectedHeaderValue = "Bearer ".$accessToken;
         $actualHeaders = $this->defaultGraphRequest->getHeaders()['Authorization'];
-        $this->assertEquals(1, sizeof($actualHeaders));
-        $this->assertEquals($expectedHeaderValue, $actualHeaders[0]);
+        $this->assertEquals($expectedHeaderValue, $actualHeaders);
     }
 
     public function testSetReturnTypeReturnsGraphRequestInstance(): void {
@@ -181,13 +176,15 @@ class GraphRequestTest extends BaseGraphRequestTest
     }
 
     public function testAddHeadersAllowsSameSdkVersionHeader(): void {
-        $instance = $this->defaultGraphRequest->addHeaders($this->defaultGraphRequest->getHeaders()["SdkVersion"]);
+        $instance = $this->defaultGraphRequest->addHeaders([
+            "SdkVersion" => $this->defaultGraphRequest->getHeaders()["SdkVersion"]
+        ]);
         $this->assertInstanceOf(GraphRequest::class, $instance);
     }
 
     public function testAddHeadersWithStringValueAppendsNewHeader(): void {
         $this->defaultGraphRequest->addHeaders(['Connection' => 'keep-alive']);
-        $this->assertEquals(['keep-alive'], $this->defaultGraphRequest->getHeaders()['Connection']);
+        $this->assertEquals('keep-alive', $this->defaultGraphRequest->getHeaders()['Connection']);
     }
 
     public function testAddHeadersWithArrayOfValuesAppendsNewHeaders(): void {
@@ -196,10 +193,10 @@ class GraphRequestTest extends BaseGraphRequestTest
         $this->assertEquals($values, $this->defaultGraphRequest->getHeaders()['Accept-Language']);
     }
 
-    public function testAddHeadersWithExistingHeaderNameDoesCaseInsensitiveAppend(): void {
-        $this->assertEquals(['application/json'], $this->defaultGraphRequest->getHeaders()['Content-Type']);
-        $this->defaultGraphRequest->addHeaders(['conTeNT-tyPe' => 'text']);
-        $this->assertEquals(['application/json', 'text'], $this->defaultGraphRequest->getHeaders()['Content-Type']);
+    public function testAddHeadersWithExistingHeaderNameDoesCaseSensitiveAppend(): void {
+        $this->assertEquals('application/json', $this->defaultGraphRequest->getHeaders()['Content-Type']);
+        $this->defaultGraphRequest->addHeaders(['Content-Type' => 'text']);
+        $this->assertEquals(["application/json", "text"], $this->defaultGraphRequest->getHeaders()['Content-Type']);
     }
 
     public function testAttachBodyReturnsGraphRequestInstance(): void {
