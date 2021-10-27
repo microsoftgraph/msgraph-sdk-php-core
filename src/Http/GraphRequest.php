@@ -37,6 +37,12 @@ class GraphRequest
     */
     private $headers;
     /**
+     * Default headers for a request
+     *
+     * @var array<string, string|string[]>
+     */
+    protected $defaultHeaders;
+    /**
     * The body of the request (optional)
     *
     * @var StreamInterface|string
@@ -378,16 +384,17 @@ class GraphRequest
             $serviceLibSdkVersion = "graph-php/".$this->graphClient->getSdkVersion();
         }
         if (NationalCloud::containsNationalCloudHost($this->requestUri)) {
-            $this->headers = [
+            $this->defaultHeaders = [
                 'Content-Type' => 'application/json',
                 'SdkVersion' => $coreSdkVersion.", ".$serviceLibSdkVersion,
                 'Authorization' => 'Bearer ' . $this->graphClient->getAccessToken()
             ];
         } else {
-            $this->headers = [
+            $this->defaultHeaders = [
                 'Content-Type' => 'application/json',
             ];
         }
+        $this->headers = $this->defaultHeaders;
     }
 
     /**
