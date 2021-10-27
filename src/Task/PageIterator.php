@@ -65,7 +65,7 @@ class PageIterator
      * Should match argument type expected by $callback
      * If empty, an array of each JSON-decoded entity is passed to $callback
      *
-     * @var string
+     * @var string|null
      */
     private $returnType;
     /**
@@ -87,7 +87,7 @@ class PageIterator
      * @param AbstractGraphClient $graphClient to be used to make the request
      * @param GraphResponse $collectionResponse initial collection of items to iterate through.
      * @param callable(): bool $callback function to execute against each element of $entityCollection. Must return boolean which determines if iteration should pause/proceed
-     * @param string $returnType (optional) class to cast subsequent responses to after requesting the next link. Should be compatible with $callback's expected argument type
+     * @param string|null $returnType (optional) class to cast subsequent responses to after requesting the next link. Should be compatible with $callback's expected argument type
      *                                 if empty, each entity will be JSON-decoded to an array and passed to $callback
      * @param RequestOptions|null $requestOptions (optional) custom headers/middleware to use for subsequent calls to $entityCollection's nextLink
      *
@@ -96,7 +96,7 @@ class PageIterator
     public function __construct(AbstractGraphClient $graphClient,
                                 GraphResponse $collectionResponse,
                                 callable $callback,
-                                string $returnType = '',
+                                ?string $returnType = '',
                                 ?RequestOptions $requestOptions = null) {
 
         if (!array_key_exists("value", $collectionResponse->getBody())
