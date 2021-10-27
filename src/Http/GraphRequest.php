@@ -386,7 +386,7 @@ class GraphRequest
         if (NationalCloud::containsNationalCloudHost($this->requestUri)) {
             $this->defaultHeaders = [
                 'Content-Type' => 'application/json',
-                'SdkVersion' => $coreSdkVersion.", ".$serviceLibSdkVersion,
+                'SdkVersion' => $serviceLibSdkVersion.", ".$coreSdkVersion,
                 'Authorization' => 'Bearer ' . $this->graphClient->getAccessToken()
             ];
         } else {

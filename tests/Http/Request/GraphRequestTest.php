@@ -89,7 +89,7 @@ class GraphRequestTest extends BaseGraphRequestTest
     public function testConstructorSetsExpectedHeadersGivenValidGraphBaseUrl(): void {
         $expectedHeaders = [
             'Content-Type' => 'application/json',
-            'SdkVersion' => "graph-php-core/".GraphConstants::SDK_VERSION.", graph-php/".$this->mockGraphClient->getSdkVersion(),
+            'SdkVersion' => "graph-php/".$this->mockGraphClient->getSdkVersion().", graph-php-core/".GraphConstants::SDK_VERSION,
             'Authorization' => 'Bearer ' . $this->mockGraphClient->getAccessToken(),
         ];
         $request = new GraphRequest("GET", "/me", $this->mockGraphClient);
@@ -104,7 +104,7 @@ class GraphRequestTest extends BaseGraphRequestTest
         $graphClient->method('getApiVersion')->willReturn(GraphConstants::BETA_API_VERSION);
 
         $request = new GraphRequest("GET", "/me", $graphClient);
-        $expected = "graph-php-core/".GraphConstants::SDK_VERSION.", graph-php-beta/".$graphClient->getSdkVersion();
+        $expected = "graph-php-beta/".$this->mockGraphClient->getSdkVersion().", graph-php-core/".GraphConstants::SDK_VERSION;
         $this->assertEquals($expected, $request->getHeaders()["SdkVersion"]);
     }
 
@@ -121,7 +121,7 @@ class GraphRequestTest extends BaseGraphRequestTest
         $endpoint = "https://graph.microsoft.com/v1.0/me/users\$skip=10&\$top=5";
         $expectedHeaders = [
             'Content-Type' => 'application/json',
-            'SdkVersion' => "graph-php-core/".GraphConstants::SDK_VERSION.", graph-php/".$this->mockGraphClient->getSdkVersion(),
+            'SdkVersion' => "graph-php/".$this->mockGraphClient->getSdkVersion().", graph-php-core/".GraphConstants::SDK_VERSION,
             'Authorization' => 'Bearer ' . $this->mockGraphClient->getAccessToken(),
         ];
         $request = new GraphRequest("GET", $endpoint, $this->mockGraphClient);
