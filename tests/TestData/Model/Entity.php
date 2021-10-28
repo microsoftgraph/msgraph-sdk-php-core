@@ -1,7 +1,7 @@
 <?php
 /**
 * Copyright (c) Microsoft Corporation.  All Rights Reserved.  Licensed under the MIT License.  See License in the project root for license information.
-* 
+*
 * Entity File
 * PHP version 7
 *
@@ -14,14 +14,12 @@
 namespace Microsoft\Graph\Test\TestData\Model;
 
 /**
-* Entity class
-*
-* @category  Model
-* @package   Microsoft.Graph
-* @copyright (c) Microsoft Corporation. All rights reserved.
-* @license   https://opensource.org/licenses/MIT MIT License
-* @link      https://graph.microsoft.com
-*/
+ * Class Entity
+ * @package Microsoft\Graph\Test\TestData\Model
+ * @copyright 2021 Microsoft Corporation
+ * @license https://opensource.org/licenses/MIT MIT License
+ * @link https://developer.microsoft.com/graph
+ */
 class Entity implements \JsonSerializable
 {
     /**
@@ -31,7 +29,7 @@ class Entity implements \JsonSerializable
     * @var array $_propDict
     */
     protected $_propDict;
-    
+
     /**
     * Construct a new Entity
     *
@@ -54,7 +52,7 @@ class Entity implements \JsonSerializable
     {
         return $this->_propDict;
     }
-    
+
     /**
     * Gets the id
     * Read-only.
@@ -69,7 +67,7 @@ class Entity implements \JsonSerializable
             return null;
         }
     }
-    
+
     /**
     * Sets the id
     * Read-only.
@@ -83,7 +81,7 @@ class Entity implements \JsonSerializable
         $this->_propDict["id"] = $val;
         return $this;
     }
-    
+
     /**
     * Gets the ODataType
     *
@@ -93,7 +91,7 @@ class Entity implements \JsonSerializable
     {
         return $this->_propDict["@odata.type"];
     }
-    
+
     /**
     * Sets the ODataType
     *
@@ -106,7 +104,7 @@ class Entity implements \JsonSerializable
         $this->_propDict["@odata.type"] = $val;
         return $this;
     }
-    
+
     /**
     * Serializes the object by property array
     * Manually serialize DateTime into RFC3339 format
@@ -118,7 +116,7 @@ class Entity implements \JsonSerializable
         $serializableProperties = $this->getProperties();
         foreach ($serializableProperties as $property => $val) {
             if (is_a($val, "\DateTime")) {
-                $serializableProperties[$property] = $val->format(\DateTime::RFC3339);
+                $serializableProperties[$property] = $val->format(\DateTimeInterface::RFC3339);
             } else if (is_a($val, "\Microsoft\Graph\Core\Enum")) {
                 $serializableProperties[$property] = $val->value();
             }
