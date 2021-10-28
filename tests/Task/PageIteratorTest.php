@@ -185,22 +185,6 @@ class PageIteratorTest extends BaseGraphRequestTest
         $this->assertEquals(1, $numEntitiesProcessed);
     }
 
-    public function testIteratorRequestOptionsCannotUpdateSdkVersion() {
-        $this->expectException(\InvalidArgumentException::class);
-        MockHttpClientResponseConfig::configureWithLastPageCollectionPayload($this->mockHttpClient);
-        $header = ["SdkVersion" => ["value"]];
-        $requestOptions = new RequestOptions($header);
-        $pageIterator = new PageIterator(
-            $this->mockGraphClient,
-            $this->defaultCollectionResponse,
-            $this->defaultCallback,
-            '',
-            $requestOptions
-        );
-        $promise = $pageIterator->iterate();
-        $promise->wait();
-    }
-
     public function testIteratorGetsNextPageUsingRequestOptions() {
         MockHttpClientResponseConfig::configureWithLastPageCollectionPayload($this->mockHttpClient);
         $header = ["SampleHeader" => ["value"]];

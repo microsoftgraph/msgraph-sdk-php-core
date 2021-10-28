@@ -167,14 +167,6 @@ class GraphRequestTest extends BaseGraphRequestTest
         $this->assertInstanceOf(GraphRequest::class, $this->defaultGraphRequest->addHeaders([]));
     }
 
-    public function testAddHeadersCannotAppendOrOverwriteSdkVersionValue(): void {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->defaultGraphRequest->addHeaders([
-            'SdkVersion' => 'Version1',
-            'Content-Encoding' => 'gzip'
-        ]);
-    }
-
     public function testAddHeadersAllowsSameSdkVersionHeader(): void {
         $instance = $this->defaultGraphRequest->addHeaders([
             "SdkVersion" => $this->defaultGraphRequest->getHeaders()["SdkVersion"]

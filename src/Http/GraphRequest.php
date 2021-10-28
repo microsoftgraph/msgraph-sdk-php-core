@@ -180,17 +180,9 @@ class GraphRequest
      * @param array<string, string|string[]> $headers An array of custom headers
      *
      * @return GraphRequest object
-     * @throws \InvalidArgumentException if attempting to overwrite SdkVersion header
      */
     public function addHeaders(array $headers): self
     {
-        // prevent overwriting Sdk version
-        $sdkVersionHeader = "SdkVersion";
-        if (array_key_exists($sdkVersionHeader, $headers)
-            && array_key_exists($sdkVersionHeader, $this->headers)
-            && $headers[$sdkVersionHeader] !== $this->headers[$sdkVersionHeader]) {
-            throw new \InvalidArgumentException("Cannot overwrite SdkVersion header");
-        }
         // Recursive merge to support appending values to multi-value headers
         $this->headers = array_merge_recursive($this->headers, $headers);
         $this->initPsr7HttpRequest();
