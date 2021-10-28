@@ -249,7 +249,7 @@ class GraphCollectionRequest extends GraphRequest
             $collectionResponse,
             $callback,
             $this->returnType,
-            new RequestOptions($this->getHeaders())
+            new RequestOptions(array_diff_key($this->getHeaders(), $this->defaultHeaders)) // remove default headers to prevent duplication in next page requests
         );
     }
 }

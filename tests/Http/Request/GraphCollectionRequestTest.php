@@ -107,6 +107,13 @@ class GraphCollectionRequestTest extends BaseGraphRequestTest
         $this->assertInstanceOf(PageIterator::class, $pageIterator);
     }
 
+    public function testPageIteratorReturnsValidPageIteratorWithNoReturnType() {
+        MockHttpClientResponseConfig::configureWithCollectionPayload($this->mockHttpClient);
+        $callback = function (){};
+        $pageIterator = (new GraphCollectionRequest("GET", "/users", $this->mockGraphClient))->pageIterator($callback);
+        $this->assertInstanceOf(PageIterator::class, $pageIterator);
+    }
+
     public function testPageIteratorInitialisesUsingFirstPageOfResults() {
         MockHttpClientResponseConfig::configureWithCollectionPayload($this->mockHttpClient);
         $numEntitiesProcessed = 0;

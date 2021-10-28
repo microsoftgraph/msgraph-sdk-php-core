@@ -11,6 +11,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 use Http\Adapter\Guzzle7\Client as GuzzleAdapter;
 use Http\Promise\Promise;
+use Microsoft\Graph\Core\GraphConstants;
 use Microsoft\Graph\Core\NationalCloud;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -142,7 +143,8 @@ final class HttpClientFactory
             RequestOptions::CONNECT_TIMEOUT => self::CONNECTION_TIMEOUT_SEC,
             RequestOptions::TIMEOUT => self::REQUEST_TIMEOUT_SEC,
             RequestOptions::HEADERS => [
-                "Content-Type" => "application/json"
+                "Content-Type" => "application/json",
+                "SdkVersion" => "graph-php-core/".GraphConstants::SDK_VERSION
             ],
             RequestOptions::HTTP_ERRORS => false,
             "base_uri" => self::$nationalCloud

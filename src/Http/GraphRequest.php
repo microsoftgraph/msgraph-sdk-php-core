@@ -37,6 +37,12 @@ class GraphRequest
     */
     private $headers;
     /**
+     * Default headers for a request
+     *
+     * @var array<string, string|string[]>
+     */
+    protected $defaultHeaders;
+    /**
     * The body of the request (optional)
     *
     * @var StreamInterface|string
@@ -174,13 +180,9 @@ class GraphRequest
      * @param array<string, string|string[]> $headers An array of custom headers
      *
      * @return GraphRequest object
-     * @throws \InvalidArgumentException if attempting to overwrite SdkVersion header
      */
     public function addHeaders(array $headers): self
     {
-        if (array_key_exists("SdkVersion", $headers)) {
-            throw new \InvalidArgumentException("Cannot overwrite SdkVersion header");
-        }
         // Recursive merge to support appending values to multi-value headers
         $this->headers = array_merge_recursive($this->headers, $headers);
         $this->initPsr7HttpRequest();
@@ -190,11 +192,11 @@ class GraphRequest
     /**
     * Get the request headers
     *
-    * @return array<string, string[]> of headers
+    * @return array<string, string|string[]> of headers
     */
     public function getHeaders(): array
     {
-        return $this->httpRequest->getHeaders();
+        return $this->headers;
     }
 
     /**
@@ -374,16 +376,17 @@ class GraphRequest
             $serviceLibSdkVersion = "graph-php/".$this->graphClient->getSdkVersion();
         }
         if (NationalCloud::containsNationalCloudHost($this->requestUri)) {
-            $this->headers = [
+            $this->defaultHeaders = [
                 'Content-Type' => 'application/json',
-                'SdkVersion' => $coreSdkVersion.", ".$serviceLibSdkVersion,
+                'SdkVersion' => $serviceLibSdkVersion.", ".$coreSdkVersion,
                 'Authorization' => 'Bearer ' . $this->graphClient->getAccessToken()
             ];
         } else {
-            $this->headers = [
+            $this->defaultHeaders = [
                 'Content-Type' => 'application/json',
             ];
         }
+        $this->headers = $this->defaultHeaders;
     }
 
     /**

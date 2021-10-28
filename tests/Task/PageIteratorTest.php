@@ -91,19 +91,38 @@ class PageIteratorTest extends BaseGraphRequestTest
         $this->assertEquals($numEntitiesInCollection, $this->callbackNumEntitiesProcessed);
     }
 
-    public function testIteratePausesIfCallbackReturnsFalse() {
-        MockHttpClientResponseConfig::configureWithLastPageCollectionPayload($this->mockHttpClient);
+    public function testIterateWithStronglyTypedCallbackArgument() {
+        $numEntitiesProcessed = 0;
+        $callback = function (User $user) use (&$numEntitiesProcessed) {
+            $numEntitiesProcessed ++;
+            return true;
+        };
+        $pageIterator = new PageIterator(
+            $this->mockGraphClient,
+            $this->createCollectionResponse(SampleGraphResponsePayload::LAST_PAGE_COLLECTION_PAYLOAD),
+            $callback,
+            User::class
+        );
+        $pageIterator->iterate()->wait();
+        $this->assertEquals(sizeof(SampleGraphResponsePayload::LAST_PAGE_COLLECTION_PAYLOAD), $numEntitiesProcessed);
+    }
 
-        // callback returns false if it encounters an entity of type User
+    public function testIteratePausesIfCallbackReturnsFalse() {
+        $numProcessed = 0;
+        $callback = function (User $user) use (&$numProcessed) {
+            $numProcessed ++;
+            return ($numProcessed % 2 != 0);
+        };
+
         $iterator = new PageIterator(
             $this->mockGraphClient,
             $this->defaultCollectionResponse,
-            $this->defaultCallback,
+            $callback,
             User::class
         );
         $promise = $iterator->iterate();
         $promise->wait();
-        $this->assertEquals(3, $this->callbackNumEntitiesProcessed);
+        $this->assertEquals(2, $numProcessed);
     }
 
     public function testIterateCastsNextPageResultsToExpectedReturnType() {
@@ -186,20 +205,26 @@ class PageIteratorTest extends BaseGraphRequestTest
     public function testResumeContinuesIteration() {
         MockHttpClientResponseConfig::configureWithLastPageCollectionPayload($this->mockHttpClient);
 
+        $numProcessed = 0;
+        $callback = function (User $user) use (&$numProcessed) {
+            $numProcessed ++;
+            return ($numProcessed % 2 != 0);
+        };
+
         $pageIterator = new PageIterator(
             $this->mockGraphClient,
             $this->defaultCollectionResponse,
-            $this->defaultCallback,
+            $callback,
             User::class
         );
 
         $promise = $pageIterator->iterate();
         $promise->wait();
         // iterator pauses
-        $this->assertEquals(3, $this->callbackNumEntitiesProcessed);
+        $this->assertEquals(2, $numProcessed);
         $promise = $pageIterator->resume();
         $expectedNumEntities = sizeof(SampleGraphResponsePayload::COLLECTION_PAYLOAD["value"]) + sizeof(SampleGraphResponsePayload::LAST_PAGE_COLLECTION_PAYLOAD["value"]);
-        $this->assertEquals($expectedNumEntities, $this->callbackNumEntitiesProcessed);
+        $this->assertEquals($expectedNumEntities, $numProcessed);
     }
 
     public function testGetNextLinkChangesAfterNextPageIsFetched() {
