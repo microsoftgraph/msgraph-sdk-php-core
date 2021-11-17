@@ -119,9 +119,6 @@ class Entity implements \JsonSerializable
     {
         $serializableProperties = $this->getProperties();
         foreach ($serializableProperties as $property => $val) {
-            if (get_class($val) === TimeOfDay::class){
-                continue;
-            }
             if (get_class($val) === \DateTime::class) {
                 $serializableProperties[$property] = $val->format(\DateTimeInterface::RFC3339);
             } else if (is_a($val, Enum::class)) {
