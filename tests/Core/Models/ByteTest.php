@@ -18,7 +18,7 @@ class ByteTest extends TestCase {
     }
 
     public function testCanCreateCorrectObject(): void{
-        self::assertInstanceOf(Byte::class, $this->byteObject);
+        $this->assertInstanceOf(Byte::class, $this->byteObject);
     }
 
     public function testWillThrowExceptionOnInvalidValue(): void {

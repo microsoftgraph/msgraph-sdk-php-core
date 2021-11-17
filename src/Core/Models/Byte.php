@@ -11,7 +11,7 @@ class Byte implements JsonSerializable
     /**
      * @var int|null $value
      */
-    private $value = null;
+    private $value;
 
     /**
      * @param int|null $value

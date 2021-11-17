@@ -2,9 +2,11 @@
 
 namespace Microsoft\Graph\Core\Models;
 
+use DateTime;
 use Exception;
+use JsonSerializable;
 
-class TimeOfDay extends \DateTime
+class TimeOfDay extends DateTime implements JsonSerializable
 {
     /**
      * @throws Exception
@@ -14,6 +16,6 @@ class TimeOfDay extends \DateTime
     }
 
     public function __toString(): string {
-        return $this->format('H-i-s');
+        return $this->format('H:i:s');
     }
 }
