@@ -3,72 +3,51 @@
 * Copyright (c) Microsoft Corporation.  All Rights Reserved.
 * Licensed under the MIT License.  See License in the project root
 * for license information.
-*
-* GraphRequest File
-* PHP version 7
-*
-* @category  Library
-* @package   Microsoft.Graph
-* @copyright 2016 Microsoft Corporation
-* @license   https://opensource.org/licenses/MIT MIT License
-* @version   GIT: 0.1.0
-* @link      https://graph.microsoft.io/
 */
 
 namespace Microsoft\Graph\Http;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\Utils;
+use Http\Client\HttpAsyncClient;
+use Http\Promise\Promise;
 use Microsoft\Graph\Core\GraphConstants;
-use Microsoft\Graph\Core\ExceptionWrapper;
-use Microsoft\Graph\Exception\GraphException;
+use Microsoft\Graph\Core\NationalCloud;
+use Microsoft\Graph\Exception\GraphClientException;
+use Microsoft\Graph\Exception\GraphServiceException;
+use Psr\Http\Client\ClientExceptionInterface;
+use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\UriInterface;
 
 /**
  * Class GraphRequest
- *
- * @category Library
- * @package  Microsoft.Graph
- * @license  https://opensource.org/licenses/MIT MIT License
- * @link     https://graph.microsoft.io/
+ * @package Microsoft\Graph\Http
+ * @copyright 2021 Microsoft Corporation
+ * @license https://opensource.org/licenses/MIT MIT License
+ * @link https://developer.microsoft.com/graph
  */
 class GraphRequest
 {
     /**
-    * A valid access token
-    *
-    * @var string
-    */
-    protected $accessToken;
-    /**
-    * The API version to use ("v1.0", "beta")
-    *
-    * @var string
-    */
-    protected $apiVersion;
-    /**
-    * The base url to call
-    *
-    * @var string
-    */
-    protected $baseUrl;
-    /**
-    * The endpoint to call
-    *
-    * @var string
-    */
-    protected $endpoint;
-    /**
     * An array of headers to send with the request
     *
-    * @var array(string => string)
+    * @var array<string, string|string[]>
     */
-    protected $headers;
+    private $headers;
+    /**
+     * Default headers for a request
+     *
+     * @var array<string, string|string[]>
+     */
+    protected $defaultHeaders;
     /**
     * The body of the request (optional)
     *
-    * @var string
+    * @var StreamInterface|string
     */
-    protected $requestBody;
+    private $requestBody = null;
     /**
     * The type of request to make ("GET", "POST", etc.)
     *
@@ -83,108 +62,83 @@ class GraphRequest
     */
     protected $returnsStream;
     /**
-    * The return type to cast the response as
+    * The object type to cast the response to
     *
-    * @var object|null
+    * @var string|null
     */
     protected $returnType;
     /**
-    * The timeout, in seconds
-    *
-    * @var int
-    */
-    protected $timeout;
-    /**
-    * The proxy port to use. Null to disable
-    *
-    * @var string
-    */
-    protected $proxyPort;
-    /**
-     * Whether SSL verification should be used for proxy requests
+     * The Graph client
      *
-     * @var bool
+     * @var AbstractGraphClient
      */
-    protected $proxyVerifySSL;
+    private $graphClient;
     /**
-    * Request options to decide if Guzzle Client should throw exceptions when http code is 4xx or 5xx
-    *
-    * @var bool
-    */
-    protected $http_errors;
+     * PSR-7 Request to be passed to HTTP client
+     *
+     * @var \GuzzleHttp\Psr7\Request
+     */
+    private $httpRequest;
+    /**
+     * Full Request URI (base URL + endpoint)
+     *
+     * @var UriInterface
+     */
+    private $requestUri;
 
     /**
-    * Constructs a new Graph Request object
-    *
-    * @param string $requestType  The HTTP method to use, e.g. "GET" or "POST"
-    * @param string $endpoint     The Graph endpoint to call
-    * @param string $accessToken  A valid access token to validate the Graph call
-    * @param string $baseUrl      The base URL to call
-    * @param string $apiVersion   The API version to use
-    * @param string $proxyPort    The url where to proxy through
-    * @param bool $proxyVerifySSL Whether the proxy requests should perform SSL verification
-    * @throws GraphException when no access token is provided
-    */
-    public function __construct($requestType, $endpoint, $accessToken, $baseUrl, $apiVersion, $proxyPort = null, $proxyVerifySSL = false)
+     * GraphRequest constructor.
+     * Sets $baseUrl by default to $graphClient's national cloud
+     * Resolves $baseUrl and $endpoint based on RFC 3986
+     *
+     * @param string $requestType The HTTP method to use e.g. "GET" or "POST"
+     * @param string $endpoint The url path on the host to be called-
+     * @param AbstractGraphClient $graphClient The Graph client to use
+     * @param string $baseUrl (optional) If empty, it's set to $client's national cloud
+     * @throws \InvalidArgumentException
+     */
+    public function __construct(string $requestType, string $endpoint, AbstractGraphClient $graphClient, string $baseUrl = "")
     {
-        $this->requestType = $requestType;
-        $this->endpoint = $endpoint;
-        $this->accessToken = $accessToken;
-        $this->http_errors = true;
-
-        if (!$this->accessToken) {
-            throw new GraphException(GraphConstants::NO_ACCESS_TOKEN);
+        if (!$requestType || !$endpoint || !$graphClient) {
+            throw new \InvalidArgumentException("Request type, endpoint and client cannot be null or empty");
         }
-
-        $this->baseUrl = $baseUrl;
-        $this->apiVersion = $apiVersion;
-        $this->timeout = 100;
-        $this->headers = $this->_getDefaultHeaders();
-        $this->proxyPort = $proxyPort;
-        $this->proxyVerifySSL = $proxyVerifySSL;
+        if (!$graphClient->getAccessToken()) {
+            throw new \InvalidArgumentException(GraphConstants::NO_ACCESS_TOKEN);
+        }
+        $this->requestType = $requestType;
+        $this->graphClient = $graphClient;
+        $baseUrl = ($baseUrl) ?: $graphClient->getNationalCloud();
+        $this->initRequestUri($baseUrl, $endpoint);
+        $this->initHeaders();
+        $this->initPsr7HttpRequest();
     }
 
     /**
-     * Gets the Base URL the request is made to
+     * Sets the request URI and updates the Psr7 request with the new URI
+     *
+     * @param UriInterface $uri
+     */
+    protected function setRequestUri(UriInterface $uri): void {
+        $this->requestUri = $uri;
+        $this->httpRequest = $this->httpRequest->withUri($uri);
+    }
+
+    /**
+     * Returns the final request URI after resolving $endpoint to base URL
+     *
+     * @return UriInterface
+     */
+    public function getRequestUri(): UriInterface {
+        return $this->requestUri;
+    }
+
+    /**
+     * Returns the HTTP method used
      *
      * @return string
      */
-    public function getBaseUrl()
-    {
-        return $this->baseUrl;
-    }
-
-    /**
-     * Gets the API version in use for the request
-     *
-     * @return string
-     */
-    public function getApiVersion()
-    {
-        return $this->apiVersion;
-    }
-
-    /**
-     * Gets whether request returns a stream or not
-     *
-     * @return boolean
-     */
-    public function getReturnsStream()
-    {
-        return $this->returnsStream;
-    }
-
-    /**
-    * Sets a http errors option
-    *
-    * @param bool $http_errors A bool option to the Graph call
-    *
-    * @return GraphRequest object
-    */
-    public function setHttpErrors($http_errors)
-    {
-        $this->http_errors = $http_errors;
-        return $this;
+    public function getRequestType(): string {
+        return $this->requestType;
     }
 
     /**
@@ -192,52 +146,55 @@ class GraphRequest
     *
     * @param string $accessToken A valid access token to validate the Graph call
     *
-    * @return GraphRequest object
+    * @return $this object
     */
-    public function setAccessToken($accessToken)
+    public function setAccessToken(string $accessToken): self
     {
-        $this->accessToken = $accessToken;
-        $this->headers['Authorization'] = 'Bearer ' . $this->accessToken;
+        unset($this->headers['Authorization']); // Prevents appending new token
+        $this->addHeaders(['Authorization' => 'Bearer '.$accessToken]);
         return $this;
     }
 
     /**
-    * Sets the return type of the response object
-    *
-    * @param mixed $returnClass The object class to use
-    *
-    * @return GraphRequest object
-    */
-    public function setReturnType($returnClass)
+     * Sets the return type of the response object
+     * Can be set to a model or \Psr\Http\Message\StreamInterface
+     *
+     * @param string $returnClass The class name to use
+     *
+     * @return $this object
+     * @throws \InvalidArgumentException when $returnClass is not an existing class
+     */
+    public function setReturnType(string $returnClass): self
     {
-        $this->returnType = $returnClass;
-        if ($this->returnType == "GuzzleHttp\Psr7\Stream") {
-            $this->returnsStream  = true;
-        } else {
-            $this->returnsStream = false;
+        if (!class_exists($returnClass) && !interface_exists($returnClass)) {
+            throw new \InvalidArgumentException("Return type specified does not match an existing class definition");
         }
+        $this->returnType = $returnClass;
+        $this->returnsStream = ($returnClass === StreamInterface::class);
         return $this;
     }
 
     /**
-    * Adds custom headers to the request
-    *
-    * @param array $headers An array of custom headers
-    *
-    * @return GraphRequest object
-    */
-    public function addHeaders($headers)
+     * Adds custom headers to the request
+     *
+     * @param array<string, string|string[]> $headers An array of custom headers
+     *
+     * @return GraphRequest object
+     */
+    public function addHeaders(array $headers): self
     {
-        $this->headers = array_merge($this->headers, $headers);
+        // Recursive merge to support appending values to multi-value headers
+        $this->headers = array_merge_recursive($this->headers, $headers);
+        $this->initPsr7HttpRequest();
         return $this;
     }
 
     /**
     * Get the request headers
     *
-    * @return array of headers
+    * @return array<string, string|string[]> of headers
     */
-    public function getHeaders()
+    public function getHeaders(): array
     {
         return $this->headers;
     }
@@ -246,27 +203,28 @@ class GraphRequest
     * Attach a body to the request. Will JSON encode
     * any Microsoft\Graph\Model objects as well as arrays
     *
-    * @param mixed $obj The object to include in the request
+    * @param string|StreamInterface|object|array $body The payload to include in the request
     *
-    * @return GraphRequest object
+    * @return $this object
     */
-    public function attachBody($obj)
+    public function attachBody($body): self
     {
         // Attach streams & JSON automatically
-        if (is_string($obj) || is_a($obj, 'GuzzleHttp\\Psr7\\Stream')) {
-            $this->requestBody = $obj;
+        if (is_string($body) || is_a($body, StreamInterface::class)) {
+            $this->requestBody = $body;
         }
         // By default, JSON-encode
         else {
-            $this->requestBody = json_encode($obj);
+            $this->requestBody = json_encode($body);
         }
+        $this->initPsr7HttpRequest();
         return $this;
     }
 
     /**
     * Get the body of the request
     *
-    * @return mixed request body of any type
+    * @return string|StreamInterface request body
     */
     public function getBody()
     {
@@ -274,56 +232,22 @@ class GraphRequest
     }
 
     /**
-    * Sets the timeout limit of the cURL request
-    *
-    * @param int $timeout The timeout in seconds
-    *
-    * @return GraphRequest object
-    */
-    public function setTimeout($timeout)
-    {
-        $this->timeout = $timeout;
-        return $this;
-    }
-
-    /**
-     * Gets the timeout value of the request
+     * Executes the HTTP request using $graphClient's http client or a PSR-18 compliant HTTP client
      *
-     * @return int
+     * @param ClientInterface|null $client (optional) When null, uses $graphClient's http client
+     * @return array|GraphResponse|StreamInterface|object Graph Response object or response body cast to $returnType
+     * @throws ClientExceptionInterface if an error occurs while making the request
+     * @throws GraphClientException containing error payload if 4xx response is returned.
+     * @throws GraphServiceException containing error payload if 5xx response is returned.
      */
-    public function getTimeout()
-    {
-        return $this->timeout;
-    }
-
-    /**
-    * Executes the HTTP request using Guzzle
-    *
-    * @param mixed $client The client to use in the request
-    *
-    * @throws \GuzzleHttp\Exception\GuzzleException
-    *
-    * @return mixed object or array of objects
-    *         of class $returnType
-    */
-    public function execute($client = null)
+    public function execute(?ClientInterface $client = null)
     {
         if (is_null($client)) {
-            $client = $this->createGuzzleClient();
+            $client = $this->graphClient->getHttpClient();
         }
 
-        try {
-            $result = $client->request(
-                $this->requestType,
-                $this->_getRequestUrl(),
-                [
-                    'body' => $this->requestBody,
-                    'timeout' => $this->timeout
-                ]
-            );
-        } catch(BadResponseException $e) {
-            throw ExceptionWrapper::wrapGuzzleBadResponseException($e);
-        }
+        $result = $client->sendRequest($this->httpRequest);
+        $this->handleErrorResponse($result);
 
         // Check to see if returnType is a stream, if so return it immediately
         if($this->returnsStream) {
@@ -348,29 +272,25 @@ class GraphRequest
     }
 
     /**
-    * Executes the HTTP request asynchronously using Guzzle
-    *
-    * @param mixed $client The client to use in the request
-    *
-    * @return mixed object or array of objects
-    *         of class $returnType
-    */
-    public function executeAsync($client = null)
+     * Executes the HTTP request asynchronously using $client
+     *
+     * @param HttpAsyncClient|null $client (optional) When null, uses $graphClient's http client
+     * @return Promise Resolves to GraphResponse object|response body cast to $returnType. Fails throwing the exception
+     * @throws ClientExceptionInterface if there are any errors while making the HTTP request
+     * @throws GraphClientException containing error payload if 4xx is returned
+     * @throws GraphServiceException containing error payload if 5xx is returned
+     * @throws \Exception
+     */
+    public function executeAsync(?HttpAsyncClient $client = null): Promise
     {
         if (is_null($client)) {
-            $client = $this->createGuzzleClient();
+            $client = $this->graphClient->getHttpClient();
         }
 
-        $promise = $client->requestAsync(
-            $this->requestType,
-            $this->_getRequestUrl(),
-            [
-                'body' => $this->requestBody,
-                'timeout' => $this->timeout
-            ]
-        )->then(
+        return $client->sendAsyncRequest($this->httpRequest)->then(
             // On success, return the result/response
             function ($result) {
+                $this->handleErrorResponse($result);
 
                 // Check to see if returnType is a stream, if so return it immediately
                 if($this->returnsStream) {
@@ -391,163 +311,145 @@ class GraphRequest
                 }
                 return $returnObject;
             },
-            // On fail, log the error and return null
+            // On fail, forward the exception
             function ($reason) {
-                if ($reason instanceof BadResponseException) {
-                    $reason = ExceptionWrapper::wrapGuzzleBadResponseException($reason);
-                }
-                trigger_error("Async call failed: " . $reason->getMessage());
-                return null;
+                throw $reason;
             }
         );
-        return $promise;
     }
 
     /**
-    * Download a file from OneDrive to a given location
-    *
-    * @param string $path   The path to download the file to
-    * @param mixed  $client The client to use in the request
-    *
-    * @throws GraphException if file path is invalid
-    * @throws \GuzzleHttp\Exception\GuzzleException
-    *
-    * @return null
-    */
-    public function download($path, $client = null)
+     * Download a file from OneDrive to a given location
+     *
+     * @param string $path path to download the file contents to
+     * @param ClientInterface|null $client (optional) When null, defaults to $graphClient's http client
+     * @throws \RuntimeException when unable to open $path for writing
+     * @throws ClientExceptionInterface if an error occurs while making the request
+     * @throws GraphClientException containing error payload if 4xx is returned
+     * @throws GraphServiceException containing error payload if 5xx is returned
+     */
+    public function download(string $path, ?ClientInterface $client = null): void
     {
         if (is_null($client)) {
-            $client = $this->createGuzzleClient();
+            $client = $this->graphClient->getHttpClient();
         }
-        try {
-            $file = fopen($path, 'w');
-            if (!$file) {
-                throw new GraphException(GraphConstants::INVALID_FILE);
-            }
 
-            $client->request(
-                $this->requestType,
-                $this->_getRequestUrl(),
-                [
-                    'body' => $this->requestBody,
-                    'sink' => $file,
-                    'timeout' => $this->timeout
-                ]
+        $resource = Utils::tryFopen($path, 'w');
+        $stream = Utils::streamFor($resource);
+        $response = $client->sendRequest($this->httpRequest);
+        $this->handleErrorResponse($response);
+        $stream->write($response->getBody()->getContents());
+        $stream->close();
+    }
+
+    /**
+     * Upload a file from $path to Graph API
+     *
+     * @param string $path path of file to be uploaded
+     * @param ClientInterface|null $client (optional)
+     * @return array|GraphResponse|StreamInterface|object Graph Response object or response body cast to $returnType
+     * @throws ClientExceptionInterface if an error occurs while making the request
+     * @throws  \RuntimeException if $path cannot be opened for reading
+     * @throws GraphClientException containing error payload if 4xx is returned
+     * @throws GraphServiceException containing error payload if 5xx is returned
+     */
+    public function upload(string $path, ?ClientInterface $client = null)
+    {
+        if (is_null($client)) {
+            $client = $this->graphClient->getHttpClient();
+        }
+        $resource = Utils::tryFopen($path, 'r');
+        $stream = Utils::streamFor($resource);
+        $this->attachBody($stream);
+        return $this->execute($client);
+    }
+
+    /**
+     * Sets default headers based on baseUrl being a Graph endpoint or not
+     */
+    private function initHeaders(): void
+    {
+        $coreSdkVersion = "graph-php-core/".GraphConstants::SDK_VERSION;
+        if ($this->graphClient->getApiVersion() === GraphConstants::BETA_API_VERSION) {
+            $serviceLibSdkVersion = "graph-php-beta/".$this->graphClient->getSdkVersion();
+        } else {
+            $serviceLibSdkVersion = "graph-php/".$this->graphClient->getSdkVersion();
+        }
+        if (NationalCloud::containsNationalCloudHost($this->requestUri)) {
+            $this->defaultHeaders = [
+                'Content-Type' => 'application/json',
+                'SdkVersion' => $serviceLibSdkVersion.", ".$coreSdkVersion,
+                'Authorization' => 'Bearer ' . $this->graphClient->getAccessToken()
+            ];
+        } else {
+            $this->defaultHeaders = [
+                'Content-Type' => 'application/json',
+            ];
+        }
+        $this->headers = $this->defaultHeaders;
+    }
+
+    /**
+     * Creates full request URI by resolving $baseUrl and $endpoint based on RFC 3986
+     *
+     * @param string $baseUrl
+     * @param string $endpoint
+     * @throws \InvalidArgumentException
+     */
+    protected function initRequestUri(string $baseUrl, string $endpoint): void {
+        $this->requestUri = GraphRequestUtil::getRequestUri($baseUrl, $endpoint, $this->graphClient->getApiVersion());
+    }
+
+    /**
+     * Initialises a PSR-7 Http Request object
+     */
+    protected function initPsr7HttpRequest(): void {
+        $this->httpRequest = new Request($this->requestType, $this->requestUri, $this->headers, $this->requestBody);
+    }
+
+    /**
+     * Check if response status code is a client error
+     *
+     * @param int $httpStatusCode
+     * @return bool
+     */
+    private function is4xx(int $httpStatusCode): bool {
+        return ($httpStatusCode >= 400 && $httpStatusCode < 500);
+    }
+
+    /**
+     * Check if response status code is a server error
+     *
+     * @param int $httpStatusCode
+     * @return bool
+     */
+    private function is5xx(int $httpStatusCode): bool {
+        return ($httpStatusCode >= 500 && $httpStatusCode < 600);
+    }
+
+    /**
+     * Throws appropriate exception type
+     *
+     * @param Response $httpResponse
+     * @throws GraphServiceException for server errors
+     * @throws GraphClientException for client errors
+     */
+    private function handleErrorResponse(Response $httpResponse) {
+        if ($this->is5xx($httpResponse->getStatusCode())) {
+            throw new GraphServiceException(
+                $this,
+                $httpResponse->getStatusCode(),
+                json_decode($httpResponse->getBody(), true),
+                $httpResponse->getHeaders()
             );
-            if(is_resource($file)){
-                fclose($file);
-            }
-
-        } catch(GraphException $e) {
-            throw new GraphException(GraphConstants::INVALID_FILE);
-        } catch(BadResponseException $e) {
-            throw ExceptionWrapper::wrapGuzzleBadResponseException($e);
         }
-
-        return null;
-    }
-
-    /**
-    * Upload a file to OneDrive from a given location
-    *
-    * @param string $path   The path of the file to upload
-    * @param mixed  $client The client to use in the request
-    *
-    * @throws GraphException if file is invalid
-    * @throws \GuzzleHttp\Exception\GuzzleException
-    *
-    * @return mixed DriveItem or array of DriveItems
-    */
-    public function upload($path, $client = null)
-    {
-        if (is_null($client)) {
-            $client = $this->createGuzzleClient();
+        if ($this->is4xx($httpResponse->getStatusCode())) {
+            throw new GraphClientException(
+                $this,
+                $httpResponse->getStatusCode(),
+                json_decode($httpResponse->getBody(), true),
+                $httpResponse->getHeaders()
+            );
         }
-        try {
-            if (file_exists($path) && is_readable($path)) {
-                $file = fopen($path, 'r');
-                $stream = \GuzzleHttp\Psr7\Utils::streamFor($file);
-                $this->requestBody = $stream;
-                return $this->execute($client);
-            } else {
-                throw new GraphException(GraphConstants::INVALID_FILE);
-            }
-        } catch(GraphException $e) {
-            throw new GraphException(GraphConstants::INVALID_FILE);
-        }
-    }
-
-    /**
-    * Get a list of headers for the request
-    *
-    * @return array The headers for the request
-    */
-    private function _getDefaultHeaders()
-    {
-        $headers = [
-            'Host' => $this->baseUrl,
-            'Content-Type' => 'application/json',
-            'SdkVersion' => 'Graph-php-' . GraphConstants::SDK_VERSION,
-            'Authorization' => 'Bearer ' . $this->accessToken
-        ];
-        return $headers;
-    }
-
-    /**
-    * Get the concatenated request URL
-    *
-    * @return string request URL
-    */
-    private function _getRequestUrl()
-    {
-        //Send request with opaque URL
-        if (stripos($this->endpoint, "http") === 0) {
-            return $this->endpoint;
-        }
-
-        return $this->apiVersion . $this->endpoint;
-    }
-
-    /**
-    * Checks whether the endpoint currently contains query
-    * parameters and returns the relevant concatenator for
-    * the new query string
-    *
-    * @return string "?" or "&"
-    */
-    protected function getConcatenator()
-    {
-        if (stripos($this->endpoint, "?") === false) {
-            return "?";
-        }
-        return "&";
-    }
-
-    /**
-    * Create a new Guzzle client
-    * To allow for user flexibility, the
-    * client is not reused. This allows the user
-    * to set and change headers on a per-request
-    * basis
-    *
-    * If a proxyPort was passed in the constructor, all
-    * requests will be forwared through this proxy.
-    *
-    * @return \GuzzleHttp\Client The new client
-    */
-    protected function createGuzzleClient()
-    {
-        $clientSettings = [
-            'base_uri' => $this->baseUrl,
-            'http_errors' => $this->http_errors,
-            'headers' => $this->headers
-        ];
-        if ($this->proxyPort !== null) {
-            $clientSettings['verify'] = $this->proxyVerifySSL;
-            $clientSettings['proxy'] = $this->proxyPort;
-        }
-        $client = new Client($clientSettings);
-
-        return $client;
     }
 }

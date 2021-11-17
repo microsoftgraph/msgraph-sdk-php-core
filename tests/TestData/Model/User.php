@@ -1,7 +1,7 @@
 <?php
 /**
 * Copyright (c) Microsoft Corporation.  All Rights Reserved.  Licensed under the MIT License.  See License in the project root for license information.
-* 
+*
 * User File
 * PHP version 7
 *
@@ -14,17 +14,15 @@
 namespace Microsoft\Graph\Test\TestData\Model;
 
 /**
-* User class
-*
-* @category  Model
-* @package   Microsoft.Graph
-* @copyright (c) Microsoft Corporation. All rights reserved.
-* @license   https://opensource.org/licenses/MIT MIT License
-* @link      https://graph.microsoft.com
-*/
+ * Class User
+ * @package Microsoft\Graph\Test\TestData\Model
+ * @copyright 2021 Microsoft Corporation
+ * @license https://opensource.org/licenses/MIT MIT License
+ * @link https://developer.microsoft.com/graph
+ */
 class User extends Entity
 {
-    
+
     /**
     * Gets the displayName
     * The name displayed in the address book for the user. This value is usually the combination of the user's first name, middle initial, and last name. This property is required when a user is created and it cannot be cleared during updates. Maximum length is 256 characters. Supports $filter (eq, ne, NOT , ge, le, in, startsWith), $orderBy, and $search.
@@ -39,7 +37,7 @@ class User extends Entity
             return null;
         }
     }
-    
+
     /**
     * Sets the displayName
     * The name displayed in the address book for the user. This value is usually the combination of the user's first name, middle initial, and last name. This property is required when a user is created and it cannot be cleared during updates. Maximum length is 256 characters. Supports $filter (eq, ne, NOT , ge, le, in, startsWith), $orderBy, and $search.
@@ -53,7 +51,7 @@ class User extends Entity
         $this->_propDict["displayName"] = $val;
         return $this;
     }
-    
+
     /**
     * Gets the givenName
     * The given name (first name) of the user. Maximum length is 64 characters. Supports $filter (eq, ne, NOT , ge, le, in, startsWith).
@@ -68,7 +66,7 @@ class User extends Entity
             return null;
         }
     }
-    
+
     /**
     * Sets the givenName
     * The given name (first name) of the user. Maximum length is 64 characters. Supports $filter (eq, ne, NOT , ge, le, in, startsWith).
@@ -82,5 +80,5 @@ class User extends Entity
         $this->_propDict["givenName"] = $val;
         return $this;
     }
-    
+
 }

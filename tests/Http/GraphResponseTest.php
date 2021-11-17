@@ -1,152 +1,99 @@
 <?php
-use PHPUnit\Framework\TestCase;
-use Microsoft\Graph\Graph;
+
+namespace Microsoft\Graph\Test\Http;
+
+use GuzzleHttp\Psr7\Utils;
 use Microsoft\Graph\Http\GraphRequest;
 use Microsoft\Graph\Http\GraphResponse;
-use Microsoft\Graph\Exception\GraphException;
-use Microsoft\Graph\Test\TestData\Model;
+use Microsoft\Graph\Test\TestData\Model\User;
+use PHPUnit\Framework\TestCase;
 
 class GraphResponseTest extends TestCase
 {
-    public $client;
-    public $request;
-    public $response;
+    private $defaultGraphResponse;
+    private $defaultStatusCode = 200;
+    private $defaultBody;
+    private $defaultHeaders;
+    private $mockGraphRequest;
+
     public $responseBody;
 
     public function setUp(): void
     {
-        $this->responseBody = array('body' => 'content', 'displayName' => 'Bob Barker');
-
-        $body = json_encode($this->responseBody);
-        $multiBody = json_encode(array('value' => array('1' => array('givenName' => 'Bob'), '2' => array('givenName' => 'Drew'))));
-        $valueBody = json_encode(array('value' => 'Bob Barker'));
-        $emptyMultiBody = json_encode(array('value' => array()));
-
-        $mock = new GuzzleHttp\Handler\MockHandler([
-            new GuzzleHttp\Psr7\Response(200, ['foo' => 'bar'], $body),
-            new GuzzleHttp\Psr7\Response(200, ['foo' => 'bar'], $body),
-            new GuzzleHttp\Psr7\Response(200, ['foo' => 'bar'], $multiBody),
-            new GuzzleHttp\Psr7\Response(200, ['foo' => 'bar'], $valueBody),
-            new GuzzleHttp\Psr7\Response(200, ['foo' => 'bar'], $emptyMultiBody),
-        ]);
-        $handler = GuzzleHttp\HandlerStack::create($mock);
-        $this->client = new GuzzleHttp\Client(['handler' => $handler]);
-
-        $this->request = new GraphRequest("GET", "/endpoint", "token", "baseUrl", "version");
-        $this->response = new GraphResponse($this->request, "{response}", "200", ["foo" => "bar"]);
-    }
-
-    public function testGetResponseAsObject()
-    {
-        $this->request->setReturnType(Model\User::class);
-        $response = $this->request->execute($this->client);
-
-        $this->assertInstanceOf(Model\User::class, $response);
-        $this->assertEquals($this->responseBody['displayName'], $response->getDisplayName());
+        $this->mockGraphRequest = $this->createMock(GraphRequest::class);
+        $this->defaultBody = SampleGraphResponsePayload::COLLECTION_PAYLOAD;
+        $this->defaultHeaders = ['foo' => 'bar'];
+        $this->defaultGraphResponse = new GraphResponse(
+            $this->mockGraphRequest,
+            Utils::streamFor(json_encode($this->defaultBody)),
+            $this->defaultStatusCode,
+            $this->defaultHeaders
+        );
     }
 
     public function testGetResponseHeaders()
     {
-        $response = $this->request->execute($this->client);
-        $headers = $response->getHeaders();
-
-        $this->assertEquals(["foo" => ["bar"]], $headers);
+        $this->assertEquals($this->defaultHeaders, $this->defaultGraphResponse->getHeaders());
     }
 
     public function testGetNextLink()
     {
-        $body = json_encode(array('@odata.nextLink' => 'https://url.com/resource?$top=4&skip=4'));
-        $response = new GraphResponse($this->request, $body);
-
-        $nextLink = $response->getNextLink();
-        $this->assertEquals('https://url.com/resource?$top=4&skip=4', $nextLink);
+        $nextLink = $this->defaultGraphResponse->getNextLink();
+        $this->assertEquals($this->defaultBody['@odata.nextLink'], $nextLink);
     }
 
-    public function testDecodeBody()
+    public function testGetBodyReturnsDecodedBody()
     {
-        //Temporarily make decodeBody() public
-        $reflectionMethod = new ReflectionMethod('Microsoft\Graph\Http\GraphResponse', '_decodeBody');
-        $reflectionMethod->setAccessible(true);
-
-        $response = new GraphResponse($this->request, json_encode($this->responseBody));
-        $decodedBody = $reflectionMethod->invokeArgs($response, array());
-
-        $this->assertEquals($this->responseBody, $decodedBody);
+        $this->assertEquals($this->defaultBody, $this->defaultGraphResponse->getBody());
     }
 
-    public function testDecodeEmptyBody()
+    public function testGetBodyWithNullBodyReturnsEmptyArray()
     {
-        //Temporarily make decodeBody() public
-        $reflectionMethod = new ReflectionMethod('Microsoft\Graph\Http\GraphResponse', '_decodeBody');
-        $reflectionMethod->setAccessible(true);
-
-        $response = new GraphResponse($this->request);
-        $decodedBody = $reflectionMethod->invokeArgs($response, array());
-
-        $this->assertEquals(array(), $decodedBody);
-    }
-
-    public function testGetHeaders()
-    {
-        $headers = $this->response->getHeaders();
-        $this->assertEquals(["foo" => "bar"], $headers);
-    }
-
-    public function testGetBody()
-    {
-        $response = $this->request->execute($this->client);
-        $this->assertInstanceOf(GraphResponse::class, $response);
-
-        $body = $response->getBody();
-        $this->assertEquals($this->responseBody, $body);
+        $response = new GraphResponse($this->mockGraphRequest, null);
+        $this->assertEquals(array(), $response->getBody());
     }
 
     public function testGetRawBody()
     {
-        $response = $this->request->execute($this->client);
-
-        $body = $response->getRawBody();
-        $this->assertEquals(json_encode($this->responseBody), $body);
+        $rawBody = $this->defaultGraphResponse->getRawBody();
+        $this->assertEquals(json_encode($this->defaultBody), $rawBody);
     }
 
     public function testGetStatus()
     {
-        $response = $this->request->execute($this->client);
-
-        $this->assertEquals('200', $response->getStatus());
+        $this->assertEquals($this->defaultStatusCode, $this->defaultGraphResponse->getStatus());
     }
 
     public function testGetMultipleObjects()
     {
-        $this->request->execute($this->client);
-        $this->request->execute($this->client);
-        $hosts = $this->request->setReturnType(Model\User::class)->execute($this->client);
-
-        $this->assertIsArray($hosts);
-        $this->assertContainsOnlyInstancesOf(Model\User::class, $hosts);
-        $this->assertSame(array_values($hosts), $hosts);
-        $this->assertEquals(2, count($hosts));
-        $this->assertEquals("Bob", $hosts[0]->getGivenName());
+        $obj = $this->defaultGraphResponse->getResponseAsObject(User::class);
+        $this->assertIsArray($obj);
+        $this->assertContainsOnlyInstancesOf(User::class, $obj);
+        $this->assertSameSize($this->defaultBody['value'], $obj);
+        $this->assertEquals(1, $obj[0]->getId());
     }
 
     public function testGetValueObject()
     {
-        $this->request->execute($this->client);
-        $this->request->execute($this->client);
-        $this->request->execute($this->client);
-        $response = $this->request->setReturnType(Model\User::class)->execute($this->client);
+        $response = new GraphResponse(
+            $this->mockGraphRequest,
+            Utils::streamFor(json_encode(SampleGraphResponsePayload::ENTITY_PAYLOAD)),
+            $this->defaultStatusCode,
+            $this->defaultHeaders
+        );
 
-        $this->assertInstanceOf(Model\User::class, $response);
+        $obj = $response->getResponseAsObject(User::class);
+        $this->assertInstanceOf(User::class, $obj);
     }
 
     public function testGetZeroMultipleObjects()
     {
-        $this->request->execute($this->client);
-        $this->request->execute($this->client);
-        $this->request->execute($this->client);
-        $this->request->execute($this->client);
-        $response = $this->request->setReturnType(Model\User::class)->execute($this->client);
+        $response = new GraphResponse(
+            $this->mockGraphRequest,
+            Utils::streamFor(json_encode(['value' => []])),
+        );
 
-        $this->assertSame(array(), $response);
+        $obj = $response->getResponseAsObject(User::class);
+        $this->assertSame(array(), $obj);
     }
 }
