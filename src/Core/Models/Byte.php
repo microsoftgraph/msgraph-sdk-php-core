@@ -4,7 +4,6 @@ namespace Microsoft\Graph\Core\Models;
 
 use InvalidArgumentException;
 use JsonSerializable;
-use ValueError;
 
 class Byte implements JsonSerializable
 {

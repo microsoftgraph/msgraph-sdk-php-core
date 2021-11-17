@@ -4,21 +4,22 @@ namespace Microsoft\Graph\Test\Core\Models;
 
 use InvalidArgumentException;
 use Microsoft\Graph\Core\Models\Byte;
+use Microsoft\Graph\Test\TestData\Model\Entity;
 use PHPUnit\Framework\TestCase;
 
 class ByteTest extends TestCase {
 
     /**
-     * @var Byte|null
+     * @var Entity|null
      */
     private $byteObject;
 
     protected function setUp(): void {
-        $this->byteObject = new Byte(12);
+        $this->byteObject = new Entity(['size' => new Byte(200)]);
     }
 
     public function testCanCreateCorrectObject(): void{
-        $this->assertInstanceOf(Byte::class, $this->byteObject);
+        $this->assertInstanceOf(Byte::class, $this->byteObject->getProperties()['size']);
     }
 
     public function testWillThrowExceptionOnInvalidValue(): void {
@@ -27,6 +28,13 @@ class ByteTest extends TestCase {
         $this->assertNull($invalid->getValue());
     }
 
+    /**
+     * @throws \JsonException
+     */
+    public function testSerialization(): void {
+        $serialized = json_decode(json_encode($this->byteObject, JSON_THROW_ON_ERROR), true,512, JSON_THROW_ON_ERROR);
+        $this->assertEquals(200, $serialized['size']);
+    }
     protected function tearDown(): void {
         parent::tearDown();
         $this->byteObject = null;
