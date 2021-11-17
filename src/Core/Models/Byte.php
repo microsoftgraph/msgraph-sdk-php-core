@@ -2,6 +2,7 @@
 
 namespace Microsoft\Graph\Core\Models;
 
+use InvalidArgumentException;
 use JsonSerializable;
 use ValueError;
 
@@ -21,7 +22,7 @@ class Byte implements JsonSerializable
         }
         $this->value = $value;
         if($this->value < 0 || $this->value > 255) {
-            throw new ValueError("Byte should be a value between 1-255 inclusive {$value} given");
+            throw new InvalidArgumentException("Byte should be a value between 1-255 inclusive {$value} given");
         }
     }
 
