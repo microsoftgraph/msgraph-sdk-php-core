@@ -2,10 +2,9 @@
 
 namespace Microsoft\Graph\Test\Core\Models;
 
-use _PHPStan_68495e8a9\Nette\Neon\Exception;
-use Cassandra\Value;
 use Microsoft\Graph\Core\Models\Byte;
 use PHPUnit\Framework\TestCase;
+use ValueError;
 
 class ByteTest extends TestCase {
 
@@ -23,7 +22,7 @@ class ByteTest extends TestCase {
     }
 
     public function testWillThrowExceptionOnInvalidValue(): void {
-        $this->expectException(\ValueError::class);
+        $this->expectException(ValueError::class);
         $invalid = new Byte(-12929);
         $this->assertNull($invalid->getValue());
     }
