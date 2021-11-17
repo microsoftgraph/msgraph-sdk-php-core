@@ -2,9 +2,9 @@
 
 namespace Microsoft\Graph\Test\Core\Models;
 
+use InvalidArgumentException;
 use Microsoft\Graph\Core\Models\Byte;
 use PHPUnit\Framework\TestCase;
-use ValueError;
 
 class ByteTest extends TestCase {
 
@@ -22,7 +22,7 @@ class ByteTest extends TestCase {
     }
 
     public function testWillThrowExceptionOnInvalidValue(): void {
-        $this->expectException(ValueError::class);
+        $this->expectException(InvalidArgumentException::class);
         $invalid = new Byte(-12929);
         $this->assertNull($invalid->getValue());
     }
