@@ -27,4 +27,9 @@ class Event extends Entity {
         }
         return $this->_propDict['eventDate'];
     }
+
+    public function setEventDate(Date $date): void
+    {
+        $this->_propDict['eventDate'] = $date;
+    }
 }

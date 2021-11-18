@@ -30,4 +30,24 @@ class DateTest extends TestCase {
         $encoded = json_decode(json_encode($this->event, JSON_THROW_ON_ERROR), true, 512, JSON_THROW_ON_ERROR);
         $this->assertEquals('2021-11-17', $encoded['eventDate']);
     }
+
+    /**
+     * @throws \Exception
+     */
+    public function testCanCreateFromDateTimeObject(): void {
+        $eventCopy = $this->event;
+        $eventCopy->setEventDate(Date::createFromDateTime(new DateTime('2021-11-18 12:30:24.000000')));
+        $decoded = json_decode(json_encode($eventCopy, JSON_THROW_ON_ERROR), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertEquals('2021-11-18', $decoded['eventDate']);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testCanCreateFromYearMonthDay(): void {
+        $eventCopy = $this->event;
+        $this->event->setEventDate(Date::createFrom(2020, 12, 31));
+        $decoded = json_decode(json_encode($eventCopy, JSON_THROW_ON_ERROR), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertEquals('2020-12-31', $decoded['eventDate']);
+    }
 }
