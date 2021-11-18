@@ -32,4 +32,8 @@ class Event extends Entity {
     {
         $this->_propDict['eventDate'] = $date;
     }
+
+    public function setStartTime(TimeOfDay $timeOfDay): void {
+        $this->_propDict['startTime'] = $timeOfDay;
+    }
 }

@@ -44,4 +44,8 @@ class ByteTest extends TestCase {
         parent::tearDown();
         $this->byteObject = null;
     }
+
+    public function testCanGetByteValue(): void {
+        $this->assertEquals(200, $this->byteObject->getProperties()['size']->getValue());
+    }
 }

@@ -19,7 +19,7 @@ class Byte implements JsonSerializable
      * The byte value
      * @var int|null $value
      */
-    private $value = null;
+    private $value;
 
     /**
      * @param int $value
@@ -36,12 +36,12 @@ class Byte implements JsonSerializable
      * @return int
      */
     public function jsonSerialize(): int {
-        return $this->value;
+        return (int)$this->__toString();
     }
 
     public function __toString(): string
     {
-       return (string)$this->jsonSerialize();
+       return (string)$this->value;
     }
 
     /**
