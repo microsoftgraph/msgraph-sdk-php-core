@@ -10,23 +10,25 @@ namespace Microsoft\Graph\Core\Models;
 use InvalidArgumentException;
 use JsonSerializable;
 
+/**
+ * This class is a wrapper around unsigned int values upto 255.
+ */
 class Byte implements JsonSerializable
 {
     /**
+     * The byte value
      * @var int|null $value
      */
-    private $value;
+    private $value = null;
 
     /**
-     * @param int|null $value
+     * @param int $value
      */
-    public function __construct(?int $value) {
-        if (is_null($value)) {
-            return;
-        }
-        $this->value = $value;
-        if($this->value < 0 || $this->value > 255) {
+    public function __construct(int $value) {
+        if($value < 0 || $value > 255) {
             throw new InvalidArgumentException("Byte should be a value between 0-255 inclusive {$value} given");
+        } else {
+            $this->value = $value;
         }
     }
 
@@ -43,6 +45,7 @@ class Byte implements JsonSerializable
     }
 
     /**
+     * Get the value of the Byte
      * @return int|null
      */
     public function getValue(): ?int{

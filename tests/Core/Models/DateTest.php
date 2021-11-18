@@ -8,6 +8,7 @@
 namespace Microsoft\Graph\Test\Core\Models;
 
 use DateTime;
+use Exception;
 use JsonException;
 use Microsoft\Graph\Core\Models\Date;
 use Microsoft\Graph\Core\Models\TimeOfDay;
@@ -32,7 +33,7 @@ class DateTest extends TestCase {
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function testCanCreateFromDateTimeObject(): void {
         $eventCopy = $this->event;
@@ -42,7 +43,7 @@ class DateTest extends TestCase {
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function testCanCreateFromYearMonthDay(): void {
         $eventCopy = $this->event;

@@ -11,6 +11,9 @@ use DateTime;
 use Exception;
 use JsonSerializable;
 
+/**
+ * This object represents time in hours minutes and seconds
+ */
 class TimeOfDay implements JsonSerializable
 {
 
@@ -58,6 +61,11 @@ class TimeOfDay implements JsonSerializable
         return $this->value;
     }
 
+
+    /**
+     * Serialize for json serialization
+     * @return string
+     */
     public function jsonSerialize(): string {
         return $this->__toString();
     }
