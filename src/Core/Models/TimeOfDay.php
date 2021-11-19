@@ -24,14 +24,18 @@ class TimeOfDay implements JsonSerializable
     private $value;
 
     /**
+     * @param string $timeString The time value in string format HH:MM:SS
+     * H - Hour
+     * M - Minutes
+     * S - Seconds
      * @throws Exception
      */
-    public function __construct(string $dateString) {
-        $this->value = (new DateTime($dateString))->format('H:i:s');
+    public function __construct(string $timeString) {
+        $this->value = (new DateTime($timeString))->format('H:i:s');
     }
 
     /**
-     * Creates a date object from a DateTime object
+     * Creates a TimeOfDay object from a DateTime object
      * @param DateTime $dateTime
      * @return TimeOfDay
      * @throws Exception
@@ -41,7 +45,7 @@ class TimeOfDay implements JsonSerializable
     }
 
     /**
-     * Creates a new Date object from $year,$month and $day
+     * Creates a new TimeOfDay object from $hour,$minute and $seconds
      * @param int $hour
      * @param int $minutes
      * @param int $seconds

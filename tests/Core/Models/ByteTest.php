@@ -29,8 +29,7 @@ class ByteTest extends TestCase {
 
     public function testWillThrowExceptionOnInvalidValue(): void {
         $this->expectException(InvalidArgumentException::class);
-        $invalid = new Byte(-12929);
-        $this->assertNull($invalid->getValue());
+        new Byte(-12929);
     }
 
     /**
@@ -43,9 +42,5 @@ class ByteTest extends TestCase {
     protected function tearDown(): void {
         parent::tearDown();
         $this->byteObject = null;
-    }
-
-    public function testCanGetByteValue(): void {
-        $this->assertEquals(200, $this->byteObject->getProperties()['size']->getValue());
     }
 }

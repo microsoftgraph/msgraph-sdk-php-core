@@ -17,38 +17,29 @@ class Byte implements JsonSerializable
 {
     /**
      * The byte value
-     * @var int|null $value
+     * @var int $value
      */
-    private $value;
+    private $value = 0;
 
     /**
-     * @param int $value
+     * @param int $value The byte value
      */
     public function __construct(int $value) {
         if($value < 0 || $value > 255) {
             throw new InvalidArgumentException("Byte should be a value between 0-255 inclusive {$value} given");
-        } else {
-            $this->value = $value;
         }
+        $this->value = $value;
     }
 
     /**
      * @return int
      */
     public function jsonSerialize(): int {
-        return (int)$this->__toString();
+        return $this->value;
     }
 
     public function __toString(): string
     {
        return (string)$this->value;
-    }
-
-    /**
-     * Get the value of the Byte
-     * @return int|null
-     */
-    public function getValue(): ?int{
-        return $this->value;
     }
 }

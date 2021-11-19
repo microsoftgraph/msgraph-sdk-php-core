@@ -17,6 +17,10 @@ class Date implements \JsonSerializable {
     private $value;
 
     /**
+     * @param string $dateString The date value in string format YYYY-MM-DD.
+     * Y - Year
+     * M - Month
+     * D - Day
      * @throws Exception
      */
     public function __construct(string $dateString) {
