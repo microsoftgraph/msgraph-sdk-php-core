@@ -13,6 +13,10 @@
 */
 namespace Microsoft\Graph\Test\TestData\Model;
 
+use Microsoft\Graph\Core\Models\Date;
+use Microsoft\Graph\Core\Models\TimeOfDay;
+use Microsoft\Graph\Core\Enum;
+
 /**
  * Class Entity
  * @package Microsoft\Graph\Test\TestData\Model
@@ -115,9 +119,9 @@ class Entity implements \JsonSerializable
     {
         $serializableProperties = $this->getProperties();
         foreach ($serializableProperties as $property => $val) {
-            if (is_a($val, "\DateTime")) {
+            if (get_class((object)$val) === \DateTime::class) {
                 $serializableProperties[$property] = $val->format(\DateTimeInterface::RFC3339);
-            } else if (is_a($val, "\Microsoft\Graph\Core\Enum")) {
+            } else if (is_a($val, Enum::class)) {
                 $serializableProperties[$property] = $val->value();
             }
         }
