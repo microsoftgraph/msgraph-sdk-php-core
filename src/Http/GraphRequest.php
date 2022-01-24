@@ -99,8 +99,8 @@ class GraphRequest
      */
     public function __construct(string $requestType, string $endpoint, AbstractGraphClient $graphClient, string $baseUrl = "")
     {
-        if (!$requestType || !$endpoint || !$graphClient) {
-            throw new \InvalidArgumentException("Request type, endpoint and client cannot be null or empty");
+        if (!$requestType || !$endpoint) {
+            throw new \InvalidArgumentException("Request type and endpoint cannot be null or empty");
         }
         if (!$graphClient->getAccessToken()) {
             throw new \InvalidArgumentException(GraphConstants::NO_ACCESS_TOKEN);
