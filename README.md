@@ -7,7 +7,7 @@ To install the `microsoft-graph-core` library with Composer, either run `compose
 ```
 {
     "require": {
-        "microsoft/microsoft-graph-core": "^2.0.0-RC2"
+        "microsoft/microsoft-graph-core": "^2.0.0-RC3"
     }
 }
 ```
