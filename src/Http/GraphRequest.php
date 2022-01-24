@@ -438,7 +438,7 @@ class GraphRequest
             throw new GraphServiceException(
                 $this,
                 $httpResponse->getStatusCode(),
-                json_decode($httpResponse->getBody(), true),
+                $httpResponse->getBody(),
                 $httpResponse->getHeaders()
             );
         }
@@ -446,7 +446,7 @@ class GraphRequest
             throw new GraphClientException(
                 $this,
                 $httpResponse->getStatusCode(),
-                json_decode($httpResponse->getBody(), true),
+                $httpResponse->getBody(),
                 $httpResponse->getHeaders()
             );
         }

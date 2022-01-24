@@ -9,6 +9,7 @@
 namespace Microsoft\Graph\Exception;
 
 use Microsoft\Graph\Http\GraphRequest;
+use Psr\Http\Message\StreamInterface;
 
 /**
  * Class GraphServiceException
@@ -35,11 +36,17 @@ class GraphResponseException extends \Exception
      */
     private $responseStatusCode;
     /**
-     * JSON-decoded response body
+     * Raw response body
+     *
+     * @var StreamInterface
+     */
+    private $responseStream;
+    /**
+     * JSON_decoded response body
      *
      * @var array
      */
-    private $responseBody;
+    private $jsonBody = [];
     /**
      * The request that triggered the error response
      *
@@ -52,20 +59,20 @@ class GraphResponseException extends \Exception
      * GraphServiceException constructor.
      * @param GraphRequest $graphRequest
      * @param int $responseStatusCode
-     * @param array $responseBody
+     * @param StreamInterface $responseStream
      * @param array $responseHeaders
      */
     public function __construct(
-        GraphRequest $graphRequest,
-        int $responseStatusCode,
-        array $responseBody,
-        array $responseHeaders
+        GraphRequest    $graphRequest,
+        int             $responseStatusCode,
+        StreamInterface $responseStream,
+        array           $responseHeaders
     ) {
         $this->graphRequest = $graphRequest;
         $this->responseStatusCode = $responseStatusCode;
-        $this->responseBody = $responseBody;
+        $this->responseStream = $responseStream;
         $this->responseHeaders = $responseHeaders;
-        $message = "'".$graphRequest->getRequestType()."' request to ".$graphRequest->getRequestUri()." returned ".$responseStatusCode."\n".json_encode($responseBody);
+        $message = "'".$graphRequest->getRequestType()."' request to ".$graphRequest->getRequestUri()." returned ".$responseStatusCode;
         parent::__construct($message, $responseStatusCode);
     }
 
@@ -88,12 +95,36 @@ class GraphResponseException extends \Exception
     }
 
     /**
-     * Get JSON-decoded response payload from the Graph
+     * Returns the raw response stream
      *
-     * @return array
+     * @return StreamInterface
      */
-    public function getRawResponseBody(): array {
-        return $this->responseBody;
+    public function getRawResponseBody(): StreamInterface {
+        return $this->responseStream;
+    }
+
+    /**
+     * Get the response stream contents
+     *
+     * @return string
+     */
+    public function getResponseBodyAsString(): string {
+        $this->responseStream->rewind();
+        return $this->responseStream->getContents();
+    }
+
+    /**
+     * Returns the JSON-decoded response payload from the Graph
+     * If payload could not be JSON-decoded, consider getResponseBodyString() or getRawResponseBody()
+     *
+     * @return array|null
+     */
+    public function getResponseBodyJson(): ?array {
+        if (!$this->jsonBody) {
+            $this->responseStream->rewind();
+            $this->jsonBody = json_decode($this->responseStream->getContents(), true);
+        }
+        return $this->jsonBody;
     }
 
     /**
@@ -102,8 +133,8 @@ class GraphResponseException extends \Exception
      * @return ODataErrorContent|null
      */
     public function getError(): ?ODataErrorContent {
-        if (array_key_exists("error", $this->responseBody)) {
-            return new ODataErrorContent($this->responseBody["error"]);
+        if (array_key_exists("error", $this->jsonBody)) {
+            return new ODataErrorContent($this->jsonBody["error"]);
         }
         return null;
     }
