@@ -175,7 +175,7 @@ class GraphRequest
     }
 
     /**
-     * Adds custom headers to the request
+     * Adds custom headers to the request. Overwrites existing header names
      *
      * @param array<string, string|string[]> $headers An array of custom headers
      *
