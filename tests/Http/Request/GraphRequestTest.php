@@ -185,10 +185,10 @@ class GraphRequestTest extends BaseGraphRequestTest
         $this->assertEquals($values, $this->defaultGraphRequest->getHeaders()['Accept-Language']);
     }
 
-    public function testAddHeadersWithExistingHeaderNameDoesCaseSensitiveAppend(): void {
+    public function testAddHeadersWithExistingHeaderNameOverwrites(): void {
         $this->assertEquals('application/json', $this->defaultGraphRequest->getHeaders()['Content-Type']);
         $this->defaultGraphRequest->addHeaders(['Content-Type' => 'text']);
-        $this->assertEquals(["application/json", "text"], $this->defaultGraphRequest->getHeaders()['Content-Type']);
+        $this->assertEquals("text", $this->defaultGraphRequest->getHeaders()['Content-Type']);
     }
 
     public function testAttachBodyReturnsGraphRequestInstance(): void {

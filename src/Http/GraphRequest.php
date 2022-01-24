@@ -183,8 +183,7 @@ class GraphRequest
      */
     public function addHeaders(array $headers): self
     {
-        // Recursive merge to support appending values to multi-value headers
-        $this->headers = array_merge_recursive($this->headers, $headers);
+        $this->headers = array_merge($this->headers, $headers);
         $this->initPsr7HttpRequest();
         return $this;
     }
