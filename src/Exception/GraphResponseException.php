@@ -44,9 +44,9 @@ class GraphResponseException extends \Exception
     /**
      * JSON_decoded response body
      *
-     * @var array
+     * @var array|null
      */
-    private $jsonBody = [];
+    private $jsonBody;
     /**
      * The request that triggered the error response
      *
@@ -105,9 +105,10 @@ class GraphResponseException extends \Exception
     }
 
     /**
-     * Get the response stream contents
+     * Get the response stream contents as a string
      *
      * @return string
+     * @throws \RuntimeException if the stream couldn't be read/rewind() failed
      */
     public function getResponseBodyAsString(): string {
         $this->responseStream->rewind();
@@ -116,7 +117,7 @@ class GraphResponseException extends \Exception
 
     /**
      * Returns the JSON-decoded response payload from the Graph
-     * If payload could not be JSON-decoded, consider getResponseBodyAsString() or getRawResponseBody()
+     * If payload could not be JSON-decoded null is returned. Consider getResponseBodyAsString() or getRawResponseBody()
      *
      * @return array|null
      */
@@ -178,6 +179,10 @@ class GraphResponseException extends \Exception
      */
     private function setJsonBody(): void {
         $this->responseStream->rewind();
-        $this->jsonBody = json_decode($this->responseStream->getContents(), true);
+        try {
+            $this->jsonBody = json_decode($this->responseStream->getContents(), true);
+        } catch (\RuntimeException $ex) {
+            $this->jsonBody = null;
+        }
     }
 }
