@@ -71,6 +71,7 @@ class GraphResponseException extends \Exception
         $this->graphRequest = $graphRequest;
         $this->responseStatusCode = $responseStatusCode;
         $this->responseStream = $responseStream;
+        $this->setJsonBody();
         $this->responseHeaders = $responseHeaders;
         $message = "'".$graphRequest->getRequestType()."' request to ".$graphRequest->getRequestUri()." returned ".$responseStatusCode;
         parent::__construct($message, $responseStatusCode);
@@ -115,15 +116,11 @@ class GraphResponseException extends \Exception
 
     /**
      * Returns the JSON-decoded response payload from the Graph
-     * If payload could not be JSON-decoded, consider getResponseBodyString() or getRawResponseBody()
+     * If payload could not be JSON-decoded, consider getResponseBodyAsString() or getRawResponseBody()
      *
      * @return array|null
      */
     public function getResponseBodyJson(): ?array {
-        if (!$this->jsonBody) {
-            $this->responseStream->rewind();
-            $this->jsonBody = json_decode($this->responseStream->getContents(), true);
-        }
         return $this->jsonBody;
     }
 
@@ -133,7 +130,7 @@ class GraphResponseException extends \Exception
      * @return ODataErrorContent|null
      */
     public function getError(): ?ODataErrorContent {
-        if (array_key_exists("error", $this->jsonBody)) {
+        if (is_array($this->jsonBody) && array_key_exists("error", $this->jsonBody)) {
             return new ODataErrorContent($this->jsonBody["error"]);
         }
         return null;
@@ -174,5 +171,13 @@ class GraphResponseException extends \Exception
             return $this->responseHeaders[$headerName][0];
         }
         return null;
+    }
+
+    /**
+     * Reads the entire stream's contents and decodes the string
+     */
+    private function setJsonBody(): void {
+        $this->responseStream->rewind();
+        $this->jsonBody = json_decode($this->responseStream->getContents(), true);
     }
 }
