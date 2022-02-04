@@ -99,8 +99,8 @@ class GraphRequest
      */
     public function __construct(string $requestType, string $endpoint, AbstractGraphClient $graphClient, string $baseUrl = "")
     {
-        if (!$requestType || !$endpoint || !$graphClient) {
-            throw new \InvalidArgumentException("Request type, endpoint and client cannot be null or empty");
+        if (!$requestType || !$endpoint) {
+            throw new \InvalidArgumentException("Request type and endpoint cannot be null or empty");
         }
         if (!$graphClient->getAccessToken()) {
             throw new \InvalidArgumentException(GraphConstants::NO_ACCESS_TOKEN);
@@ -175,7 +175,7 @@ class GraphRequest
     }
 
     /**
-     * Adds custom headers to the request
+     * Adds custom headers to the request. Overwrites existing header names
      *
      * @param array<string, string|string[]> $headers An array of custom headers
      *
@@ -183,8 +183,7 @@ class GraphRequest
      */
     public function addHeaders(array $headers): self
     {
-        // Recursive merge to support appending values to multi-value headers
-        $this->headers = array_merge_recursive($this->headers, $headers);
+        $this->headers = array_merge($this->headers, $headers);
         $this->initPsr7HttpRequest();
         return $this;
     }
@@ -439,7 +438,7 @@ class GraphRequest
             throw new GraphServiceException(
                 $this,
                 $httpResponse->getStatusCode(),
-                json_decode($httpResponse->getBody(), true),
+                $httpResponse->getBody(),
                 $httpResponse->getHeaders()
             );
         }
@@ -447,7 +446,7 @@ class GraphRequest
             throw new GraphClientException(
                 $this,
                 $httpResponse->getStatusCode(),
-                json_decode($httpResponse->getBody(), true),
+                $httpResponse->getBody(),
                 $httpResponse->getHeaders()
             );
         }
