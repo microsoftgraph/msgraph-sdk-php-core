@@ -8,11 +8,13 @@
 namespace Microsoft\Graph\Http;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\HandlerStack;
 use GuzzleHttp\RequestOptions;
 use Http\Adapter\Guzzle7\Client as GuzzleAdapter;
 use Http\Promise\Promise;
 use Microsoft\Graph\Core\GraphConstants;
 use Microsoft\Graph\Core\NationalCloud;
+use Microsoft\Kiota\Http\KiotaClientFactory;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -26,7 +28,7 @@ use Psr\Http\Message\ResponseInterface;
  * @license https://opensource.org/licenses/MIT MIT License
  * @link https://developer.microsoft.com/graph
  */
-final class HttpClientFactory
+final class HttpClientFactory extends KiotaClientFactory
 {
     /**
      * @var int Default connection timeout
@@ -42,11 +44,6 @@ final class HttpClientFactory
      * @var string Graph API host to use as base URL and for authentication
      */
     private static $nationalCloud = NationalCloud::GLOBAL;
-
-    /**
-     * @var array Guzzle client config options (https://docs.guzzlephp.org/en/stable/quickstart.html#creating-a-client)
-     */
-    private static $clientConfig = [];
 
     /**
      * @var HttpClientFactory|null Store singleton instance of the HttpClientFactory
@@ -86,28 +83,35 @@ final class HttpClientFactory
     }
 
     /**
-     * Set configuration options for the Guzzle client
+     * Create Guzzle client configured for Graph
      *
-     * @param array $config
-     * @return $this
+     * @param array $guzzleConfig
+     * @return Client
      */
-    public static function setClientConfig(array $config): HttpClientFactory {
-        self::$clientConfig = $config;
-        return self::getInstance();
+    public static function createWithConfig(array $guzzleConfig): Client
+    {
+        return parent::createWithConfig(array_merge(self::getDefaultConfig(), $guzzleConfig));
     }
 
     /**
      * Creates a Guzzle client with the custom configs provided or a default client if no config was given
      * Creates default Guzzle client if no custom configs were passed
      *
-     * @return \GuzzleHttp\Client
+     * @return Client
      */
-    public static function create(): \GuzzleHttp\Client {
-        if (!self::$clientConfig) {
-            return new Client(self::getDefaultConfig());
-        }
-        self::mergeConfig();
-        return new Client(self::$clientConfig);
+    public static function create(): Client {
+        return parent::createWithConfig(self::getDefaultConfig());
+    }
+
+    /**
+     * Initialises a Guzzle client with middleware and default Graph configs
+     *
+     * @param HandlerStack $handlerStack
+     * @return Client
+     */
+    public static function createWithMiddleware(HandlerStack $handlerStack): Client
+    {
+        return parent::createWithConfig(array_merge(self::getDefaultConfig(), ['handler' => $handlerStack]));
     }
 
     /**
@@ -134,6 +138,17 @@ final class HttpClientFactory
     }
 
     /**
+     * Return default handler stack for Graph
+     *
+     * @return HandlerStack
+     */
+    public static function getDefaultHandlerStack(): HandlerStack
+    {
+        return parent::getDefaultHandlerStack();
+        //TODO: Add Telemetry handler, compression handler?
+    }
+
+    /**
      * Returns Graph-specific config for Guzzle
      *
      * @return array
@@ -147,27 +162,8 @@ final class HttpClientFactory
                 "SdkVersion" => "graph-php-core/".GraphConstants::SDK_VERSION
             ],
             RequestOptions::HTTP_ERRORS => false,
-            "base_uri" => self::$nationalCloud
+            "base_uri" => self::$nationalCloud,
+            'handler' => self::getDefaultHandlerStack()
         ];
-    }
-
-    /**
-     * Merges client defined config array with Graph's default config.
-     * Provides defaults for timeouts and headers if none have been provided.
-     * Overrides base_uri.
-     */
-    private static function mergeConfig(): void {
-        $defaultConfig = self::getDefaultConfig();
-
-        if (!isset(self::$clientConfig[RequestOptions::CONNECT_TIMEOUT])) {
-            self::$clientConfig[RequestOptions::CONNECT_TIMEOUT] = $defaultConfig[RequestOptions::CONNECT_TIMEOUT];
-        }
-        if (!isset(self::$clientConfig[RequestOptions::TIMEOUT])) {
-            self::$clientConfig[RequestOptions::TIMEOUT] = $defaultConfig[RequestOptions::TIMEOUT];
-        }
-        if (!isset(self::$clientConfig[RequestOptions::HEADERS])) {
-            self::$clientConfig[RequestOptions::HEADERS] = $defaultConfig[RequestOptions::HEADERS];
-        }
-        self::$clientConfig["base_uri"] = self::$nationalCloud;
     }
 }

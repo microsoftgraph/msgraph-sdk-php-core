@@ -1,11 +1,10 @@
 <?php
 
 
-namespace Http;
+namespace Microsoft\Graph\Test\Http;
 
 
 use Microsoft\Graph\Core\NationalCloud;
-use Microsoft\Graph\Exception\GraphClientException;
 use Microsoft\Graph\Http\HttpClientFactory;
 use Microsoft\Graph\Http\HttpClientInterface;
 
@@ -31,7 +30,7 @@ class HttpClientFactoryTest extends \PHPUnit\Framework\TestCase
             "proxy" => "localhost:8000",
             "verify" => false
         ];
-        $client = HttpClientFactory::setClientConfig($config)::setNationalCloud(NationalCloud::GERMANY)::create();
+        $client = HttpClientFactory::setNationalCloud(NationalCloud::GERMANY)::createWithConfig($config);
         $this->assertInstanceOf(\GuzzleHttp\Client::class, $client);
     }
 
