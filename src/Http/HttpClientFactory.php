@@ -14,6 +14,7 @@ use Http\Adapter\Guzzle7\Client as GuzzleAdapter;
 use Http\Promise\Promise;
 use Microsoft\Graph\Core\GraphConstants;
 use Microsoft\Graph\Core\NationalCloud;
+use Microsoft\Graph\Middleware\GraphMiddleware;
 use Microsoft\Kiota\Http\KiotaClientFactory;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -144,8 +145,9 @@ final class HttpClientFactory extends KiotaClientFactory
      */
     public static function getDefaultHandlerStack(): HandlerStack
     {
-        return parent::getDefaultHandlerStack();
-        //TODO: Add Telemetry handler, compression handler?
+        $handlerStack = parent::getDefaultHandlerStack();
+        $handlerStack->push(GraphMiddleware::telemetry());
+        return $handlerStack;
     }
 
     /**
@@ -159,7 +161,6 @@ final class HttpClientFactory extends KiotaClientFactory
             RequestOptions::TIMEOUT => self::REQUEST_TIMEOUT_SEC,
             RequestOptions::HEADERS => [
                 "Content-Type" => "application/json",
-                "SdkVersion" => "graph-php-core/".GraphConstants::SDK_VERSION
             ],
             RequestOptions::HTTP_ERRORS => false,
             "base_uri" => self::$nationalCloud,
