@@ -12,9 +12,9 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\RequestOptions;
 use Http\Adapter\Guzzle7\Client as GuzzleAdapter;
 use Http\Promise\Promise;
-use Microsoft\Graph\Core\GraphConstants;
 use Microsoft\Graph\Core\NationalCloud;
 use Microsoft\Graph\Middleware\GraphMiddleware;
+use Microsoft\Graph\Middleware\Option\GraphTelemetryOption;
 use Microsoft\Kiota\Http\KiotaClientFactory;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -52,6 +52,11 @@ final class HttpClientFactory extends KiotaClientFactory
     private static $instance = null;
 
     /**
+     * @var GraphTelemetryOption|null telemetry config
+     */
+    private static $graphTelemetryOption = null;
+
+    /**
      * HttpClientFactory constructor.
      */
     private function __construct() {}
@@ -80,6 +85,18 @@ final class HttpClientFactory extends KiotaClientFactory
             throw new \InvalidArgumentException("Invalid national cloud passed. See https://docs.microsoft.com/en-us/graph/deployments#microsoft-graph-and-graph-explorer-service-root-endpoints.");
         }
         self::$nationalCloud = $nationalCloud;
+        return self::getInstance();
+    }
+
+    /**
+     * Set telemetry configuration
+     *
+     * @param GraphTelemetryOption $telemetryOption
+     * @return HttpClientFactory
+     */
+    public static function setTelemetryOption(GraphTelemetryOption $telemetryOption): HttpClientFactory
+    {
+        self::$graphTelemetryOption = $telemetryOption;
         return self::getInstance();
     }
 
@@ -146,7 +163,7 @@ final class HttpClientFactory extends KiotaClientFactory
     public static function getDefaultHandlerStack(): HandlerStack
     {
         $handlerStack = parent::getDefaultHandlerStack();
-        $handlerStack->push(GraphMiddleware::telemetry());
+        $handlerStack->push(GraphMiddleware::telemetry(self::$graphTelemetryOption));
         return $handlerStack;
     }
 

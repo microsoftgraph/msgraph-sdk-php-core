@@ -10,7 +10,6 @@ namespace Microsoft\Graph\Middleware;
 
 use GuzzleHttp\Promise\PromiseInterface;
 use Microsoft\Graph\Middleware\Option\GraphTelemetryOption;
-use Microsoft\Kiota\Http\Middleware\Options\TelemetryOption;
 use Psr\Http\Message\RequestInterface;
 
 /**

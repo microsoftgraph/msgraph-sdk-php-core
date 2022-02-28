@@ -26,18 +26,20 @@ use Ramsey\Uuid\Uuid;
 class GraphTelemetryOption extends \Microsoft\Kiota\Http\Middleware\Options\TelemetryOption
 {
     private $apiVersion;
-    private $sdkVersion;
+    private $serviceLibraryVersion;
     private $clientRequestId;
     private $featureFlag;
 
     /**
      * Create new instance
      *
-     * @param string $clientRequestId if not set, defaults to random UUID
+     * @param string $apiVersion
+     * @param string $serviceLibraryVersion
      */
-    public function __construct(string $clientRequestId = '')
+    public function __construct(string $apiVersion = '', string $serviceLibraryVersion = '')
     {
-        $this->setClientRequestId($clientRequestId);
+        $this->apiVersion = $apiVersion;
+        $this->serviceLibraryVersion = $serviceLibraryVersion;
         parent::__construct($this->initTelemetryConfigurator());
     }
 
@@ -64,17 +66,17 @@ class GraphTelemetryOption extends \Microsoft\Kiota\Http\Middleware\Options\Tele
     /**
      * @return string
      */
-    public function getSdkVersion(): string
+    public function getServiceLibraryVersion(): string
     {
-        return $this->sdkVersion;
+        return $this->serviceLibraryVersion;
     }
 
     /**
-     * @param string $sdkVersion
+     * @param string $serviceLibraryVersion
      */
-    public function setSdkVersion(string $sdkVersion): void
+    public function setServiceLibraryVersion(string $serviceLibraryVersion): void
     {
-        $this->sdkVersion = $sdkVersion;
+        $this->serviceLibraryVersion = $serviceLibraryVersion;
     }
 
     /**
@@ -118,7 +120,7 @@ class GraphTelemetryOption extends \Microsoft\Kiota\Http\Middleware\Options\Tele
     {
         $this->clientRequestId = ($graphTelemetryOption->getClientRequestId()) ?: $this->clientRequestId;
         $this->apiVersion = ($graphTelemetryOption->getApiVersion()) ?: $this->apiVersion;
-        $this->sdkVersion = ($graphTelemetryOption->getSdkVersion()) ?: $this->sdkVersion;
+        $this->serviceLibraryVersion = ($graphTelemetryOption->getServiceLibraryVersion()) ?: $this->serviceLibraryVersion;
         $this->featureFlag = ($graphTelemetryOption->getFeatureFlag()) ?: $this->featureFlag;
     }
 
@@ -129,19 +131,18 @@ class GraphTelemetryOption extends \Microsoft\Kiota\Http\Middleware\Options\Tele
      */
     protected function getTelemetryHeaderValue(): string
     {
-        $telemetryValue = 'graph-php-core/'.GraphConstants::SDK_VERSION.", (featureUsage={$this->getFeatureFlag()}; ";
+        $telemetryValue = 'graph-php-core/'.GraphConstants::SDK_VERSION
+                            .', (featureUsage='.$this->getFeatureFlag()
+                            .'; hostOS='.php_uname('s')
+                            .'; runtimeEnvironment=PHP/'.phpversion().')';
         // Prepend service lib version
-        if ($this->getSdkVersion() && $this->getApiVersion()) {
+        if ($this->getServiceLibraryVersion() && $this->getApiVersion()) {
             if ($this->getApiVersion() == 'beta') {
-                $telemetryValue = 'graph-php-beta/'.$this->getSdkVersion().', '.$telemetryValue;
+                $telemetryValue = 'graph-php-beta/'.$this->getServiceLibraryVersion().', '.$telemetryValue;
             } else {
-                $telemetryValue = 'graph-php/'.$this->getSdkVersion().', '.$telemetryValue;
+                $telemetryValue = 'graph-php/'.$this->getServiceLibraryVersion().', '.$telemetryValue;
             }
         }
-
-        $telemetryValue .= 'hostOS='.php_uname('s').'; ';
-        $telemetryValue .= 'runtimeEnvironment=PHP/'.phpversion().'; ';
-        $telemetryValue .= ')';
         return $telemetryValue;
     }
 
@@ -152,7 +153,7 @@ class GraphTelemetryOption extends \Microsoft\Kiota\Http\Middleware\Options\Tele
     {
         return function (RequestInterface $request) {
             return $request->withHeader('SdkVersion', $this->getTelemetryHeaderValue())
-                ->withHeader('client-request-id', $this->getClientRequestId());
+                            ->withHeader('client-request-id', $this->getClientRequestId());
         };
     }
 }
