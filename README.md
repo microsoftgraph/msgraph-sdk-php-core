@@ -39,18 +39,19 @@ $accessToken = $token->access_token;
 ```
 
 ### 3. Create a Guzzle HTTP client object
-You can create a Guzzle HTTP client object pre-configured for use with the Graph API using our `HttpClientFactory`. The `HttpClientFactory`
+You can create a Guzzle HTTP client object pre-configured for use with the Graph API using our `GraphClientFactory`. The `GraphClientFactory`
 sets some Guzzle config defaults such as connection and request timeouts, and the `base_uri` to your preferred [National Cloud endpoint](https://docs.microsoft.com/en-us/graph/deployments#microsoft-graph-and-graph-explorer-service-root-endpoints).
 
-In the near future, the `HttpClientFactory` will provide some default middleware to use with the Graph API such as retry handlers.
+In the near future, the `GraphClientFactory` will provide some default middleware to use with the Graph API such as retry handlers.
+
 ```php
-use Microsoft\Graph\Http\HttpClientFactory;
+use Microsoft\Graph\Http\GraphClientFactory;
 
 $guzzleConfig = [
     // your preferred guzzle config
 ];
 
-$httpClient = HttpClientFactory::setClientConfig($guzzleConfig)::create();
+$httpClient = GraphClientFactory::setClientConfig($guzzleConfig)::create();
 
 ```
 
@@ -59,7 +60,7 @@ $httpClient = HttpClientFactory::setClientConfig($guzzleConfig)::create();
 The following is an example that shows how to call Microsoft Graph.
 
 ```php
-use Microsoft\Graph\Http\HttpClientFactory;
+use Microsoft\Graph\Http\GraphClientFactory;
 
 class UsageExample
 {
@@ -73,7 +74,7 @@ class UsageExample
             ]
         ];
 
-        $httpClient = HttpClientFactory::setClientConfig($config)::create();
+        $httpClient = GraphClientFactory::setClientConfig($config)::create();
         $response = $httpClient->get("/v1.0/me");
         $currentUser = json_decode($response->getBody());
 
@@ -119,7 +120,7 @@ xdebug.remote_autostart = 1
 
 Now you can hit a Visual Studio Code breakpoint in a test. Try this:
 
-1. Add a breakpoint to `testCreateWithConfigCreatesClient` in *.\tests\Http\HttpClientFactoryTest.php*.
+1. Add a breakpoint to `testCreateWithConfigCreatesClient` in *.\tests\Http\GraphClientFactoryTest.php*.
 2. Run the **Listen for XDebug** configuration in VS Code.
 3. Run `.\vendor\bin\phpunit --filter testCreateWithConfigCreatesClient` from the PowerShell terminal to run the test and hit the breakpoint.
 

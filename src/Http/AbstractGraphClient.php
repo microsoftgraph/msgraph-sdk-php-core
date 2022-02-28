@@ -55,7 +55,7 @@ abstract class AbstractGraphClient
                                 ?HttpClientInterface  $httpClient = null)
     {
         $this->nationalCloud = ($nationalCloud) ?: NationalCloud::GLOBAL;
-        $this->httpClient = ($httpClient) ?: HttpClientFactory::setNationalCloud($this->nationalCloud)::createAdapter();
+        $this->httpClient = ($httpClient) ?: GraphClientFactory::setNationalCloud($this->nationalCloud)::createAdapter();
     }
 
     /**

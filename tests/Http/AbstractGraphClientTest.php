@@ -7,7 +7,7 @@ use Microsoft\Graph\Exception\GraphClientException;
 use Microsoft\Graph\Http\AbstractGraphClient;
 use Microsoft\Graph\Http\GraphCollectionRequest;
 use Microsoft\Graph\Http\GraphRequest;
-use Microsoft\Graph\Http\HttpClientFactory;
+use Microsoft\Graph\Http\GraphClientFactory;
 use Microsoft\Graph\Http\HttpClientInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -25,7 +25,7 @@ class AbstractGraphClientTest extends TestCase {
     }
 
     public function testGraphConstructor() {
-        $httpClient = HttpClientFactory::createAdapter();
+        $httpClient = GraphClientFactory::createAdapter();
         $graphClient = $this->getMockBuilder(AbstractGraphClient::class)
                             ->setConstructorArgs([NationalCloud::US_DOD, $httpClient])
                             ->getMockForAbstractClass();

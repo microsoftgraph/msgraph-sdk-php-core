@@ -5,23 +5,23 @@ namespace Microsoft\Graph\Test\Http;
 
 
 use Microsoft\Graph\Core\NationalCloud;
-use Microsoft\Graph\Http\HttpClientFactory;
+use Microsoft\Graph\Http\GraphClientFactory;
 use Microsoft\Graph\Http\HttpClientInterface;
 
-class HttpClientFactoryTest extends \PHPUnit\Framework\TestCase
+class GraphClientFactoryTest extends \PHPUnit\Framework\TestCase
 {
     function testNationalCloudWithEmptyString() {
         $this->expectException(\InvalidArgumentException::class);
-        HttpClientFactory::setNationalCloud("");
+        GraphClientFactory::setNationalCloud("");
     }
 
     function testNationalCloudWithInvalidUrl() {
         $this->expectException(\InvalidArgumentException::class);
-        HttpClientFactory::setNationalCloud("https://www.microsoft.com");
+        GraphClientFactory::setNationalCloud("https://www.microsoft.com");
     }
 
     function testCreateWithNoConfigReturnsDefaultClient() {
-        $client = HttpClientFactory::create();
+        $client = GraphClientFactory::create();
         $this->assertInstanceOf(\GuzzleHttp\Client::class, $client);
     }
 
@@ -30,12 +30,12 @@ class HttpClientFactoryTest extends \PHPUnit\Framework\TestCase
             "proxy" => "localhost:8000",
             "verify" => false
         ];
-        $client = HttpClientFactory::setNationalCloud(NationalCloud::GERMANY)::createWithConfig($config);
+        $client = GraphClientFactory::setNationalCloud(NationalCloud::GERMANY)::createWithConfig($config);
         $this->assertInstanceOf(\GuzzleHttp\Client::class, $client);
     }
 
     function testCreateAdapterReturnsHttpClientInterface() {
-        $adapter = HttpClientFactory::setNationalCloud(NationalCloud::US_DOD)::createAdapter();
+        $adapter = GraphClientFactory::setNationalCloud(NationalCloud::US_DOD)::createAdapter();
         $this->assertInstanceOf(HttpClientInterface::class, $adapter);
     }
 

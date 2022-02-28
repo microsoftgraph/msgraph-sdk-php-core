@@ -20,7 +20,7 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
 /**
- * Class HttpClientFactory
+ * Class GraphClientFactory
  *
  * Configures a Guzzle HTTP client for use with Graph API
  *
@@ -29,7 +29,7 @@ use Psr\Http\Message\ResponseInterface;
  * @license https://opensource.org/licenses/MIT MIT License
  * @link https://developer.microsoft.com/graph
  */
-final class HttpClientFactory extends KiotaClientFactory
+final class GraphClientFactory extends KiotaClientFactory
 {
     /**
      * @var int Default connection timeout
@@ -47,7 +47,7 @@ final class HttpClientFactory extends KiotaClientFactory
     private static $nationalCloud = NationalCloud::GLOBAL;
 
     /**
-     * @var HttpClientFactory|null Store singleton instance of the HttpClientFactory
+     * @var GraphClientFactory|null Store singleton instance of the GraphClientFactory
      */
     private static $instance = null;
 
@@ -57,18 +57,18 @@ final class HttpClientFactory extends KiotaClientFactory
     private static $graphTelemetryOption = null;
 
     /**
-     * HttpClientFactory constructor.
+     * GraphClientFactory constructor.
      */
     private function __construct() {}
 
     /**
      * Returns singleton instance
      *
-     * @return HttpClientFactory
+     * @return GraphClientFactory
      */
-    private static function getInstance(): HttpClientFactory {
+    private static function getInstance(): GraphClientFactory {
         if (!self::$instance) {
-            self::$instance = new HttpClientFactory();
+            self::$instance = new GraphClientFactory();
         }
         return self::$instance;
     }
@@ -80,7 +80,7 @@ final class HttpClientFactory extends KiotaClientFactory
      * @return $this
      * @throws \InvalidArgumentException if $nationalCloud is empty or an invalid national cloud Host
      */
-    public static function setNationalCloud(string $nationalCloud = NationalCloud::GLOBAL): HttpClientFactory {
+    public static function setNationalCloud(string $nationalCloud = NationalCloud::GLOBAL): GraphClientFactory {
         if (!$nationalCloud || !NationalCloud::containsNationalCloudHost($nationalCloud)) {
             throw new \InvalidArgumentException("Invalid national cloud passed. See https://docs.microsoft.com/en-us/graph/deployments#microsoft-graph-and-graph-explorer-service-root-endpoints.");
         }
@@ -92,9 +92,9 @@ final class HttpClientFactory extends KiotaClientFactory
      * Set telemetry configuration
      *
      * @param GraphTelemetryOption $telemetryOption
-     * @return HttpClientFactory
+     * @return GraphClientFactory
      */
-    public static function setTelemetryOption(GraphTelemetryOption $telemetryOption): HttpClientFactory
+    public static function setTelemetryOption(GraphTelemetryOption $telemetryOption): GraphClientFactory
     {
         self::$graphTelemetryOption = $telemetryOption;
         return self::getInstance();
