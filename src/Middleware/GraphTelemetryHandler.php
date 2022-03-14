@@ -10,6 +10,7 @@ namespace Microsoft\Graph\Core\Middleware;
 
 use GuzzleHttp\Promise\PromiseInterface;
 use Microsoft\Graph\Core\Middleware\Option\GraphTelemetryOption;
+use Microsoft\Kiota\Http\Middleware\TelemetryHandler;
 use Psr\Http\Message\RequestInterface;
 
 /**
@@ -22,7 +23,7 @@ use Psr\Http\Message\RequestInterface;
  * @license https://opensource.org/licenses/MIT MIT License
  * @link https://developer.microsoft.com/graph
  */
-class GraphTelemetryHandler extends \Microsoft\Kiota\Http\Middleware\TelemetryHandler
+class GraphTelemetryHandler extends TelemetryHandler
 {
     private $graphTelemetryOption;
 
@@ -51,7 +52,7 @@ class GraphTelemetryHandler extends \Microsoft\Kiota\Http\Middleware\TelemetryHa
         if (array_key_exists(GraphTelemetryOption::class, $options)) {
             $graphTelemetryOption = $options[GraphTelemetryOption::class];
             if (is_a($graphTelemetryOption, GraphTelemetryOption::class)) {
-                $this->graphTelemetryOption->merge($options[GraphTelemetryOption::class]);
+                $this->graphTelemetryOption->override($options[GraphTelemetryOption::class]);
                 unset($options[GraphTelemetryOption::class]);
             }
         }

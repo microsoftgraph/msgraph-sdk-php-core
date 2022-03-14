@@ -10,6 +10,7 @@ namespace Microsoft\Graph\Core\Middleware\Option;
 
 
 use Microsoft\Graph\Core\GraphConstants;
+use Microsoft\Kiota\Http\Middleware\Options\TelemetryOption;
 use Psr\Http\Message\RequestInterface;
 use Ramsey\Uuid\Uuid;
 
@@ -23,7 +24,7 @@ use Ramsey\Uuid\Uuid;
  * @license https://opensource.org/licenses/MIT MIT License
  * @link https://developer.microsoft.com/graph
  */
-class GraphTelemetryOption extends \Microsoft\Kiota\Http\Middleware\Options\TelemetryOption
+class GraphTelemetryOption extends TelemetryOption
 {
     private $apiVersion;
     private $serviceLibraryVersion;
@@ -56,9 +57,8 @@ class GraphTelemetryOption extends \Microsoft\Kiota\Http\Middleware\Options\Tele
      */
     public function setApiVersion(string $apiVersion): void
     {
-        $versions = ['beta' => true, 'v1.0' => true];
-        if ($apiVersion && !array_key_exists(strtolower($apiVersion), $versions)) {
-            throw new \InvalidArgumentException('Api version can only be beta/v1.0');
+        if ($apiVersion !== GraphConstants::BETA_API_VERSION || $apiVersion !== GraphConstants::V1_API_VERSION) {
+            throw new \InvalidArgumentException('Api version can only be '.GraphConstants::BETA_API_VERSION.' or '.GraphConstants::V1_API_VERSION);
         }
         $this->apiVersion = strtolower($apiVersion);
     }
@@ -116,11 +116,9 @@ class GraphTelemetryOption extends \Microsoft\Kiota\Http\Middleware\Options\Tele
      *
      * @param GraphTelemetryOption $graphTelemetryOption
      */
-    public function merge(GraphTelemetryOption $graphTelemetryOption): void
+    public function override(GraphTelemetryOption $graphTelemetryOption): void
     {
         $this->clientRequestId = ($graphTelemetryOption->getClientRequestId()) ?: $this->clientRequestId;
-        $this->apiVersion = ($graphTelemetryOption->getApiVersion()) ?: $this->apiVersion;
-        $this->serviceLibraryVersion = ($graphTelemetryOption->getServiceLibraryVersion()) ?: $this->serviceLibraryVersion;
         $this->featureFlag = ($graphTelemetryOption->getFeatureFlag()) ?: $this->featureFlag;
     }
 
