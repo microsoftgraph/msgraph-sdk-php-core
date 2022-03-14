@@ -6,16 +6,16 @@
  */
 
 
-namespace Microsoft\Graph\Test\Http\Request;
+namespace Microsoft\Graph\Core\Test\Http\Request;
 
 
 use Http\Client\HttpAsyncClient;
 use Http\Promise\Promise;
-use Microsoft\Graph\Exception\GraphClientException;
-use Microsoft\Graph\Exception\GraphServiceException;
-use Microsoft\Graph\Http\GraphResponse;
-use Microsoft\Graph\Test\Http\SampleGraphResponsePayload;
-use Microsoft\Graph\Test\TestData\Model\User;
+use Microsoft\Graph\Core\Exception\GraphClientException;
+use Microsoft\Graph\Core\Exception\GraphServiceException;
+use Microsoft\Graph\Core\Http\GraphResponse;
+use Microsoft\Graph\Core\Test\Http\SampleGraphResponsePayload;
+use Microsoft\Graph\Core\Test\TestData\Model\User;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\NetworkExceptionInterface;
 use Psr\Http\Message\StreamInterface;

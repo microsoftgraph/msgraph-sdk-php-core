@@ -6,7 +6,7 @@
  */
 
 
-namespace Microsoft\Graph\Exception;
+namespace Microsoft\Graph\Core\Exception;
 
 /**
  * Class Error

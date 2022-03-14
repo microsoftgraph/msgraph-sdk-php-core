@@ -1,11 +1,11 @@
 <?php
 
-namespace Microsoft\Graph\Test\Http;
+namespace Microsoft\Graph\Core\Test\Http;
 
 use GuzzleHttp\Psr7\Utils;
-use Microsoft\Graph\Http\GraphRequest;
-use Microsoft\Graph\Http\GraphResponse;
-use Microsoft\Graph\Test\TestData\Model\User;
+use Microsoft\Graph\Core\Http\GraphRequest;
+use Microsoft\Graph\Core\Http\GraphResponse;
+use Microsoft\Graph\Core\Test\TestData\Model\User;
 use PHPUnit\Framework\TestCase;
 
 class GraphResponseTest extends TestCase

@@ -5,7 +5,7 @@
  * for license information.
  */
 
-namespace Microsoft\Graph\Http;
+namespace Microsoft\Graph\Core\Http;
 
 use Http\Client\HttpAsyncClient;
 use Http\Client\HttpClient;

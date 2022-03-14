@@ -6,9 +6,9 @@
  */
 
 
-namespace Microsoft\Graph\Middleware;
+namespace Microsoft\Graph\Core\Middleware;
 
-use Microsoft\Graph\Middleware\Option\GraphTelemetryOption;
+use Microsoft\Graph\Core\Middleware\Option\GraphTelemetryOption;
 
 /**
  * Class GraphMiddleware

@@ -6,7 +6,7 @@
  */
 
 
-namespace Microsoft\Graph\Http;
+namespace Microsoft\Graph\Core\Http;
 
 use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\Psr7\UriResolver;

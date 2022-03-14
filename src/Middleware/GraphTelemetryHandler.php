@@ -6,10 +6,10 @@
  */
 
 
-namespace Microsoft\Graph\Middleware;
+namespace Microsoft\Graph\Core\Middleware;
 
 use GuzzleHttp\Promise\PromiseInterface;
-use Microsoft\Graph\Middleware\Option\GraphTelemetryOption;
+use Microsoft\Graph\Core\Middleware\Option\GraphTelemetryOption;
 use Psr\Http\Message\RequestInterface;
 
 /**

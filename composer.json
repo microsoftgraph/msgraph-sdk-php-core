@@ -64,12 +64,12 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"Microsoft\\Graph\\": "src/"
+			"Microsoft\\Graph\\Core\\": "src/"
 		}
 	},
 	"autoload-dev": {
 		"psr-4": {
-			"Microsoft\\Graph\\Test\\": "tests/"
+			"Microsoft\\Graph\\Core\\Test\\": "tests/"
 		}
 	}
 }

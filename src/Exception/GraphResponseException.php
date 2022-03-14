@@ -6,9 +6,9 @@
  */
 
 
-namespace Microsoft\Graph\Exception;
+namespace Microsoft\Graph\Core\Exception;
 
-use Microsoft\Graph\Http\GraphRequest;
+use Microsoft\Graph\Core\Http\GraphRequest;
 use Psr\Http\Message\StreamInterface;
 
 /**

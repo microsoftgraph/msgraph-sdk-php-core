@@ -6,15 +6,15 @@
  */
 
 
-namespace Microsoft\Graph\Test\Exception;
+namespace Microsoft\Graph\Core\Test\Exception;
 
 
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
-use Microsoft\Graph\Exception\GraphResponseException;
-use Microsoft\Graph\Exception\ODataErrorContent;
-use Microsoft\Graph\Http\GraphRequest;
-use Microsoft\Graph\Test\Http\SampleGraphResponsePayload;
+use Microsoft\Graph\Core\Exception\GraphResponseException;
+use Microsoft\Graph\Core\Exception\ODataErrorContent;
+use Microsoft\Graph\Core\Http\GraphRequest;
+use Microsoft\Graph\Core\Test\Http\SampleGraphResponsePayload;
 use Psr\Http\Message\StreamInterface;
 
 class GraphResponseExceptionTest extends \PHPUnit\Framework\TestCase

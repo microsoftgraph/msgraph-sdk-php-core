@@ -1,14 +1,14 @@
 <?php
-namespace Microsoft\Graph\Test\Http\Request;
+namespace Microsoft\Graph\Core\Test\Http\Request;
 
 use Microsoft\Graph\Core\GraphConstants;
-use Microsoft\Graph\Exception\GraphClientException;
-use Microsoft\Graph\Exception\GraphServiceException;
-use Microsoft\Graph\Http\GraphCollectionRequest;
-use Microsoft\Graph\Http\GraphRequestUtil;
-use Microsoft\Graph\Task\PageIterator;
-use Microsoft\Graph\Test\Http\SampleGraphResponsePayload;
-use Microsoft\Graph\Test\TestData\Model\User;
+use Microsoft\Graph\Core\Exception\GraphClientException;
+use Microsoft\Graph\Core\Exception\GraphServiceException;
+use Microsoft\Graph\Core\Http\GraphCollectionRequest;
+use Microsoft\Graph\Core\Http\GraphRequestUtil;
+use Microsoft\Graph\Core\Task\PageIterator;
+use Microsoft\Graph\Core\Test\Http\SampleGraphResponsePayload;
+use Microsoft\Graph\Core\Test\TestData\Model\User;
 
 class GraphCollectionRequestTest extends BaseGraphRequestTest
 {

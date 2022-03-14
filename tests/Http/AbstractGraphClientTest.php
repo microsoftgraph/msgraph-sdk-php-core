@@ -1,14 +1,14 @@
 <?php
 
-namespace Microsoft\Graph\Test\Http;
+namespace Microsoft\Graph\Core\Test\Http;
 
 use Microsoft\Graph\Core\NationalCloud;
-use Microsoft\Graph\Exception\GraphClientException;
-use Microsoft\Graph\Http\AbstractGraphClient;
-use Microsoft\Graph\Http\GraphCollectionRequest;
-use Microsoft\Graph\Http\GraphRequest;
-use Microsoft\Graph\Http\GraphClientFactory;
-use Microsoft\Graph\Http\HttpClientInterface;
+use Microsoft\Graph\Core\Exception\GraphClientException;
+use Microsoft\Graph\Core\Http\AbstractGraphClient;
+use Microsoft\Graph\Core\Http\GraphCollectionRequest;
+use Microsoft\Graph\Core\Http\GraphRequest;
+use Microsoft\Graph\Core\Http\GraphClientFactory;
+use Microsoft\Graph\Core\Http\HttpClientInterface;
 use PHPUnit\Framework\TestCase;
 
 class AbstractGraphClientTest extends TestCase {

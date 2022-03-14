@@ -6,13 +6,13 @@
  */
 
 
-namespace Microsoft\Graph\Test\Http\Request;
+namespace Microsoft\Graph\Core\Test\Http\Request;
 
 
 use Microsoft\Graph\Core\NationalCloud;
-use Microsoft\Graph\Http\AbstractGraphClient;
-use Microsoft\Graph\Http\GraphRequest;
-use Microsoft\Graph\Http\HttpClientInterface;
+use Microsoft\Graph\Core\Http\AbstractGraphClient;
+use Microsoft\Graph\Core\Http\GraphRequest;
+use Microsoft\Graph\Core\Http\HttpClientInterface;
 
 abstract class BaseGraphRequestTest extends \PHPUnit\Framework\TestCase
 {

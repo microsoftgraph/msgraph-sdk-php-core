@@ -6,7 +6,7 @@
  */
 
 
-namespace Microsoft\Graph\Middleware\Option;
+namespace Microsoft\Graph\Core\Middleware\Option;
 
 
 use Microsoft\Graph\Core\GraphConstants;

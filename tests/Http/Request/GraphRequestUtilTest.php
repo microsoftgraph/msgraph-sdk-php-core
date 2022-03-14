@@ -5,13 +5,13 @@
  * for license information.
  */
 
-namespace Microsoft\Graph\Test\Http\Request;
+namespace Microsoft\Graph\Core\Test\Http\Request;
 
 
 use GuzzleHttp\Psr7\Uri;
 use Microsoft\Graph\Core\NationalCloud;
-use Microsoft\Graph\Http\AbstractGraphClient;
-use Microsoft\Graph\Http\GraphRequestUtil;
+use Microsoft\Graph\Core\Http\AbstractGraphClient;
+use Microsoft\Graph\Core\Http\GraphRequestUtil;
 
 class GraphRequestUtilTest extends \PHPUnit\Framework\TestCase
 {

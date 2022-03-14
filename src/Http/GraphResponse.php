@@ -15,7 +15,7 @@
 * @link      https://graph.microsoft.io/
 */
 
-namespace Microsoft\Graph\Http;
+namespace Microsoft\Graph\Core\Http;
 
 use Psr\Http\Message\StreamInterface;
 

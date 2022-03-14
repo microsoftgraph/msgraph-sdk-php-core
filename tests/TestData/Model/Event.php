@@ -1,6 +1,6 @@
 <?php
 
-namespace Microsoft\Graph\Test\TestData\Model;
+namespace Microsoft\Graph\Core\Test\TestData\Model;
 
 use Exception;
 use Microsoft\Graph\Core\Models\Date;

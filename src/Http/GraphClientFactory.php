@@ -5,7 +5,7 @@
  * for license information.
  */
 
-namespace Microsoft\Graph\Http;
+namespace Microsoft\Graph\Core\Http;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
@@ -13,8 +13,8 @@ use GuzzleHttp\RequestOptions;
 use Http\Adapter\Guzzle7\Client as GuzzleAdapter;
 use Http\Promise\Promise;
 use Microsoft\Graph\Core\NationalCloud;
-use Microsoft\Graph\Middleware\GraphMiddleware;
-use Microsoft\Graph\Middleware\Option\GraphTelemetryOption;
+use Microsoft\Graph\Core\Middleware\GraphMiddleware;
+use Microsoft\Graph\Core\Middleware\Option\GraphTelemetryOption;
 use Microsoft\Kiota\Http\KiotaClientFactory;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
