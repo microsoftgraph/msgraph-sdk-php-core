@@ -173,7 +173,7 @@ final class GraphClientFactory extends KiotaClientFactory
      * @return array
      */
     private static function getDefaultConfig(): array {
-        return [
+        $config = [
             RequestOptions::CONNECT_TIMEOUT => self::CONNECTION_TIMEOUT_SEC,
             RequestOptions::TIMEOUT => self::REQUEST_TIMEOUT_SEC,
             RequestOptions::HEADERS => [
@@ -183,5 +183,10 @@ final class GraphClientFactory extends KiotaClientFactory
             "base_uri" => self::$nationalCloud,
             'handler' => self::getDefaultHandlerStack()
         ];
+        if (extension_loaded('curl') && curl_version()["features"] & CURL_VERSION_HTTP2 !== 0) {
+            // Enable HTTP/2 if curl extension exists and supports it
+            $config['version'] = '2';
+        }
+        return $config;
     }
 }
