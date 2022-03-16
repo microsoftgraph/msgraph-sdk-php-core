@@ -20,6 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2.4.0
+      with:
+        submodules: 'true'
     - name: Setup PHP and Xdebug for Code Coverage report
       uses: shivammathur/setup-php@v2
       with:
