@@ -9,6 +9,11 @@
 namespace Microsoft\Graph\Core\Middleware;
 
 use Microsoft\Graph\Core\Middleware\Option\GraphTelemetryOption;
+use Microsoft\Kiota\Http\Middleware\CompressionHandler;
+use Microsoft\Kiota\Http\Middleware\KiotaMiddleware;
+use Microsoft\Kiota\Http\Middleware\Options\CompressionOption;
+use Microsoft\Kiota\Http\Middleware\Options\RetryOption;
+use Microsoft\Kiota\Http\Middleware\RetryHandler;
 
 /**
  * Class GraphMiddleware
@@ -20,7 +25,7 @@ use Microsoft\Graph\Core\Middleware\Option\GraphTelemetryOption;
  * @license https://opensource.org/licenses/MIT MIT License
  * @link https://developer.microsoft.com/graph
  */
-class GraphMiddleware
+class GraphMiddleware extends KiotaMiddleware
 {
     /**
      * Middleware that allows configuration of a Graph request with telemetry data
@@ -28,10 +33,38 @@ class GraphMiddleware
      * @param GraphTelemetryOption|null $graphTelemetryOption
      * @return callable
      */
-    public static function telemetry(?GraphTelemetryOption $graphTelemetryOption = null): callable
+    public static function graphTelemetry(?GraphTelemetryOption $graphTelemetryOption = null): callable
     {
         return static function (callable $handler) use ($graphTelemetryOption): GraphTelemetryHandler {
             return new GraphTelemetryHandler($handler, $graphTelemetryOption);
+        };
+    }
+
+    /**
+     * Middleware that retries requests for 429,503 and 504 response status codes (by default) while respecting the Retry-After response header
+     * Configurable using {@link RetryOption}
+     *
+     * @param RetryOption|null $retryOption
+     * @return callable
+     */
+    public static function retry(?RetryOption $retryOption = null): callable
+    {
+        return static function (callable $handler) use ($retryOption) : RetryHandler {
+            return new GraphRetryHandler($handler, $retryOption);
+        };
+    }
+
+    /**
+     * Middleware that compresses a request body based on compression callbacks provided in {@link CompressionOption} and retries
+     * the initial request with an uncompressed body only once if a 415 response is received.
+     *
+     * @param CompressionOption|null $compressionOption
+     * @return callable
+     */
+    public static function compression(?CompressionOption $compressionOption = null): callable
+    {
+        return static function (callable $handler) use ($compressionOption): CompressionHandler {
+            return new GraphCompressionHandler($handler, $compressionOption);
         };
     }
 }

@@ -9,12 +9,15 @@ namespace Microsoft\Graph\Core\Http;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware as GuzzleMiddleware;
 use GuzzleHttp\RequestOptions;
+use GuzzleHttp\Utils;
+use Hoa\Math\Util;
 use Http\Adapter\Guzzle7\Client as GuzzleAdapter;
 use Http\Promise\Promise;
-use Microsoft\Graph\Core\NationalCloud;
 use Microsoft\Graph\Core\Middleware\GraphMiddleware;
 use Microsoft\Graph\Core\Middleware\Option\GraphTelemetryOption;
+use Microsoft\Graph\Core\NationalCloud;
 use Microsoft\Kiota\Http\KiotaClientFactory;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -158,12 +161,16 @@ final class GraphClientFactory extends KiotaClientFactory
     /**
      * Return default handler stack for Graph
      *
+     * @param null $handler final handler
      * @return HandlerStack
      */
-    public static function getDefaultHandlerStack(): HandlerStack
+    public static function getDefaultHandlerStack($handler = null): HandlerStack
     {
-        $handlerStack = parent::getDefaultHandlerStack();
-        $handlerStack->push(GraphMiddleware::telemetry(self::$graphTelemetryOption));
+        $handler = ($handler) ?: Utils::chooseHandler();
+        $handlerStack = new HandlerStack($handler);
+        $handlerStack->push(GraphMiddleware::retry());
+        $handlerStack->push(GuzzleMiddleware::redirect());
+        $handlerStack->push(GraphMiddleware::graphTelemetry(self::$graphTelemetryOption));
         return $handlerStack;
     }
 

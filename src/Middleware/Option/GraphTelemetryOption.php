@@ -29,7 +29,7 @@ class GraphTelemetryOption extends TelemetryOption
     private $apiVersion;
     private $serviceLibraryVersion;
     private $clientRequestId;
-    private $featureFlag;
+    private $featureFlag = 0x00000000;
 
     /**
      * Create new instance
@@ -96,19 +96,20 @@ class GraphTelemetryOption extends TelemetryOption
     }
 
     /**
-     * @return string
+     * @return int hex value
      */
-    public function getFeatureFlag(): string
+    public function getFeatureFlag(): int
     {
-        return ($this->featureFlag) ?: '0x00000000';
+        return $this->featureFlag;
     }
 
     /**
-     * @param string $featureFlag
+     * Handles bitwise OR-ing if there is an already existing feature flag value
+     * @param int $featureFlag hex value
      */
-    public function setFeatureFlag(string $featureFlag): void
+    public function setFeatureFlag(int $featureFlag): void
     {
-        $this->featureFlag = $featureFlag;
+        $this->featureFlag = $this->featureFlag | $featureFlag;
     }
 
     /**
@@ -130,7 +131,7 @@ class GraphTelemetryOption extends TelemetryOption
     protected function getTelemetryHeaderValue(): string
     {
         $telemetryValue = 'graph-php-core/'.GraphConstants::SDK_VERSION
-                            .', (featureUsage='.$this->getFeatureFlag()
+                            .', (featureUsage='.sprintf('0x%08X', $this->getFeatureFlag())
                             .'; hostOS='.php_uname('s')
                             .'; runtimeEnvironment=PHP/'.phpversion().')';
         // Prepend service lib version
