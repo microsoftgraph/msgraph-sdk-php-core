@@ -190,7 +190,7 @@ final class GraphClientFactory extends KiotaClientFactory
             "base_uri" => self::$nationalCloud,
             'handler' => self::getDefaultHandlerStack()
         ];
-        if (extension_loaded('curl') && curl_version()["features"] & CURL_VERSION_HTTP2 !== 0) {
+        if (extension_loaded('curl') && defined('CURL_VERSION_HTTP2') && curl_version()["features"] & CURL_VERSION_HTTP2 !== 0) {
             // Enable HTTP/2 if curl extension exists and supports it
             $config['version'] = '2';
         }
