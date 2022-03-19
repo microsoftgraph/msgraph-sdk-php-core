@@ -3,17 +3,17 @@
 namespace Microsoft\Graph\Core\Test\TestData\Model;
 
 use Exception;
-use Microsoft\Graph\Core\Models\Date;
-use Microsoft\Graph\Core\Models\TimeOfDay;
+use Microsoft\Kiota\Abstractions\Types\Date;
+use Microsoft\Kiota\Abstractions\Types\Time;
 
 class Event extends Entity {
 
     /**
      * @throws Exception
      */
-    public function getStartTime(): TimeOfDay {
-        if (!is_a($this->_propDict['startTime'], TimeOfDay::class)) {
-            return new TimeOfDay($this->_propDict['startTime']);
+    public function getStartTime(): Time {
+        if (!is_a($this->_propDict['startTime'], Time::class)) {
+            return new Time($this->_propDict['startTime']);
         }
         return $this->_propDict['startTime'];
     }
@@ -33,7 +33,7 @@ class Event extends Entity {
         $this->_propDict['eventDate'] = $date;
     }
 
-    public function setStartTime(TimeOfDay $timeOfDay): void {
+    public function setStartTime(Time $timeOfDay): void {
         $this->_propDict['startTime'] = $timeOfDay;
     }
 }
