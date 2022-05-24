@@ -1,3 +1,4 @@
 [submodule "kiota"]
 	path = kiota
 	url = https://github.com/microsoft/kiota
+	branch = main
