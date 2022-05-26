@@ -26,10 +26,10 @@ use Ramsey\Uuid\Uuid;
  */
 class GraphTelemetryOption extends TelemetryOption
 {
-    private $apiVersion;
-    private $serviceLibraryVersion;
-    private $clientRequestId;
-    private $featureFlag = 0x00000000;
+    private string $apiVersion;
+    private string $serviceLibraryVersion;
+    private string $clientRequestId;
+    private int $featureFlag = 0x00000000;
 
     /**
      * Create new instance
@@ -39,17 +39,9 @@ class GraphTelemetryOption extends TelemetryOption
      */
     public function __construct(string $apiVersion = '', string $serviceLibraryVersion = '')
     {
-        $this->apiVersion = $apiVersion;
+        $this->setApiVersion($apiVersion);
         $this->serviceLibraryVersion = $serviceLibraryVersion;
         parent::__construct($this->initTelemetryConfigurator());
-    }
-
-    /**
-     * @return string
-     */
-    public function getApiVersion(): string
-    {
-        return $this->apiVersion;
     }
 
     /**
@@ -57,26 +49,10 @@ class GraphTelemetryOption extends TelemetryOption
      */
     public function setApiVersion(string $apiVersion): void
     {
-        if ($apiVersion !== GraphConstants::BETA_API_VERSION || $apiVersion !== GraphConstants::V1_API_VERSION) {
+        if ($apiVersion &&  (strtolower($apiVersion) !== GraphConstants::BETA_API_VERSION || strtolower($apiVersion) !== GraphConstants::V1_API_VERSION)) {
             throw new \InvalidArgumentException('Api version can only be '.GraphConstants::BETA_API_VERSION.' or '.GraphConstants::V1_API_VERSION);
         }
         $this->apiVersion = strtolower($apiVersion);
-    }
-
-    /**
-     * @return string
-     */
-    public function getServiceLibraryVersion(): string
-    {
-        return $this->serviceLibraryVersion;
-    }
-
-    /**
-     * @param string $serviceLibraryVersion
-     */
-    public function setServiceLibraryVersion(string $serviceLibraryVersion): void
-    {
-        $this->serviceLibraryVersion = $serviceLibraryVersion;
     }
 
     /**
@@ -96,14 +72,6 @@ class GraphTelemetryOption extends TelemetryOption
     }
 
     /**
-     * @return int hex value
-     */
-    public function getFeatureFlag(): int
-    {
-        return $this->featureFlag;
-    }
-
-    /**
      * Handles bitwise OR-ing if there is an already existing feature flag value
      * @param int $featureFlag hex value
      */
@@ -120,7 +88,7 @@ class GraphTelemetryOption extends TelemetryOption
     public function override(GraphTelemetryOption $graphTelemetryOption): void
     {
         $this->clientRequestId = ($graphTelemetryOption->getClientRequestId()) ?: $this->clientRequestId;
-        $this->featureFlag = ($graphTelemetryOption->getFeatureFlag()) ?: $this->featureFlag;
+        $this->featureFlag = ($graphTelemetryOption->featureFlag) ?: $this->featureFlag;
     }
 
     /**
@@ -131,15 +99,15 @@ class GraphTelemetryOption extends TelemetryOption
     protected function getTelemetryHeaderValue(): string
     {
         $telemetryValue = 'graph-php-core/'.GraphConstants::SDK_VERSION
-                            .', (featureUsage='.sprintf('0x%08X', $this->getFeatureFlag())
+                            .', (featureUsage='.sprintf('0x%08X', $this->featureFlag)
                             .'; hostOS='.php_uname('s')
                             .'; runtimeEnvironment=PHP/'.phpversion().')';
         // Prepend service lib version
-        if ($this->getServiceLibraryVersion() && $this->getApiVersion()) {
-            if ($this->getApiVersion() == 'beta') {
-                $telemetryValue = 'graph-php-beta/'.$this->getServiceLibraryVersion().', '.$telemetryValue;
+        if ($this->serviceLibraryVersion && $this->apiVersion) {
+            if ($this->apiVersion == GraphConstants::BETA_API_VERSION) {
+                $telemetryValue = 'graph-php-beta/'.$this->serviceLibraryVersion.', '.$telemetryValue;
             } else {
-                $telemetryValue = 'graph-php/'.$this->getServiceLibraryVersion().', '.$telemetryValue;
+                $telemetryValue = 'graph-php/'.$this->serviceLibraryVersion.', '.$telemetryValue;
             }
         }
         return $telemetryValue;
