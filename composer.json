@@ -43,6 +43,14 @@
 			"options": {
 				"symlink": false
 			}
+		},
+		{
+			"type": "path",
+			"url": "./kiota/serialization/php/text",
+			"only": ["microsoft/kiota-serialization-text"],
+			"options": {
+				"symlink": false
+			}
 		}
 	],
 	"require": {
@@ -50,12 +58,10 @@
 		"microsoft/kiota-authentication-phpleague": "@dev",
 		"microsoft/kiota-http-guzzle": "@dev",
 		"microsoft/kiota-serialization-json": "@dev",
+		"microsoft/kiota-serialization-text": "@dev",
 		"microsoft/kiota-abstractions": "@dev",
-		"guzzlehttp/guzzle": "^7.0",
-		"guzzlehttp/psr7": "^2.0",
 		"php-http/httplug": "^2.2",
-		"php-http/guzzle7-adapter": "^1.0",
-		"ext-json": "*"
+		"php-http/guzzle7-adapter": "^1.0"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "^9.0",
