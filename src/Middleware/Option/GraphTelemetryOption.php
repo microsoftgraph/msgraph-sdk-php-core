@@ -28,7 +28,7 @@ class GraphTelemetryOption extends TelemetryOption
 {
     private string $apiVersion;
     private string $serviceLibraryVersion;
-    private string $clientRequestId;
+    private string $clientRequestId = '';
     private int $featureFlag = 0x00000000;
 
     /**
@@ -49,8 +49,8 @@ class GraphTelemetryOption extends TelemetryOption
      */
     public function setApiVersion(string $apiVersion): void
     {
-        if ($apiVersion &&  (strtolower($apiVersion) !== GraphConstants::BETA_API_VERSION || strtolower($apiVersion) !== GraphConstants::V1_API_VERSION)) {
-            throw new \InvalidArgumentException('Api version can only be '.GraphConstants::BETA_API_VERSION.' or '.GraphConstants::V1_API_VERSION);
+        if ($apiVersion && strtolower($apiVersion) !== GraphConstants::BETA_API_VERSION && strtolower($apiVersion) !== GraphConstants::V1_API_VERSION) {
+            throw new \InvalidArgumentException("Invalid API version='{$apiVersion}'. Api version can only be ".GraphConstants::BETA_API_VERSION.' or '.GraphConstants::V1_API_VERSION);
         }
         $this->apiVersion = strtolower($apiVersion);
     }
@@ -60,7 +60,10 @@ class GraphTelemetryOption extends TelemetryOption
      */
     public function getClientRequestId(): string
     {
-        return ($this->clientRequestId) ?: Uuid::uuid4();
+        if (!$this->clientRequestId) {
+            $this->clientRequestId = Uuid::uuid4();
+        }
+        return $this->clientRequestId;
     }
 
     /**
