@@ -5,7 +5,7 @@
  * for license information.
  */
 
-namespace Microsoft\Graph\Core\Exception;
+namespace Microsoft\Graph\Core\Core\Exception;
 
 /**
  * Class GraphClientException

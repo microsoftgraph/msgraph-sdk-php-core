@@ -6,12 +6,12 @@
  */
 
 
-namespace Microsoft\Graph\Core\Test\Exception;
+namespace Microsoft\Graph\Core\Core\Test\Exception;
 
 
-use Microsoft\Graph\Core\Exception\GraphErrorContent;
-use Microsoft\Graph\Core\Exception\ODataErrorContent;
-use Microsoft\Graph\Core\Test\Http\SampleGraphResponsePayload;
+use Microsoft\Graph\Core\Core\Exception\GraphErrorContent;
+use Microsoft\Graph\Core\Core\Exception\ODataErrorContent;
+use Microsoft\Graph\Core\Core\Test\Http\SampleGraphResponsePayload;
 
 class ErrorContentTest extends \PHPUnit\Framework\TestCase
 {

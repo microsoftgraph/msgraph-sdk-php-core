@@ -1,10 +1,10 @@
 <?php
 
-namespace Microsoft\Graph\Core\Test\Http\Request;
+namespace Microsoft\Graph\Core\Core\Test\Http\Request;
 
-use Microsoft\Graph\Core\Exception\GraphClientException;
-use Microsoft\Graph\Core\Exception\GraphServiceException;
-use Microsoft\Graph\Core\Test\Http\SampleGraphResponsePayload;
+use Microsoft\Graph\Core\Core\Exception\GraphClientException;
+use Microsoft\Graph\Core\Core\Exception\GraphServiceException;
+use Microsoft\Graph\Core\Core\Test\Http\SampleGraphResponsePayload;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamFile;
 

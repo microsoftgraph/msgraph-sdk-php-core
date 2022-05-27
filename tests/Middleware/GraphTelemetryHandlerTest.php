@@ -1,14 +1,14 @@
 <?php
 
-namespace Microsoft\Graph\Core\Test\Middleware;
+namespace Microsoft\Graph\Core\Core\Test\Middleware;
 
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
-use Microsoft\Graph\Core\GraphConstants;
-use Microsoft\Graph\Core\Http\GraphClientFactory;
-use Microsoft\Graph\Core\Middleware\GraphMiddleware;
-use Microsoft\Graph\Core\Middleware\Option\GraphTelemetryOption;
+use Microsoft\Graph\Core\Core\GraphConstants;
+use Microsoft\Graph\Core\Core\Http\GraphClientFactory;
+use Microsoft\Graph\Core\Core\Middleware\GraphMiddleware;
+use Microsoft\Graph\Core\Core\Middleware\Option\GraphTelemetryOption;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 

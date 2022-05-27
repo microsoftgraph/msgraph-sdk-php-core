@@ -6,7 +6,7 @@
  */
 
 
-namespace Microsoft\Graph\Core\Test\Http;
+namespace Microsoft\Graph\Core\Core\Test\Http;
 
 
 use GuzzleHttp\Psr7\Utils;

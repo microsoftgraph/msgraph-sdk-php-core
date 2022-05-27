@@ -6,15 +6,15 @@
  */
 
 
-namespace Microsoft\Graph\Core\Task;
+namespace Microsoft\Graph\Core\Core\Task;
 
 use Http\Promise\FulfilledPromise;
 use Http\Promise\Promise;
-use Microsoft\Graph\Core\Exception\GraphClientException;
-use Microsoft\Graph\Core\Exception\GraphServiceException;
-use Microsoft\Graph\Core\Http\AbstractGraphClient;
-use Microsoft\Graph\Core\Http\GraphResponse;
-use Microsoft\Graph\Core\Http\RequestOptions;
+use Microsoft\Graph\Core\Core\Exception\GraphClientException;
+use Microsoft\Graph\Core\Core\Exception\GraphServiceException;
+use Microsoft\Graph\Core\Core\Http\AbstractGraphClient;
+use Microsoft\Graph\Core\Core\Http\GraphResponse;
+use Microsoft\Graph\Core\Core\Http\RequestOptions;
 use Psr\Http\Client\ClientExceptionInterface;
 
 /**

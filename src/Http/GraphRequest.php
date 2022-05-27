@@ -5,17 +5,17 @@
 * for license information.
 */
 
-namespace Microsoft\Graph\Core\Http;
+namespace Microsoft\Graph\Core\Core\Http;
 
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use Http\Client\HttpAsyncClient;
 use Http\Promise\Promise;
-use Microsoft\Graph\Core\GraphConstants;
-use Microsoft\Graph\Core\NationalCloud;
-use Microsoft\Graph\Core\Exception\GraphClientException;
-use Microsoft\Graph\Core\Exception\GraphServiceException;
+use Microsoft\Graph\Core\Core\GraphConstants;
+use Microsoft\Graph\Core\Core\NationalCloud;
+use Microsoft\Graph\Core\Core\Exception\GraphClientException;
+use Microsoft\Graph\Core\Core\Exception\GraphServiceException;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\StreamInterface;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Microsoft\Graph\Core\Test\TestData\Model;
+namespace Microsoft\Graph\Core\Core\Test\TestData\Model;
 
 use Exception;
 use Microsoft\Kiota\Abstractions\Types\Date;

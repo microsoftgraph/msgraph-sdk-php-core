@@ -5,13 +5,13 @@
 * for license information.
 */
 
-namespace Microsoft\Graph\Core\Http;
+namespace Microsoft\Graph\Core\Core\Http;
 
 use GuzzleHttp\Psr7\Uri;
-use Microsoft\Graph\Core\GraphConstants;
-use Microsoft\Graph\Core\Exception\GraphClientException;
-use Microsoft\Graph\Core\Exception\GraphServiceException;
-use Microsoft\Graph\Core\Task\PageIterator;
+use Microsoft\Graph\Core\Core\GraphConstants;
+use Microsoft\Graph\Core\Core\Exception\GraphClientException;
+use Microsoft\Graph\Core\Core\Exception\GraphServiceException;
+use Microsoft\Graph\Core\Core\Task\PageIterator;
 use Psr\Http\Client\ClientExceptionInterface;
 
 /**

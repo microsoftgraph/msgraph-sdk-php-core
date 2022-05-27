@@ -1,12 +1,12 @@
 <?php
 
-namespace Microsoft\Graph\Core\Test\Http\Request;
+namespace Microsoft\Graph\Core\Core\Test\Http\Request;
 
-use Microsoft\Graph\Core\GraphConstants;
-use Microsoft\Graph\Core\NationalCloud;
-use Microsoft\Graph\Core\Http\AbstractGraphClient;
-use Microsoft\Graph\Core\Http\GraphRequest;
-use Microsoft\Graph\Core\Test\TestData\Model\User;
+use Microsoft\Graph\Core\Core\GraphConstants;
+use Microsoft\Graph\Core\Core\NationalCloud;
+use Microsoft\Graph\Core\Core\Http\AbstractGraphClient;
+use Microsoft\Graph\Core\Core\Http\GraphRequest;
+use Microsoft\Graph\Core\Core\Test\TestData\Model\User;
 
 class GraphRequestTest extends BaseGraphRequestTest
 {

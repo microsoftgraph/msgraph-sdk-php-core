@@ -6,7 +6,7 @@
  */
 
 
-namespace Microsoft\Graph\Core\Test\Http\Request;
+namespace Microsoft\Graph\Core\Core\Test\Http\Request;
 
 
 trait MockHttpClientResponseConfigTrait

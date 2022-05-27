@@ -11,7 +11,7 @@
 * @license   https://opensource.org/licenses/MIT MIT License
 * @link      https://graph.microsoft.com
 */
-namespace Microsoft\Graph\Core\Test\TestData\Model;
+namespace Microsoft\Graph\Core\Core\Test\TestData\Model;
 
 /**
  * Class User

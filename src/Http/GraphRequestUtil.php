@@ -6,11 +6,11 @@
  */
 
 
-namespace Microsoft\Graph\Core\Http;
+namespace Microsoft\Graph\Core\Core\Http;
 
 use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\Psr7\UriResolver;
-use Microsoft\Graph\Core\NationalCloud;
+use Microsoft\Graph\Core\Core\NationalCloud;
 use Psr\Http\Message\UriInterface;
 
 /**

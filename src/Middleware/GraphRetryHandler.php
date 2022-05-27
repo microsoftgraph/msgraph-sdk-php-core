@@ -6,7 +6,7 @@
  */
 
 
-namespace Microsoft\Graph\Core\Middleware;
+namespace Microsoft\Graph\Core\Core\Middleware;
 
 
 use GuzzleHttp\Promise\PromiseInterface;

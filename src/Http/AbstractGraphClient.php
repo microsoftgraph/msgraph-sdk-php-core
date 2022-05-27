@@ -5,9 +5,9 @@
 * for license information.
 */
 
-namespace Microsoft\Graph\Core\Http;
+namespace Microsoft\Graph\Core\Core\Http;
 
-use Microsoft\Graph\Core\NationalCloud;
+use Microsoft\Graph\Core\Core\NationalCloud;
 
 /**
  * Class BaseClient

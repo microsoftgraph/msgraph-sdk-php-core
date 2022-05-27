@@ -1,10 +1,10 @@
 <?php
 
 
-namespace Microsoft\Graph\Core\Test;
+namespace Microsoft\Graph\Core\Core\Test;
 
 
-use Microsoft\Graph\Core\NationalCloud;
+use Microsoft\Graph\Core\Core\NationalCloud;
 
 class NationalCloudTest extends \PHPUnit\Framework\TestCase
 {

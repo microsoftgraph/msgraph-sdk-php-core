@@ -6,7 +6,7 @@
  */
 
 
-namespace Microsoft\Graph\Core\Http;
+namespace Microsoft\Graph\Core\Core\Http;
 
 /**
  * Class RequestOptions

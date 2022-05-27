@@ -6,13 +6,13 @@
  */
 
 
-namespace Microsoft\Graph\Core\Test\Http\Request;
+namespace Microsoft\Graph\Core\Core\Test\Http\Request;
 
 
-use Microsoft\Graph\Core\Exception\GraphClientException;
-use Microsoft\Graph\Core\Exception\GraphServiceException;
-use Microsoft\Graph\Core\Http\GraphResponse;
-use Microsoft\Graph\Core\Test\TestData\Model\User;
+use Microsoft\Graph\Core\Core\Exception\GraphClientException;
+use Microsoft\Graph\Core\Core\Exception\GraphServiceException;
+use Microsoft\Graph\Core\Core\Http\GraphResponse;
+use Microsoft\Graph\Core\Core\Test\TestData\Model\User;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Client\NetworkExceptionInterface;

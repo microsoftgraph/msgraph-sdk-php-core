@@ -6,10 +6,10 @@
  */
 
 
-namespace Microsoft\Graph\Core\Test\Http\Request;
+namespace Microsoft\Graph\Core\Core\Test\Http\Request;
 
 
-use Microsoft\Graph\Core\Http\RequestOptions;
+use Microsoft\Graph\Core\Core\Http\RequestOptions;
 
 class RequestOptionsTest extends \PHPUnit\Framework\TestCase
 {

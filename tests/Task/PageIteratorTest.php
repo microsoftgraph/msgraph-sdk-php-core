@@ -6,18 +6,18 @@
  */
 
 
-namespace Microsoft\Graph\Core\Test\Task;
+namespace Microsoft\Graph\Core\Core\Test\Task;
 
 
 use GuzzleHttp\Psr7\Utils;
-use Microsoft\Graph\Core\Http\GraphCollectionRequest;
-use Microsoft\Graph\Core\Http\GraphResponse;
-use Microsoft\Graph\Core\Http\RequestOptions;
-use Microsoft\Graph\Core\Task\PageIterator;
-use Microsoft\Graph\Core\Test\Http\Request\BaseGraphRequestTest;
-use Microsoft\Graph\Core\Test\Http\Request\MockHttpClientResponseConfig;
-use Microsoft\Graph\Core\Test\Http\SampleGraphResponsePayload;
-use Microsoft\Graph\Core\Test\TestData\Model\User;
+use Microsoft\Graph\Core\Core\Http\GraphCollectionRequest;
+use Microsoft\Graph\Core\Core\Http\GraphResponse;
+use Microsoft\Graph\Core\Core\Http\RequestOptions;
+use Microsoft\Graph\Core\Core\Task\PageIterator;
+use Microsoft\Graph\Core\Core\Test\Http\Request\BaseGraphRequestTest;
+use Microsoft\Graph\Core\Core\Test\Http\Request\MockHttpClientResponseConfig;
+use Microsoft\Graph\Core\Core\Test\Http\SampleGraphResponsePayload;
+use Microsoft\Graph\Core\Core\Test\TestData\Model\User;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\NetworkExceptionInterface;
 
