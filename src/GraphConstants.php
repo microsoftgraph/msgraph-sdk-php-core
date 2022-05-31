@@ -14,7 +14,7 @@
 * @link      https://graph.microsoft.com
 */
 
-namespace Microsoft\Graph\Core\Core;
+namespace Microsoft\Graph\Core;
 
 final class GraphConstants
 {

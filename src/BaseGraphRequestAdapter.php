@@ -10,8 +10,7 @@ namespace Microsoft\Graph\Core;
 
 
 use GuzzleHttp\Client;
-use Microsoft\Graph\Core\Core\Http\GraphClientFactory;
-use Microsoft\Graph\Core\Core\Middleware\Option\GraphTelemetryOption;
+use Microsoft\Graph\Core\Middleware\Option\GraphTelemetryOption;
 use Microsoft\Kiota\Abstractions\Authentication\AuthenticationProvider;
 use Microsoft\Kiota\Abstractions\Serialization\ParseNodeFactory;
 use Microsoft\Kiota\Abstractions\Serialization\SerializationWriterFactory;

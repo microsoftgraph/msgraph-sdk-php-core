@@ -5,20 +5,22 @@
  * for license information.
  */
 
+namespace Microsoft\Graph\Core;
 
-namespace Microsoft\Graph\Core\Core\Exception;
+use Http\Client\HttpAsyncClient;
+use Http\Client\HttpClient;
 
 /**
- * Class GraphServiceException
+ * Interface HttpClientInterface
  *
- * Thrown when the Graph API returns a 4xx response
+ * Provides methods for making synchronous and asynchronous requests on an HTTP client
  *
- * @package Microsoft\Graph\Exception
+ * @package Microsoft\Graph\Http
  * @copyright 2021 Microsoft Corporation
  * @license https://opensource.org/licenses/MIT MIT License
  * @link https://developer.microsoft.com/graph
  */
-class GraphServiceException extends GraphResponseException
+interface HttpClientInterface extends HttpClient, HttpAsyncClient
 {
 
 }

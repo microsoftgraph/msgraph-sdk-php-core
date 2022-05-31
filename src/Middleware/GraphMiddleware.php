@@ -6,9 +6,9 @@
  */
 
 
-namespace Microsoft\Graph\Core\Core\Middleware;
+namespace Microsoft\Graph\Core\Middleware;
 
-use Microsoft\Graph\Core\Core\Middleware\Option\GraphTelemetryOption;
+use Microsoft\Graph\Core\Middleware\Option\GraphTelemetryOption;
 use Microsoft\Kiota\Http\Middleware\CompressionHandler;
 use Microsoft\Kiota\Http\Middleware\KiotaMiddleware;
 use Microsoft\Kiota\Http\Middleware\Options\CompressionOption;

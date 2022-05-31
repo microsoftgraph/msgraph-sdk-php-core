@@ -5,7 +5,7 @@
  * for license information.
  */
 
-namespace Microsoft\Graph\Core\Core;
+namespace Microsoft\Graph\Core;
 
 /**
  * Class NationalCloud

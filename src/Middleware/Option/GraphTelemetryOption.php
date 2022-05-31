@@ -6,10 +6,10 @@
  */
 
 
-namespace Microsoft\Graph\Core\Core\Middleware\Option;
+namespace Microsoft\Graph\Core\Middleware\Option;
 
 
-use Microsoft\Graph\Core\Core\GraphConstants;
+use Microsoft\Graph\Core\GraphConstants;
 use Microsoft\Kiota\Http\Middleware\Options\TelemetryOption;
 use Psr\Http\Message\RequestInterface;
 use Ramsey\Uuid\Uuid;

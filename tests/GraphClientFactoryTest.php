@@ -1,12 +1,12 @@
 <?php
 
 
-namespace Microsoft\Graph\Core\Core\Test\Http;
+namespace Microsoft\Graph\Core\Test;
 
 
-use Microsoft\Graph\Core\Core\NationalCloud;
-use Microsoft\Graph\Core\Core\Http\GraphClientFactory;
-use Microsoft\Graph\Core\Core\Http\HttpClientInterface;
+use Microsoft\Graph\Core\NationalCloud;
+use Microsoft\Graph\Core\GraphClientFactory;
+use Microsoft\Graph\Core\HttpClientInterface;
 
 class GraphClientFactoryTest extends \PHPUnit\Framework\TestCase
 {
