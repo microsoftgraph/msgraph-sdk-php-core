@@ -27,7 +27,7 @@ use Microsoft\Kiota\Http\GuzzleRequestAdapter;
 class BaseGraphRequestAdapter extends GuzzleRequestAdapter
 {
     /**
-     * @param AuthenticationProvider|null $authenticationProvider
+     * @param AuthenticationProvider $authenticationProvider
      * @param ParseNodeFactory|null $parseNodeFactory
      * @param SerializationWriterFactory|null $serializationWriterFactory
      * @param Client|null $guzzleClient
