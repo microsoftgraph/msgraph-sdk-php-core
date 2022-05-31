@@ -18,14 +18,14 @@ use Microsoft\Kiota\Abstractions\Serialization\SerializationWriterFactory;
 use Microsoft\Kiota\Http\GuzzleRequestAdapter;
 
 /**
- * Class GraphRequestAdapter
+ * Class BaseGraphRequestAdapter
  *
  * @package Microsoft\Graph\Core
  * @copyright 2022 Microsoft Corporation
  * @license https://opensource.org/licenses/MIT MIT License
  * @link https://developer.microsoft.com/graph
  */
-class GraphRequestAdapter extends GuzzleRequestAdapter
+class BaseGraphRequestAdapter extends GuzzleRequestAdapter
 {
     /**
      * @param AuthenticationProvider|null $authenticationProvider
