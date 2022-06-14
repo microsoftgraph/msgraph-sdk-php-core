@@ -11,6 +11,7 @@ namespace Microsoft\Graph\Core;
 
 use GuzzleHttp\Client;
 use Microsoft\Graph\Core\Middleware\Option\GraphTelemetryOption;
+use Microsoft\Kiota\Abstractions\Authentication\AnonymousAuthenticationProvider;
 use Microsoft\Kiota\Abstractions\Authentication\AuthenticationProvider;
 use Microsoft\Kiota\Abstractions\Serialization\ParseNodeFactory;
 use Microsoft\Kiota\Abstractions\Serialization\SerializationWriterFactory;
@@ -27,14 +28,15 @@ use Microsoft\Kiota\Http\GuzzleRequestAdapter;
 class BaseGraphRequestAdapter extends GuzzleRequestAdapter
 {
     /**
-     * @param AuthenticationProvider $authenticationProvider
+     * @param AuthenticationProvider|null $authenticationProvider
+     * @param GraphTelemetryOption|null $telemetryOption
      * @param ParseNodeFactory|null $parseNodeFactory
      * @param SerializationWriterFactory|null $serializationWriterFactory
      * @param Client|null $guzzleClient
-     * @param GraphTelemetryOption|null $telemetryOption
      */
-    public function __construct(AuthenticationProvider $authenticationProvider, ?GraphTelemetryOption $telemetryOption = null, ?ParseNodeFactory $parseNodeFactory = null, ?SerializationWriterFactory $serializationWriterFactory = null, ?Client $guzzleClient = null)
+    public function __construct(?AuthenticationProvider $authenticationProvider = null, ?GraphTelemetryOption $telemetryOption = null, ?ParseNodeFactory $parseNodeFactory = null, ?SerializationWriterFactory $serializationWriterFactory = null, ?Client $guzzleClient = null)
     {
+        $authenticationProvider = ($authenticationProvider) ?? new AnonymousAuthenticationProvider();
         $guzzleClient = ($guzzleClient) ?? GraphClientFactory::setTelemetryOption($telemetryOption)::create();
         parent::__construct($authenticationProvider, $parseNodeFactory, $serializationWriterFactory, $guzzleClient);
         $this->setBaseUrl('https://graph.microsoft.com/'.$telemetryOption->getApiVersion());
