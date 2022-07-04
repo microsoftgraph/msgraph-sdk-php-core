@@ -1,28 +1,27 @@
 <?php
 
 
-namespace Http;
+namespace Microsoft\Graph\Core\Test;
 
 
 use Microsoft\Graph\Core\NationalCloud;
-use Microsoft\Graph\Exception\GraphClientException;
-use Microsoft\Graph\Http\HttpClientFactory;
-use Microsoft\Graph\Http\HttpClientInterface;
+use Microsoft\Graph\Core\GraphClientFactory;
+use Microsoft\Graph\Core\HttpClientInterface;
 
-class HttpClientFactoryTest extends \PHPUnit\Framework\TestCase
+class GraphClientFactoryTest extends \PHPUnit\Framework\TestCase
 {
     function testNationalCloudWithEmptyString() {
         $this->expectException(\InvalidArgumentException::class);
-        HttpClientFactory::setNationalCloud("");
+        GraphClientFactory::setNationalCloud("");
     }
 
     function testNationalCloudWithInvalidUrl() {
         $this->expectException(\InvalidArgumentException::class);
-        HttpClientFactory::setNationalCloud("https://www.microsoft.com");
+        GraphClientFactory::setNationalCloud("https://www.microsoft.com");
     }
 
     function testCreateWithNoConfigReturnsDefaultClient() {
-        $client = HttpClientFactory::create();
+        $client = GraphClientFactory::create();
         $this->assertInstanceOf(\GuzzleHttp\Client::class, $client);
     }
 
@@ -31,12 +30,12 @@ class HttpClientFactoryTest extends \PHPUnit\Framework\TestCase
             "proxy" => "localhost:8000",
             "verify" => false
         ];
-        $client = HttpClientFactory::setClientConfig($config)::setNationalCloud(NationalCloud::GERMANY)::create();
+        $client = GraphClientFactory::setNationalCloud(NationalCloud::GERMANY)::createWithConfig($config);
         $this->assertInstanceOf(\GuzzleHttp\Client::class, $client);
     }
 
     function testCreateAdapterReturnsHttpClientInterface() {
-        $adapter = HttpClientFactory::setNationalCloud(NationalCloud::US_DOD)::createAdapter();
+        $adapter = GraphClientFactory::setNationalCloud(NationalCloud::US_DOD)::createAdapter();
         $this->assertInstanceOf(HttpClientInterface::class, $adapter);
     }
 
