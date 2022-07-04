@@ -556,72 +556,72 @@ Search.appendIndex(
             "summary": "The\u0020status\u0020code\u0020of\u0020the\u0020response",
             "url": "classes/Microsoft-Graph-Http-GraphResponse.html#property__httpStatusCode"
         },                {
-            "fqsen": "\\Microsoft\\Graph\\Http\\HttpClientFactory",
+            "fqsen": "\\Microsoft\\Graph\\Http\\GraphClientFactory",
             "name": "HttpClientFactory",
             "summary": "Class\u0020HttpClientFactory",
             "url": "classes/Microsoft-Graph-Http-HttpClientFactory.html"
         },                {
-            "fqsen": "\\Microsoft\\Graph\\Http\\HttpClientFactory\u003A\u003A__construct\u0028\u0029",
+            "fqsen": "\\Microsoft\\Graph\\Http\\GraphClientFactory\u003A\u003A__construct\u0028\u0029",
             "name": "__construct",
-            "summary": "HttpClientFactory\u0020constructor.",
+            "summary": "GraphClientFactory\u0020constructor.",
             "url": "classes/Microsoft-Graph-Http-HttpClientFactory.html#method___construct"
         },                {
-            "fqsen": "\\Microsoft\\Graph\\Http\\HttpClientFactory\u003A\u003AgetInstance\u0028\u0029",
+            "fqsen": "\\Microsoft\\Graph\\Http\\GraphClientFactory\u003A\u003AgetInstance\u0028\u0029",
             "name": "getInstance",
             "summary": "Returns\u0020singleton\u0020instance",
             "url": "classes/Microsoft-Graph-Http-HttpClientFactory.html#method_getInstance"
         },                {
-            "fqsen": "\\Microsoft\\Graph\\Http\\HttpClientFactory\u003A\u003AsetNationalCloud\u0028\u0029",
+            "fqsen": "\\Microsoft\\Graph\\Http\\GraphClientFactory\u003A\u003AsetNationalCloud\u0028\u0029",
             "name": "setNationalCloud",
             "summary": "Set\u0020national\u0020cloud\u0020to\u0020be\u0020used\u0020as\u0020the\u0020base\u0020URL",
             "url": "classes/Microsoft-Graph-Http-HttpClientFactory.html#method_setNationalCloud"
         },                {
-            "fqsen": "\\Microsoft\\Graph\\Http\\HttpClientFactory\u003A\u003AsetClientConfig\u0028\u0029",
+            "fqsen": "\\Microsoft\\Graph\\Http\\GraphClientFactory\u003A\u003AsetClientConfig\u0028\u0029",
             "name": "setClientConfig",
             "summary": "Set\u0020configuration\u0020options\u0020for\u0020the\u0020Guzzle\u0020client",
             "url": "classes/Microsoft-Graph-Http-HttpClientFactory.html#method_setClientConfig"
         },                {
-            "fqsen": "\\Microsoft\\Graph\\Http\\HttpClientFactory\u003A\u003Acreate\u0028\u0029",
+            "fqsen": "\\Microsoft\\Graph\\Http\\GraphClientFactory\u003A\u003Acreate\u0028\u0029",
             "name": "create",
             "summary": "Creates\u0020a\u0020Guzzle\u0020client\u0020with\u0020the\u0020custom\u0020configs\u0020provided\u0020or\u0020a\u0020default\u0020client\u0020if\u0020no\u0020config\u0020was\u0020given\nCreates\u0020default\u0020Guzzle\u0020client\u0020if\u0020no\u0020custom\u0020configs\u0020were\u0020passed",
             "url": "classes/Microsoft-Graph-Http-HttpClientFactory.html#method_create"
         },                {
-            "fqsen": "\\Microsoft\\Graph\\Http\\HttpClientFactory\u003A\u003AcreateAdapter\u0028\u0029",
+            "fqsen": "\\Microsoft\\Graph\\Http\\GraphClientFactory\u003A\u003AcreateAdapter\u0028\u0029",
             "name": "createAdapter",
             "summary": "Creates\u0020an\u0020HttpClientInterface\u0020implementation\u0020that\u0020wraps\u0020around\u0020a\u0020Guzzle\u0020client",
             "url": "classes/Microsoft-Graph-Http-HttpClientFactory.html#method_createAdapter"
         },                {
-            "fqsen": "\\Microsoft\\Graph\\Http\\HttpClientFactory\u003A\u003AgetDefaultConfig\u0028\u0029",
+            "fqsen": "\\Microsoft\\Graph\\Http\\GraphClientFactory\u003A\u003AgetDefaultConfig\u0028\u0029",
             "name": "getDefaultConfig",
             "summary": "Returns\u0020Graph\u002Dspecific\u0020config\u0020for\u0020Guzzle",
             "url": "classes/Microsoft-Graph-Http-HttpClientFactory.html#method_getDefaultConfig"
         },                {
-            "fqsen": "\\Microsoft\\Graph\\Http\\HttpClientFactory\u003A\u003AmergeConfig\u0028\u0029",
+            "fqsen": "\\Microsoft\\Graph\\Http\\GraphClientFactory\u003A\u003AmergeConfig\u0028\u0029",
             "name": "mergeConfig",
             "summary": "Merges\u0020client\u0020defined\u0020config\u0020array\u0020with\u0020Graph\u0027s\u0020default\u0020config.",
             "url": "classes/Microsoft-Graph-Http-HttpClientFactory.html#method_mergeConfig"
         },                {
-            "fqsen": "\\Microsoft\\Graph\\Http\\HttpClientFactory\u003A\u003ACONNECTION_TIMEOUT_SEC",
+            "fqsen": "\\Microsoft\\Graph\\Http\\GraphClientFactory\u003A\u003ACONNECTION_TIMEOUT_SEC",
             "name": "CONNECTION_TIMEOUT_SEC",
             "summary": "",
             "url": "classes/Microsoft-Graph-Http-HttpClientFactory.html#constant_CONNECTION_TIMEOUT_SEC"
         },                {
-            "fqsen": "\\Microsoft\\Graph\\Http\\HttpClientFactory\u003A\u003AREQUEST_TIMEOUT_SEC",
+            "fqsen": "\\Microsoft\\Graph\\Http\\GraphClientFactory\u003A\u003AREQUEST_TIMEOUT_SEC",
             "name": "REQUEST_TIMEOUT_SEC",
             "summary": "",
             "url": "classes/Microsoft-Graph-Http-HttpClientFactory.html#constant_REQUEST_TIMEOUT_SEC"
         },                {
-            "fqsen": "\\Microsoft\\Graph\\Http\\HttpClientFactory\u003A\u003A\u0024nationalCloud",
+            "fqsen": "\\Microsoft\\Graph\\Http\\GraphClientFactory\u003A\u003A\u0024nationalCloud",
             "name": "nationalCloud",
             "summary": "",
             "url": "classes/Microsoft-Graph-Http-HttpClientFactory.html#property_nationalCloud"
         },                {
-            "fqsen": "\\Microsoft\\Graph\\Http\\HttpClientFactory\u003A\u003A\u0024clientConfig",
+            "fqsen": "\\Microsoft\\Graph\\Http\\GraphClientFactory\u003A\u003A\u0024clientConfig",
             "name": "clientConfig",
             "summary": "",
             "url": "classes/Microsoft-Graph-Http-HttpClientFactory.html#property_clientConfig"
         },                {
-            "fqsen": "\\Microsoft\\Graph\\Http\\HttpClientFactory\u003A\u003A\u0024instance",
+            "fqsen": "\\Microsoft\\Graph\\Http\\GraphClientFactory\u003A\u003A\u0024instance",
             "name": "instance",
             "summary": "",
             "url": "classes/Microsoft-Graph-Http-HttpClientFactory.html#property_instance"

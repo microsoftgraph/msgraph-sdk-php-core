@@ -1,0 +1,34 @@
+<?php
+/**
+ * Copyright (c) Microsoft Corporation.  All Rights Reserved.
+ * Licensed under the MIT License.  See License in the project root
+ * for license information.
+ */
+
+
+namespace Microsoft\Graph\Core\Middleware;
+
+
+use GuzzleHttp\Promise\PromiseInterface;
+use Microsoft\Kiota\Http\Middleware\CompressionHandler;
+use Psr\Http\Message\RequestInterface;
+
+/**
+ * Class GraphCompressionHandler
+ * @package Microsoft\Graph\Core\Middleware
+ * @copyright 2022 Microsoft Corporation
+ * @license https://opensource.org/licenses/MIT MIT License
+ * @link https://developer.microsoft.com/graph
+ */
+class GraphCompressionHandler extends CompressionHandler
+{
+    use FeatureFlagTrait;
+
+    const FEATURE_FLAG = 0x00000040;
+
+    public function __invoke(RequestInterface $request, array $options): PromiseInterface
+    {
+        $this->setFeatureFlag(self::FEATURE_FLAG, $options);
+        return parent::__invoke($request, $options);
+    }
+}

@@ -5,19 +5,24 @@
  * for license information.
  */
 
-namespace Microsoft\Graph\Http;
+
+namespace Microsoft\Graph\Core;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware as GuzzleMiddleware;
 use GuzzleHttp\RequestOptions;
+use GuzzleHttp\Utils;
 use Http\Adapter\Guzzle7\Client as GuzzleAdapter;
 use Http\Promise\Promise;
-use Microsoft\Graph\Core\GraphConstants;
-use Microsoft\Graph\Core\NationalCloud;
+use Microsoft\Graph\Core\Middleware\GraphMiddleware;
+use Microsoft\Graph\Core\Middleware\Option\GraphTelemetryOption;
+use Microsoft\Kiota\Http\KiotaClientFactory;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
 /**
- * Class HttpClientFactory
+ * Class GraphClientFactory
  *
  * Configures a Guzzle HTTP client for use with Graph API
  *
@@ -26,7 +31,7 @@ use Psr\Http\Message\ResponseInterface;
  * @license https://opensource.org/licenses/MIT MIT License
  * @link https://developer.microsoft.com/graph
  */
-final class HttpClientFactory
+final class GraphClientFactory extends KiotaClientFactory
 {
     /**
      * @var int Default connection timeout
@@ -44,28 +49,28 @@ final class HttpClientFactory
     private static $nationalCloud = NationalCloud::GLOBAL;
 
     /**
-     * @var array Guzzle client config options (https://docs.guzzlephp.org/en/stable/quickstart.html#creating-a-client)
-     */
-    private static $clientConfig = [];
-
-    /**
-     * @var HttpClientFactory|null Store singleton instance of the HttpClientFactory
+     * @var GraphClientFactory|null Store singleton instance of the GraphClientFactory
      */
     private static $instance = null;
 
     /**
-     * HttpClientFactory constructor.
+     * @var GraphTelemetryOption|null telemetry config
+     */
+    private static $graphTelemetryOption = null;
+
+    /**
+     * GraphClientFactory constructor.
      */
     private function __construct() {}
 
     /**
      * Returns singleton instance
      *
-     * @return HttpClientFactory
+     * @return GraphClientFactory
      */
-    private static function getInstance(): HttpClientFactory {
+    private static function getInstance(): GraphClientFactory {
         if (!self::$instance) {
-            self::$instance = new HttpClientFactory();
+            self::$instance = new GraphClientFactory();
         }
         return self::$instance;
     }
@@ -77,7 +82,7 @@ final class HttpClientFactory
      * @return $this
      * @throws \InvalidArgumentException if $nationalCloud is empty or an invalid national cloud Host
      */
-    public static function setNationalCloud(string $nationalCloud = NationalCloud::GLOBAL): HttpClientFactory {
+    public static function setNationalCloud(string $nationalCloud = NationalCloud::GLOBAL): GraphClientFactory {
         if (!$nationalCloud || !NationalCloud::containsNationalCloudHost($nationalCloud)) {
             throw new \InvalidArgumentException("Invalid national cloud passed. See https://docs.microsoft.com/en-us/graph/deployments#microsoft-graph-and-graph-explorer-service-root-endpoints.");
         }
@@ -86,28 +91,47 @@ final class HttpClientFactory
     }
 
     /**
-     * Set configuration options for the Guzzle client
+     * Set telemetry configuration
      *
-     * @param array $config
-     * @return $this
+     * @param GraphTelemetryOption $telemetryOption
+     * @return GraphClientFactory
      */
-    public static function setClientConfig(array $config): HttpClientFactory {
-        self::$clientConfig = $config;
+    public static function setTelemetryOption(GraphTelemetryOption $telemetryOption): GraphClientFactory
+    {
+        self::$graphTelemetryOption = $telemetryOption;
         return self::getInstance();
+    }
+
+    /**
+     * Create Guzzle client configured for Graph
+     *
+     * @param array $guzzleConfig
+     * @return Client
+     */
+    public static function createWithConfig(array $guzzleConfig): Client
+    {
+        return parent::createWithConfig(array_merge(self::getDefaultConfig(), $guzzleConfig));
     }
 
     /**
      * Creates a Guzzle client with the custom configs provided or a default client if no config was given
      * Creates default Guzzle client if no custom configs were passed
      *
-     * @return \GuzzleHttp\Client
+     * @return Client
      */
-    public static function create(): \GuzzleHttp\Client {
-        if (!self::$clientConfig) {
-            return new Client(self::getDefaultConfig());
-        }
-        self::mergeConfig();
-        return new Client(self::$clientConfig);
+    public static function create(): Client {
+        return parent::createWithConfig(self::getDefaultConfig());
+    }
+
+    /**
+     * Initialises a Guzzle client with middleware and default Graph configs
+     *
+     * @param HandlerStack $handlerStack
+     * @return Client
+     */
+    public static function createWithMiddleware(HandlerStack $handlerStack): Client
+    {
+        return parent::createWithConfig(array_merge(self::getDefaultConfig(), ['handler' => $handlerStack]));
     }
 
     /**
@@ -134,40 +158,41 @@ final class HttpClientFactory
     }
 
     /**
+     * Return default handler stack for Graph
+     *
+     * @param null $handler final handler
+     * @return HandlerStack
+     */
+    public static function getDefaultHandlerStack($handler = null): HandlerStack
+    {
+        $handler = ($handler) ?: Utils::chooseHandler();
+        $handlerStack = new HandlerStack($handler);
+        $handlerStack->push(GraphMiddleware::retry());
+        $handlerStack->push(GuzzleMiddleware::redirect());
+        $handlerStack->push(GraphMiddleware::graphTelemetry(self::$graphTelemetryOption));
+        return $handlerStack;
+    }
+
+    /**
      * Returns Graph-specific config for Guzzle
      *
      * @return array
      */
     private static function getDefaultConfig(): array {
-        return [
+        $config = [
             RequestOptions::CONNECT_TIMEOUT => self::CONNECTION_TIMEOUT_SEC,
             RequestOptions::TIMEOUT => self::REQUEST_TIMEOUT_SEC,
             RequestOptions::HEADERS => [
                 "Content-Type" => "application/json",
-                "SdkVersion" => "graph-php-core/".GraphConstants::SDK_VERSION
             ],
             RequestOptions::HTTP_ERRORS => false,
-            "base_uri" => self::$nationalCloud
+            "base_uri" => self::$nationalCloud,
+            'handler' => self::getDefaultHandlerStack()
         ];
-    }
-
-    /**
-     * Merges client defined config array with Graph's default config.
-     * Provides defaults for timeouts and headers if none have been provided.
-     * Overrides base_uri.
-     */
-    private static function mergeConfig(): void {
-        $defaultConfig = self::getDefaultConfig();
-
-        if (!isset(self::$clientConfig[RequestOptions::CONNECT_TIMEOUT])) {
-            self::$clientConfig[RequestOptions::CONNECT_TIMEOUT] = $defaultConfig[RequestOptions::CONNECT_TIMEOUT];
+        if (extension_loaded('curl') && defined('CURL_VERSION_HTTP2') && curl_version()["features"] & CURL_VERSION_HTTP2 !== 0) {
+            // Enable HTTP/2 if curl extension exists and supports it
+            $config['version'] = '2';
         }
-        if (!isset(self::$clientConfig[RequestOptions::TIMEOUT])) {
-            self::$clientConfig[RequestOptions::TIMEOUT] = $defaultConfig[RequestOptions::TIMEOUT];
-        }
-        if (!isset(self::$clientConfig[RequestOptions::HEADERS])) {
-            self::$clientConfig[RequestOptions::HEADERS] = $defaultConfig[RequestOptions::HEADERS];
-        }
-        self::$clientConfig["base_uri"] = self::$nationalCloud;
+        return $config;
     }
 }

@@ -19,11 +19,13 @@ jobs:
   validate-pull-request:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v2.4.0
+      with:
+        submodules: 'true'
     - name: Setup PHP and Xdebug for Code Coverage report
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '7.3'
+        php-version: '7.4'
         coverage: xdebug
     - name: Validate composer file
       run: |
@@ -34,16 +36,6 @@ jobs:
     - name: Run tests
       run : |
         vendor/bin/phpunit --coverage-text
-  run-static-analysis:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Validate composer file
-      run: |
-        composer validate
-    - name: Composer install
-      run: |
-        composer install
     - name: Run static analysis
       run: |
-          vendor/bin/phpstan analyse --memory-limit=500M --error-format=github
+        vendor/bin/phpstan analyse --memory-limit=500M --error-format=github
