@@ -16,7 +16,7 @@
 		"microsoft/kiota-authentication-phpleague": "^0.1.0",
 		"microsoft/kiota-http-guzzle": "^0.1.0",
 		"microsoft/kiota-serialization-json": "^0.1.0",
-		"microsoft/kiota-serialization-text": "^0.1.0",
+		"microsoft/kiota-serialization-text": "^0.1.0 || ^0.2.0",
 		"microsoft/kiota-abstractions": "^0.1.0",
 		"php-http/httplug": "^2.2",
 		"php-http/guzzle7-adapter": "^1.0"
