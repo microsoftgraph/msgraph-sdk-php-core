@@ -24,8 +24,9 @@
 	"require-dev": {
 		"phpunit/phpunit": "^9.0",
 		"mikey179/vfsstream": "^1.2",
-		"phpstan/phpstan": "^0.12.90 || ^1.0.0"
-	},
+		"phpstan/phpstan": "^0.12.90 || ^1.0.0",
+      "ext-json": "*"
+    },
 	"autoload": {
 		"psr-4": {
 			"Microsoft\\Graph\\Core\\": "src/"
