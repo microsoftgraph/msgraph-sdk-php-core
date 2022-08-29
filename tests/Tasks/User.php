@@ -98,4 +98,52 @@ class User implements Parsable, AdditionalDataHolder
     {
         $this->mobilePhone = $mobilePhone;
     }
+
+    /**
+     * @return string|null
+     */
+    public function getId(): ?string
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getBusinessPhones(): ?array
+    {
+        return $this->businessPhones;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getDisplayName(): ?string
+    {
+        return $this->displayName;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getGivenName(): ?string
+    {
+        return $this->givenName;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getMail(): ?string
+    {
+        return $this->mail;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getMobilePhone(): ?string
+    {
+        return $this->mobilePhone;
+    }
 }

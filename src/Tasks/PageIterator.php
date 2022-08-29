@@ -163,7 +163,7 @@ class PageIterator
             return false;
         }
         for ($i = $this->pauseIndex; $i < count($pageItems); $i++){
-            $keepIterating = $callback($pageItems);
+            $keepIterating = $callback($pageItems[$i]);
 
              if (!$keepIterating) {
                  $this->pauseIndex = $i + 1;
