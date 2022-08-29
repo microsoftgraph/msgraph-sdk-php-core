@@ -1,6 +1,6 @@
 <?php
 
-namespace Microsoft\Graph\Core\Tasks;
+namespace Microsoft\Graph\Core\Models;
 
 class PageResult
 {

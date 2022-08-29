@@ -6,6 +6,7 @@ use Exception;
 use Http\Promise\FulfilledPromise;
 use Http\Promise\Promise;
 use InvalidArgumentException;
+use Microsoft\Graph\Core\Models\PageResult;
 use Microsoft\Kiota\Abstractions\HttpMethod;
 use Microsoft\Kiota\Abstractions\RequestAdapter;
 use Microsoft\Kiota\Abstractions\RequestInformation;
@@ -19,9 +20,9 @@ class PageIterator
     private int $pauseIndex;
     /** @var array{string, string} $constructorFunc */
     private array $constructorCallable;
-    private array $headers;
+    private array $headers = [];
     /** @var array<RequestOption>|null  */
-    private ?array $requestOptions;
+    private ?array $requestOptions = [];
 
     /**
      * @param $res
@@ -76,6 +77,9 @@ class PageIterator
             }
             $nextPage = $this->next();
 
+            if (empty($nextPage)) {
+                return;
+            }
             $this->currentPage = $nextPage;
             $this->pauseIndex = 0;
         }
@@ -87,13 +91,11 @@ class PageIterator
     public function next(): ?PageResult {
         /** @var PageResult|null $page */
         $page = null;
-
         if (empty($this->currentPage->getNextLink())) {
             return null;
         }
 
         $response = $this->fetchNextPage();
-        $result = null;
         try {
             $result = $response->wait();
         } catch (Exception $exception){
@@ -123,9 +125,8 @@ class PageIterator
         for ($i = 0; $i < count($value); $i++) {
             $collected []= $value[$i];
         }
-        $parsablePage =  $response;
-
-        $page->setNextLink($parsablePage->getNextLink());
+        $parsablePage =  json_decode(json_encode($response), true);
+        $page->setNextLink($parsablePage['@odata.nextLink'] ?? '');
         $page->setValue($collected);
         return $page;
     }
@@ -158,11 +159,9 @@ class PageIterator
         $keepIterating = true;
 
         $pageItems = $this->currentPage->getValue();
-
         if (empty($pageItems)) {
             return false;
         }
-
         for ($i = $this->pauseIndex; $i < count($pageItems); $i++){
             $keepIterating = $callback($pageItems);
 
