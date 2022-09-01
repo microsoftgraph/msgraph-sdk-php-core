@@ -17,6 +17,7 @@ class PageIterator
 {
     private PageResult $currentPage;
     private RequestAdapter $requestAdapter;
+    private bool $hasNext = true;
     private int $pauseIndex;
     /** @var array{string, string} $constructorFunc */
     private array $constructorCallable;
@@ -78,6 +79,7 @@ class PageIterator
             $nextPage = $this->next();
 
             if (empty($nextPage)) {
+                $this->hasNext = false;
                 return;
             }
             $this->currentPage = $nextPage;
@@ -171,5 +173,9 @@ class PageIterator
              }
         }
         return $keepIterating;
+    }
+
+    public function hasNext(): bool {
+        return $this->hasNext;
     }
 }

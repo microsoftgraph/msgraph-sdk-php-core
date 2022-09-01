@@ -10,6 +10,7 @@ use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use Http\Promise\FulfilledPromise;
 use Microsoft\Graph\Core\Tasks\PageIterator;
+use Microsoft\Kiota\Abstractions\RequestAdapter;
 use Microsoft\Kiota\Abstractions\RequestInformation;
 use Microsoft\Kiota\Http\GuzzleRequestAdapter;
 use Microsoft\Kiota\Serialization\Json\JsonParseNode;
@@ -19,11 +20,15 @@ use PHPUnit\Framework\TestCase;
 class PageIteratorTest extends TestCase
 {
     private $mock;
-    private $handlerStack;
-    private $testClient;
-    private $mockRequestAdapter;
-    private $requestInfoMock;
-    private $firstPageData;
+    private HandlerStack $handlerStack;
+    private Client $testClient;
+    private RequestAdapter $mockRequestAdapter;
+    private RequestInformation $requestInfoMock;
+    private $firstPageContent;
+
+    /**
+     * @throws GuzzleException
+     */
     protected function setUp(): void {
 
         $this->mockRequestAdapter = $this->createMock(GuzzleRequestAdapter::class);
@@ -63,7 +68,7 @@ class PageIteratorTest extends TestCase
             }
             ');
         $usersPage = new FulfilledPromise(json_decode($data->getContents()));
-        $this->firstPageData = '{
+        $firstPageData = '{
                 "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users",
                 "@odata.nextLink": "https://graph.microsoft.com/v1.0/users?skip=2&page=10",
                 "value": [
@@ -101,18 +106,31 @@ class PageIteratorTest extends TestCase
         $this->mockRequestAdapter->method('sendAsync')
             ->willReturn($usersPage);
         $this->mock = new MockHandler([
-            new Response(200, ['X-Foo' => 'Bar'], $this->firstPageData),
+            new Response(200, ['X-Foo' => 'Bar'], $firstPageData),
         ]);
         $this->handlerStack = HandlerStack::create($this->mock);
         $this->testClient = new Client(['handler' => $this->handlerStack]);
+        $this->firstPageContent = json_decode($this->testClient->get('/')->getBody()->getContents());
     }
 
     /**
-     * @throws GuzzleException
+     * @throws \Exception
      */
     public function testHandlerCanWork(): void {
-        $content = json_decode($this->testClient->get('/')->getBody()->getContents());
-        $pageIterator = new PageIterator($content, $this->mockRequestAdapter, [UsersResponse::class, 'createFromDiscriminator']);
+        $pageIterator = new PageIterator($this->firstPageContent, $this->mockRequestAdapter, [UsersResponse::class, 'createFromDiscriminator']);
+        $count = 0;
+        $pageIterator->iterate(function ($value) use (&$count)  {
+            $count++;
+            return true;
+        });
+        $this->assertEquals(4, $count);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testCanResumeIteration(): void{
+        $pageIterator = new PageIterator($this->firstPageContent, $this->mockRequestAdapter, [UsersResponse::class, 'createFromDiscriminator']);
         $count = 0;
         $pageIterator->iterate(function ($value) use (&$count)  {
             $parseNode = new JsonParseNode($value);
@@ -126,7 +144,39 @@ class PageIteratorTest extends TestCase
             $count++;
             return true;
         });
-        $this->assertNotEmpty($content);
         $this->assertEquals(4, $count);
+    }
+
+    public function testCanPauseIteration(): void {
+        $pageIterator = new PageIterator($this->firstPageContent, $this->mockRequestAdapter, [UsersResponse::class, 'createFromDiscriminator']);
+        $count = 0;
+        $pageIterator->iterate(function ($value) use (&$count)  {
+            $parseNode = new JsonParseNode($value);
+            /** @var User $user */
+            $user = $parseNode->getObjectValue([User::class, 'createFromDiscriminator']);
+            $count++;
+            return '6ea91a8d-e32e-41a1-b7bd-d2d185eed0e0' !== $user->getId();
+        });
+
+        $this->assertEquals(1, $count);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testCanDeserializeUsingCallback(): void {
+        $pageIterator = new PageIterator($this->firstPageContent, $this->mockRequestAdapter, [UsersResponse::class, 'createFromDiscriminator']);
+        $count = 0;
+        $usersArray = [];
+        $pageIterator->iterate(function ($value) use (&$count,&$usersArray)  {
+            $parseNode = new JsonParseNode($value);
+            /** @var User $user */
+            $user = $parseNode->getObjectValue([User::class, 'createFromDiscriminator']);
+            $usersArray []= $user;
+            $count++;
+            return true;
+        });
+
+        $this->assertInstanceOf(User::class, $usersArray[0]);
     }
 }
