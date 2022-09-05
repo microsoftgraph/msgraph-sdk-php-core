@@ -4,16 +4,16 @@ namespace Microsoft\Graph\Core\Models;
 
 class PageResult
 {
-    /** @var string|null $nextLink */
-    private ?string $nextLink;
+    /** @var string|null $odataNextLink */
+    private ?string $odataNextLink;
     /** @var array<mixed>|null $value  */
     private ?array $value;
 
     /**
      * @return string|null
      */
-    public function getNextLink(): ?string {
-        return $this->nextLink;
+    public function getOdataNextLink(): ?string {
+        return $this->odataNextLink;
     }
 
     /**
@@ -26,8 +26,8 @@ class PageResult
     /**
      * @param string|null $nextLink
      */
-    public function setNextLink(?string $nextLink): void{
-        $this->nextLink = $nextLink;
+    public function setOdataNextLink(?string $nextLink): void{
+        $this->odataNextLink = $nextLink;
     }
 
     /**

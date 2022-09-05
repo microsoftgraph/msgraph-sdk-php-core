@@ -93,7 +93,7 @@ class PageIterator
     public function next(): ?PageResult {
         /** @var PageResult|null $page */
         $page = null;
-        if (empty($this->currentPage->getNextLink())) {
+        if (empty($this->currentPage->getOdataNextLink())) {
             return null;
         }
 
@@ -116,7 +116,7 @@ class PageIterator
             throw new InvalidArgumentException('$response cannot be null');
         }
 
-        $value = $response->value;
+        $value = is_array($response) ? $response['value'] : $response->value;
 
         if ($value === null) {
             throw new InvalidArgumentException('');
@@ -127,8 +127,12 @@ class PageIterator
         for ($i = 0; $i < count($value); $i++) {
             $collected []= $value[$i];
         }
-        $parsablePage =  json_decode(json_encode($response), true);
-        $page->setNextLink($parsablePage['@odata.nextLink'] ?? '');
+        $parsablePage =  is_a($response, Parsable::class) ? $response : json_decode(json_encode($response), true);
+        if (is_array($parsablePage)) {
+            $page->setOdataNextLink($parsablePage['@odata.nextLink'] ?? '');
+        } else {
+            $page->setOdataNextLink($parsablePage->getOdataNextLink());
+        }
         $page->setValue($collected);
         return $page;
     }
@@ -136,7 +140,7 @@ class PageIterator
         /** @var Parsable $graphResponse */
         $graphResponse = null;
 
-        $nextLink = $this->currentPage->getNextLink();
+        $nextLink = $this->currentPage->getOdataNextLink();
 
         if ($nextLink === null) {
             return new FulfilledPromise($graphResponse);
