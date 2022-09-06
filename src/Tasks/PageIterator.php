@@ -6,8 +6,10 @@ use Exception;
 use Http\Promise\FulfilledPromise;
 use Http\Promise\Promise;
 use InvalidArgumentException;
+use JsonException;
 use Microsoft\Graph\Core\Models\PageResult;
 use Microsoft\Kiota\Abstractions\HttpMethod;
+use Microsoft\Kiota\Abstractions\NativeResponseHandler;
 use Microsoft\Kiota\Abstractions\RequestAdapter;
 use Microsoft\Kiota\Abstractions\RequestInformation;
 use Microsoft\Kiota\Abstractions\RequestOption;
@@ -17,7 +19,7 @@ class PageIterator
 {
     private PageResult $currentPage;
     private RequestAdapter $requestAdapter;
-    private bool $hasNext = true;
+    private bool $hasNext = false;
     private int $pauseIndex;
     /** @var array{string, string} $constructorFunc */
     private array $constructorCallable;
@@ -26,18 +28,20 @@ class PageIterator
     private ?array $requestOptions = [];
 
     /**
-     * @param $res
+     * @param mixed $response
      * @param RequestAdapter $requestAdapter
-     * @param array{string,string} $constructorCallable
+     * @param array{string,string} $constructorCallable The method to construct a paged response object.
+     * @throws JsonException
      */
-    public function __construct($res, RequestAdapter $requestAdapter, array $constructorCallable) {
+    public function __construct($response, RequestAdapter $requestAdapter, array $constructorCallable) {
         $this->requestAdapter = $requestAdapter;
         $this->constructorCallable = $constructorCallable;
         $this->pauseIndex = 0;
-        $page = self::convertToPage($res);
+        $page = self::convertToPage($response);
 
         if ($page !== null) {
             $this->currentPage = $page;
+            $this->hasNext = true;
         }
         $this->headers = [];
     }
@@ -67,6 +71,7 @@ class PageIterator
     }
 
     /**
+     * @param callable $callback The callback function to apply on every entity.
      * @throws Exception
      */
     public function iterate(callable $callback): void {
@@ -91,8 +96,6 @@ class PageIterator
      * @throws Exception
      */
     public function next(): ?PageResult {
-        /** @var PageResult|null $page */
-        $page = null;
         if (empty($this->currentPage->getOdataNextLink())) {
             return null;
         }
@@ -109,6 +112,7 @@ class PageIterator
     /**
      * @param $response
      * @return PageResult|null
+     * @throws JsonException
      */
     public static function convertToPage($response): ?PageResult {
         $page = new PageResult();
@@ -116,27 +120,28 @@ class PageIterator
             throw new InvalidArgumentException('$response cannot be null');
         }
 
-        $value = is_array($response) ? $response['value'] : $response->value;
+        if (is_array($response)) {
+            $value = $response['value'];
+        } else if(is_a($response, Parsable::class) && method_exists($response, 'getValue')) {
+            $value = $response->getValue();
+        } else {
+            $value = $response->value;
+        }
 
         if ($value === null) {
-            throw new InvalidArgumentException('');
+            throw new InvalidArgumentException('The response does not contain a value.');
         }
 
-        $collected = [];
-
-        for ($i = 0; $i < count($value); $i++) {
-            $collected []= $value[$i];
-        }
-        $parsablePage =  is_a($response, Parsable::class) ? $response : json_decode(json_encode($response), true);
+        $parsablePage =  is_a($response, Parsable::class) ? $response : json_decode(json_encode($response,JSON_THROW_ON_ERROR), true);
         if (is_array($parsablePage)) {
             $page->setOdataNextLink($parsablePage['@odata.nextLink'] ?? '');
         } else {
             $page->setOdataNextLink($parsablePage->getOdataNextLink());
         }
-        $page->setValue($collected);
+        $page->setValue($value);
         return $page;
     }
-    public function fetchNextPage(): ?Promise {
+    private function fetchNextPage(): ?Promise {
         /** @var Parsable $graphResponse */
         $graphResponse = null;
 
