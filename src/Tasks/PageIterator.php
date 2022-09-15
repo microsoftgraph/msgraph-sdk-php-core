@@ -71,7 +71,7 @@ class PageIterator
     }
 
     /**
-     * @param callable $callback The callback function to apply on every entity.
+     * @param callable(Parsable|array|object): bool $callback The callback function to apply on every entity. Pauses iteration if false is returned
      * @throws Exception
      */
     public function iterate(callable $callback): void {
