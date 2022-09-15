@@ -28,7 +28,7 @@ class PageIterator
     private ?array $requestOptions = [];
 
     /**
-     * @param mixed $response
+     * @param Parsable|array|object $response paged collection response
      * @param RequestAdapter $requestAdapter
      * @param array{string,string} $constructorCallable The method to construct a paged response object.
      * @throws JsonException
