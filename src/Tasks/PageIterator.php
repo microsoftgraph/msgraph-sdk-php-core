@@ -5,6 +5,7 @@ namespace Microsoft\Graph\Core\Tasks;
 use Exception;
 use Http\Promise\FulfilledPromise;
 use Http\Promise\Promise;
+use Http\Promise\RejectedPromise;
 use InvalidArgumentException;
 use JsonException;
 use Microsoft\Graph\Core\Models\PageResult;
@@ -148,7 +149,7 @@ class PageIterator
         $nextLink = $this->currentPage->getOdataNextLink();
 
         if ($nextLink === null) {
-            return new FulfilledPromise($graphResponse);
+            return new RejectedPromise(new InvalidArgumentException('The response does not have a nextLink'));
         }
 
         if (!filter_var($nextLink, FILTER_VALIDATE_URL)) {
