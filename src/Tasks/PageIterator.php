@@ -102,11 +102,7 @@ class PageIterator
         }
 
         $response = $this->fetchNextPage();
-        try {
-            $result = $response->wait();
-        } catch (Exception $exception){
-            return null;
-        }
+        $result = $response->wait();
         return self::convertToPage($result);
     }
 
