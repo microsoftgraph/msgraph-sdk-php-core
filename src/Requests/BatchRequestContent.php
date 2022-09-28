@@ -33,16 +33,17 @@ class BatchRequestContent implements Parsable
      */
     private array $requests = [];
 
-
     /**
-     * @param RequestInformation ...$requests Converts $requests to BatchRequestItems with auto-generated incrementing IDs starting from "0".
+     * @param RequestInformation[]|BatchRequestItem[] $requests Converts $requests to BatchRequestItems with auto-generated incrementing IDs starting from "0".
      *                                         Use getRequests() to fetch created BatchRequestItem objects.
      * @throws \JsonException
      * @throws \League\Uri\Contracts\UriException
      */
-    public function __construct(RequestInformation ...$requests)
+    public function __construct(array $requests = [])
     {
-        $this->setRequests(array_map(fn ($request) => new BatchRequestItem($request), $requests));
+        $this->setRequests(
+            array_map(fn ($request) => is_a($request, BatchRequestItem::class) ? $request : new BatchRequestItem($request),
+        $requests));
     }
 
     /**

@@ -101,6 +101,19 @@ class BatchResponseContent implements Parsable
     }
 
     /**
+     * Gets a response for a given request ID
+     * @param string $requestId
+     * @return BatchResponseItem
+     */
+    public function getResponse(string $requestId): BatchResponseItem
+    {
+        if (!array_key_exists($requestId, $this->responses)) {
+            throw new \InvalidArgumentException("No response found for id: {$requestId}");
+        }
+        return $this->responses[$requestId];
+    }
+
+    /**
      * @param string $nextLink
      */
     public function setNextLink(string $nextLink): void
@@ -111,14 +124,15 @@ class BatchResponseContent implements Parsable
     public function getFieldDeserializers(): array
     {
         return [
-            'nextLink' => fn (ParseNode $n) => $this->setNextLink($n->getStringValue("@nextLink")),
+            '@nextLink' => fn (ParseNode $n) => $this->setNextLink($n->getStringValue()),
             'responses' => fn (ParseNode $n) => $this->setResponses($n->getCollectionOfObjectValues([BatchResponseItem::class, 'create']))
         ];
     }
 
     public function serialize(SerializationWriter $writer): void
     {
-        return;
+        $writer->writeStringValue('@nextLink', $this->getNextLink());
+        $writer->writeCollectionOfObjectValues('responses', [BatchResponseItem::class, 'create']);
     }
 
     public static function create(): BatchResponseContent

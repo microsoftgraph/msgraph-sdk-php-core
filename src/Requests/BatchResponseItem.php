@@ -48,7 +48,7 @@ class BatchResponseItem implements Parsable
        return [
            'id' => fn (ParseNode $n) => $this->setId($n->getStringValue()),
            'atomicityGroup' => fn (ParseNode $n) => $this->setAtomicityGroup($n->getStringValue()),
-           'statusCode' => fn (ParseNode $n) => $this->setStatusCode($n->getIntegerValue()),
+           'status' => fn (ParseNode $n) => $this->setStatusCode($n->getIntegerValue()),
            'headers' => fn (ParseNode $n) => $this->setHeaders($n->getCollectionOfPrimitiveValues('string')),
            'body' => fn (ParseNode $n) => $this->setBody($n->getBinaryContent())
        ];
@@ -56,7 +56,11 @@ class BatchResponseItem implements Parsable
 
     public function serialize(SerializationWriter $writer): void
     {
-        return;
+        $writer->writeStringValue('id', $this->getId());
+        $writer->writeStringValue('atomicityGroup', $this->getAtomicityGroup());
+        $writer->writeIntegerValue('statusCode', $this->getStatusCode());
+        $writer->writeAnyValue('headers', $this->getHeaders());
+        $writer->writeBinaryContent('body', $this->getBody());
     }
 
     public static function create(ParseNode $parseNode): BatchResponseItem

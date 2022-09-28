@@ -73,23 +73,25 @@ class BatchRequestBuilder
     /**
      * @param BatchRequestContent $body
      * @param BatchRequestBuilderPostRequestConfiguration|null $requestConfig
-     * @param ResponseHandler|null $responseHandler
      * @return Promise
      */
-    public function postAsync(BatchRequestContent $body, ?BatchRequestBuilderPostRequestConfiguration $requestConfig = null, ?ResponseHandler $responseHandler = null): Promise
+    public function postAsync(BatchRequestContent $body, ?BatchRequestBuilderPostRequestConfiguration $requestConfig = null): Promise
     {
         $requestInfo = $this->createPostRequestInformation($body, $requestConfig);
         try {
-            return $this->requestAdapter->sendAsync($requestInfo, [], new NativeResponseHandler())->then(
+            return $this->requestAdapter->sendAsync($requestInfo, [], new NativeResponseHandler())->wait()->then(
                 function (ResponseInterface $response) {
+                    //TODO: Replace with getParseNodeFactory
                     $tempReflectionClass = new \ReflectionClass($this->requestAdapter);
-                    $rootParseNode = $tempReflectionClass->getProperty('parseNodeFactory')->getValue()->getRootParseNode('application/json', $response->getBody());
+                    $parseNodeFactoryProperty = $tempReflectionClass->getParentClass()->getProperty('parseNodeFactory');
+                    $parseNodeFactoryProperty->setAccessible(true);
+                    $rootParseNode = $parseNodeFactoryProperty->getValue($this->requestAdapter)->getRootParseNode('application/json', $response->getBody());
 
                     $batchResponseContent = $rootParseNode->getObjectValue([BatchResponseContent::class, 'create']);
                     $batchResponseContent->setStatusCode($response->getStatusCode());
                     $headers = [];
                     foreach ($response->getHeaders() as $key => $value) {
-                        $headers [] = [strtolower($key) => strtolower(implode(",", $value))];
+                        $headers[strtolower($key)] = strtolower(implode(",", $value));
                     }
                     $batchResponseContent->setHeaders($headers);
                     return $batchResponseContent;
