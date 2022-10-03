@@ -81,12 +81,7 @@ class BatchRequestBuilder
         try {
             return $this->requestAdapter->sendAsync($requestInfo, [], new NativeResponseHandler())->wait()->then(
                 function (ResponseInterface $response) {
-                    //TODO: Replace with getParseNodeFactory
-                    $tempReflectionClass = new \ReflectionClass($this->requestAdapter);
-                    $parseNodeFactoryProperty = $tempReflectionClass->getParentClass()->getProperty('parseNodeFactory');
-                    $parseNodeFactoryProperty->setAccessible(true);
-                    $rootParseNode = $parseNodeFactoryProperty->getValue($this->requestAdapter)->getRootParseNode('application/json', $response->getBody());
-
+                    $rootParseNode = $this->requestAdapter->getParseNodeFactory()->getRootParseNode('application/json', $response->getBody());
                     $batchResponseContent = $rootParseNode->getObjectValue([BatchResponseContent::class, 'create']);
                     $batchResponseContent->setStatusCode($response->getStatusCode());
                     $headers = [];
