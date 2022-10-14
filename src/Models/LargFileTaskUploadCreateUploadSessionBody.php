@@ -11,19 +11,36 @@ class LargFileTaskUploadCreateUploadSessionBody implements Parsable, AdditionalD
     /** @var array $additionalData */
     private array $additionalData = [];
     private string $conflictBehavior = 'rename';
+
+    private int $fileSize = 0;
     private ?string $oDataType = null;
     private ?string $name = null;
     public function serialize(SerializationWriter $writer): void {
         $writer->writeStringValue('name', $this->name);
         $writer->writeStringValue('@microsoft.graph.conflictBehavior', $this->conflictBehavior);
         $writer->writeStringValue('@odata.type', $this->oDataType);
+        $writer->writeIntegerValue('fileSize', $this->fileSize);
         $writer->writeAdditionalData($this->additionalData);
     }
 
+    /**
+     * @return int
+     */
+    public function getFileSize(): int {
+        return $this->fileSize;
+    }
+
+    /**
+     * @param int $fileSize
+     */
+    public function setFileSize(int $fileSize): void {
+        $this->fileSize = $fileSize;
+    }
     public function getFieldDeserializers(): array {
         return [
         'name' => fn (ParseNode $parseNode) => $this->setName($parseNode->getStringValue()),
         '@microsoft.graph.conflictBehavior' => fn (ParseNode $parseNode) => $this->setConflictBehavior($parseNode->getStringValue()),
+        'fileSize' => fn (ParseNode $parseNode) => $this->setFileSize($parseNode->getIntegerValue()),
         '@odata.type' => fn (ParseNode $parseNode) => $this->setOdataType($parseNode->getStringValue())
       ];
     }
