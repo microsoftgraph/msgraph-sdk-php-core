@@ -40,11 +40,6 @@ class BatchResponseContent implements Parsable
      */
     private array $responses = [];
 
-    /**
-     * @var string
-     */
-    private string $nextLink = "";
-
     public function __construct() {}
 
     /**
@@ -96,14 +91,6 @@ class BatchResponseContent implements Parsable
     }
 
     /**
-     * @return string
-     */
-    public function getNextLink(): string
-    {
-        return $this->nextLink;
-    }
-
-    /**
      * Gets a response for a given request ID
      * @param string $requestId
      * @return BatchResponseItem
@@ -151,25 +138,15 @@ class BatchResponseContent implements Parsable
         return $parseNode->getObjectValue([$type, 'createFromDiscriminatorValue']);
     }
 
-    /**
-     * @param string $nextLink
-     */
-    public function setNextLink(string $nextLink): void
-    {
-        $this->nextLink = $nextLink;
-    }
-
     public function getFieldDeserializers(): array
     {
         return [
-            '@nextLink' => fn (ParseNode $n) => $this->setNextLink($n->getStringValue()),
             'responses' => fn (ParseNode $n) => $this->setResponses($n->getCollectionOfObjectValues([BatchResponseItem::class, 'create']))
         ];
     }
 
     public function serialize(SerializationWriter $writer): void
     {
-        $writer->writeStringValue('@nextLink', $this->getNextLink());
         $writer->writeCollectionOfObjectValues('responses', $this->getResponses());
     }
 

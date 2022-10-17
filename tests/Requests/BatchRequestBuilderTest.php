@@ -28,7 +28,6 @@ class BatchRequestBuilderTest extends TestCase
             new Response(200,
                 ['content-type' => 'application/json'],
                 Utils::streamFor(json_encode([
-                    "@nextLink" => "https://graph.microsoft.com/",
                     "responses" => [
                         [
                             "id" => 1,
@@ -43,7 +42,6 @@ class BatchRequestBuilderTest extends TestCase
             new Response(200,
                 ['content-type' => 'application/json'],
                 Utils::streamFor(json_encode([
-                    "@nextLink" => "https://graph.microsoft.com/",
                     "responses" => [
                         [
                             "id" => 1,
@@ -80,7 +78,6 @@ class BatchRequestBuilderTest extends TestCase
         $this->assertInstanceOf(BatchResponseContent::class, $response);
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals(['content-type' => 'application/json'], $response->getHeaders());
-        $this->assertEquals("https://graph.microsoft.com/", $response->getNextLink());
         $this->assertEquals(1, $response->getResponses()[0]->getId());
         $this->assertEquals(200, $response->getResponses()[0]->getStatusCode());
         $this->assertEquals(['content-type' => 'text/plain'], $response->getResponses()[0]->getHeaders());
