@@ -119,6 +119,6 @@ class BatchRequestContent implements Parsable
 
     public function serialize(SerializationWriter $writer): void
     {
-        $writer->writeCollectionOfObjectValues("requests", array_values($this->requests));
+        $writer->writeCollectionOfObjectValues("requests", $this->requests);
     }
 }
