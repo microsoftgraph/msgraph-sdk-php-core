@@ -99,7 +99,7 @@ class BatchRequestContent implements Parsable
         $this->addRequest(BatchRequestItem::createWithPsrRequest($request));
     }
 
-    public function remove(string $requestId)
+    public function remove(string $requestId): void
     {
         if (!array_key_exists($requestId, $this->requests)) {
             throw new \InvalidArgumentException("Request with id:{$requestId} does NOT exist");
