@@ -107,7 +107,7 @@ class BatchRequestContent implements Parsable
         unset($this->requests[$requestId]);
     }
 
-    public function removeBatchRequestItem(BatchRequestItem $item)
+    public function removeBatchRequestItem(BatchRequestItem $item): void
     {
         $this->remove($item->getId());
     }
