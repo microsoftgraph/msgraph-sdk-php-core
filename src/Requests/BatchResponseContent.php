@@ -10,7 +10,10 @@ namespace Microsoft\Graph\Core\Requests;
 
 use Microsoft\Kiota\Abstractions\Serialization\Parsable;
 use Microsoft\Kiota\Abstractions\Serialization\ParseNode;
+use Microsoft\Kiota\Abstractions\Serialization\ParseNodeFactory;
+use Microsoft\Kiota\Abstractions\Serialization\ParseNodeFactoryRegistry;
 use Microsoft\Kiota\Abstractions\Serialization\SerializationWriter;
+use Microsoft\Kiota\Serialization\Json\JsonParseNodeFactory;
 
 /**
  * Class BatchResponseContent
@@ -114,6 +117,41 @@ class BatchResponseContent implements Parsable
     }
 
     /**
+     * Deserializes a response item's body to $type. $type MUST implement Parsable
+     *
+     * @param string $requestId
+     * @param string $type Parsable class name
+     * @param ParseNodeFactory|null $parseNodeFactory checks the ParseNodeFactoryRegistry by default
+     * @return Parsable|null
+     */
+    public function getResponseBody(string $requestId, string $type, ?ParseNodeFactory $parseNodeFactory = null): ?Parsable
+    {
+        if (!array_key_exists($requestId, $this->responses)) {
+            throw new \InvalidArgumentException("No response found for id: {$requestId}");
+        }
+        $interfaces = class_implements($type);
+        if (!$interfaces || !in_array(Parsable::class, $interfaces)) {
+            throw new \InvalidArgumentException("Type passed must implement the Parsable interface");
+        }
+        $response = $this->responses[$requestId];
+        if (!array_key_exists('content-type', $response->getHeaders())) {
+            throw new \RuntimeException("Unable to get content-type header in response item");
+        }
+        $contentType = $response->getHeaders()['content-type'];
+        if ($parseNodeFactory) {
+            $parseNode = $parseNodeFactory->getRootParseNode($contentType, $response->getBody());
+        } else {
+            // Check the registry or default to Json deserialization
+            try {
+                $parseNode = ParseNodeFactoryRegistry::getDefaultInstance()->getRootParseNode($contentType, $response->getBody());
+            } catch (\UnexpectedValueException $ex) {
+                $parseNode = (new JsonParseNodeFactory())->getRootParseNode($contentType, $response->getBody());
+            }
+        }
+        return $parseNode->getObjectValue([$type, 'createFromDiscriminatorValue']);
+    }
+
+    /**
      * @param string $nextLink
      */
     public function setNextLink(string $nextLink): void
@@ -132,10 +170,10 @@ class BatchResponseContent implements Parsable
     public function serialize(SerializationWriter $writer): void
     {
         $writer->writeStringValue('@nextLink', $this->getNextLink());
-        $writer->writeCollectionOfObjectValues('responses', [BatchResponseItem::class, 'create']);
+        $writer->writeCollectionOfObjectValues('responses', $this->getResponses());
     }
 
-    public static function create(): BatchResponseContent
+    public static function create(ParseNode $parseNode): BatchResponseContent
     {
         return new BatchResponseContent();
     }
