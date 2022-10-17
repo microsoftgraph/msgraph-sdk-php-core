@@ -89,8 +89,8 @@ class FileUploadTask
                 $this->uploadedChunks++;
                 $afterChunkUpload($this);
                 $this->setNextRange($session->getNextExpectedRanges()[0]);
-                $prom = $this->nextChunk($this->stream);
-                $q->enqueue($prom);
+                $nextChunkTask = $this->nextChunk($this->stream);
+                $q->enqueue($nextChunkTask);
             });
         }
     }
