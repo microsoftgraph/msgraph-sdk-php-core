@@ -94,7 +94,7 @@ class BatchRequestContent implements Parsable
      * @throws \JsonException
      * @throws \League\Uri\Contracts\UriException
      */
-    public function addPsrRequest(RequestInterface $request)
+    public function addPsrRequest(RequestInterface $request): void
     {
         $this->addRequest(BatchRequestItem::createWithPsrRequest($request));
     }
