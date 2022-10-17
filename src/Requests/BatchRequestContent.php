@@ -70,7 +70,7 @@ class BatchRequestContent implements Parsable
      */
     public function addRequest(BatchRequestItem $request)
     {
-        if (sizeof($this->requests) >= self::MAX_REQUESTS) {
+        if (count($this->requests) >= self::MAX_REQUESTS) {
             throw new \RuntimeException("Maximum number of requests is ".self::MAX_REQUESTS);
         }
         if (!$request->getId()) {
