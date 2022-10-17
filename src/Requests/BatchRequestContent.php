@@ -59,7 +59,7 @@ class BatchRequestContent implements Parsable
      */
     public function setRequests(array $requests): void
     {
-        if (sizeof($requests) >= self::MAX_REQUESTS) {
+        if (count($requests) >= self::MAX_REQUESTS) {
             throw new \InvalidArgumentException("Maximum number of requests is ".self::MAX_REQUESTS);
         }
         array_map(fn ($request) => $this->addRequest($request), $requests);
