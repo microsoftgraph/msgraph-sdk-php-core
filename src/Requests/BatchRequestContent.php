@@ -84,7 +84,7 @@ class BatchRequestContent implements Parsable
      * @throws \JsonException
      * @throws \League\Uri\Contracts\UriException
      */
-    public function addRequestInformation(RequestInformation $request)
+    public function addRequestInformation(RequestInformation $request): void
     {
         $this->addRequest(new BatchRequestItem($request));
     }
