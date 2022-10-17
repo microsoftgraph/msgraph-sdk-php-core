@@ -30,6 +30,7 @@ class BatchResponseContentTest extends TestCase
 
     public function testGetResponseBody(): void
     {
+        /** @var TestUserModel $response */
         $response = $this->batchResponseContent->getResponseBody('1', TestUserModel::class);
         $this->assertInstanceOf(TestUserModel::class, $response);
         $this->assertEquals('123', $response->getId());
