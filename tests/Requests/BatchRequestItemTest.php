@@ -60,7 +60,6 @@ class BatchRequestItemTest extends TestCase
     {
         $batchRequestItem1 = BatchRequestItem::createWithPsrRequest($this->psrRequest);
         $batchRequestItem2 = new BatchRequestItem($this->requestInformation);
-        $batchRequestItem2->setAtomicityGroup("1");
         $batchRequestItem3 = new BatchRequestItem($this->requestInformation, "1");
         $batchRequestItem1->dependsOn([$batchRequestItem2, $batchRequestItem3]);
 
@@ -72,7 +71,7 @@ class BatchRequestItemTest extends TestCase
             "id" => $batchRequestItem1->getId(),
             "method" => $batchRequestItem1->getMethod(),
             "url" => '/v1/users',
-            "dependsOn" => [$batchRequestItem2->getAtomicityGroup(), $batchRequestItem3->getId()],
+            "dependsOn" => [$batchRequestItem2->getId(), $batchRequestItem3->getId()],
             "headers" => ['host' => 'graph.microsoft.com'],
             "body" => urlencode($this->psrRequest->getBody()->getContents())
         ], JSON_UNESCAPED_SLASHES);
