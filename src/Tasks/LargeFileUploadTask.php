@@ -3,19 +3,19 @@ namespace Microsoft\Graph\Core\Tasks;
 
 use Exception;
 use GuzzleHttp\Psr7\Utils;
-use Http\Promise\FulfilledPromise;
 use Http\Promise\Promise;
 use InvalidArgumentException;
-use Microsoft\Graph\Core\Models\LargFileTaskUploadCreateUploadSessionBody;
-use Microsoft\Kiota\Abstractions\ApiException;
+use Microsoft\Graph\Core\Models\LargeFileUploadCreateUploadSessionBody;
+use Microsoft\Kiota\Abstractions\Authentication\AnonymousAuthenticationProvider;
 use Microsoft\Kiota\Abstractions\HttpMethod;
 use Microsoft\Kiota\Abstractions\RequestAdapter;
 use Microsoft\Graph\Core\Models\LargeFileTaskUploadSession;
 use Microsoft\Kiota\Abstractions\RequestInformation;
+use Microsoft\Kiota\Http\GuzzleRequestAdapter;
 use Psr\Http\Message\StreamInterface;
 use SplQueue;
 
-class FileUploadTask
+class LargeFileUploadTask
 {
     private LargeFileTaskUploadSession $uploadSession;
     private RequestAdapter $adapter;
@@ -28,6 +28,7 @@ class FileUploadTask
     public function __construct(LargeFileTaskUploadSession $uploadSession, RequestAdapter $adapter, StreamInterface $stream, int $maxChunkSize = 5 * 1024 * 1024){
         $this->uploadSession = $uploadSession;
         $this->adapter = $adapter;
+        $this->adapter->setAuthenticationProvider(new AnonymousAuthenticationProvider());
         $this->stream = $stream;
         $this->fileSize = $stream->getSize();
         $this->maxChunkSize = $maxChunkSize;
@@ -44,9 +45,13 @@ class FileUploadTask
     /**
      * @throws \Exception
      */
-    public static function createUploadSession(RequestAdapter $adapter, LargFileTaskUploadCreateUploadSessionBody $uploadSessionBody, string $url): Promise {
+    public static function createUploadSession(RequestAdapter $adapter, LargeFileUploadCreateUploadSessionBody $uploadSessionBody, string $url): Promise {
         $requestInformation = new RequestInformation();
-        $requestInformation->setUri($url);
+        $baseUrl = rtrim($adapter->getBaseUrl(), '/');
+        $path = ltrim($url, '/');
+
+        $newUrl = "{$baseUrl}/$path";
+        $requestInformation->setUri($newUrl);
         $requestInformation->httpMethod = HttpMethod::POST;
         $requestInformation->setContentFromParsable($adapter, 'application/json', $uploadSessionBody);
         return $adapter->sendAsync($requestInformation, [LargeFileTaskUploadSession::class, 'createFromDiscriminatorValue']);
@@ -86,11 +91,18 @@ class FileUploadTask
             $front = $q->dequeue();
 
             $front->then(function (LargeFileTaskUploadSession $session) use (&$q, $afterChunkUpload){
+                $nextRange = $session->getNextExpectedRanges();
+                if (empty($nextRange)) {
+                    echo "Upload finished!!!!\n";
+                    return;
+                }
                 $this->uploadedChunks++;
                 $afterChunkUpload($this);
-                $this->setNextRange($session->getNextExpectedRanges()[0]);
+                $this->setNextRange($nextRange[0]."-");
                 $nextChunkTask = $this->nextChunk($this->stream);
                 $q->enqueue($nextChunkTask);
+            }, function ($error) {
+                print_r($error);
             });
         }
     }
@@ -115,12 +127,11 @@ class FileUploadTask
         $info->setUri($uploadUrl);
         $info->httpMethod = HttpMethod::PUT;
         if (empty($this->nextRange)) {
-            $nextRange = $this->nextRange($uploadUrl);
-            $this->setNextRange($nextRange);
+            $this->setNextRange('0-0');
         }
         $rangeParts = explode('-', $this->nextRange);
         $start = intval($rangeParts[0]);
-        $end = intval($rangeParts[1]);
+        $end = intval($rangeParts[1] ?? 0);
         $file->rewind();
         if ($start === 0 && $end === 0) {
             $chunkData = $file->read($this->maxChunkSize);
@@ -131,7 +142,7 @@ class FileUploadTask
         else if ($end === 0){
             $file->seek($start);
             $chunkData = $file->read($this->maxChunkSize);
-            $end = $start + $this->maxChunkSize + 1;
+            $end = $start + strlen($chunkData) - 1;
         } else {
             $file->seek($start);
             $end = min($end, $this->maxChunkSize + $start);
@@ -140,6 +151,8 @@ class FileUploadTask
         }
         $info->headers = array_merge($info->headers, ['Content-Range' => 'bytes '.($start).'-'.($end).'/'.$this->fileSize]);
         $info->headers = array_merge($info->headers, ['Content-Length' => strlen($chunkData)]);
+
+        print_r($info->headers);
 
         $info->setStreamContent(Utils::streamFor($chunkData));
         return $this->adapter->sendAsync($info, [LargeFileTaskUploadSession::class, 'createFromDiscriminatorValue']);
@@ -159,7 +172,7 @@ class FileUploadTask
             $this->setNextRange($session->getNextExpectedRanges()[0]);
             $next = $this->nextRange;
         });
-
+        print_r($response);
         if (empty($next)) {
             throw new InvalidArgumentException('No range!!!!');
         }
