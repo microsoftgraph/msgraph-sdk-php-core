@@ -16,9 +16,9 @@ class LargeFileTaskUploadSession implements Parsable, AdditionalDataHolder
     private array $nextExpectedRanges = [];
 
     /**
-     * @param DateTime $expirationDateTime
+     * @param DateTime|null $expirationDateTime
      */
-    public function setExpirationDateTime(DateTime $expirationDateTime): void {
+    public function setExpirationDateTime(?DateTime $expirationDateTime): void {
         $this->expirationDateTime = $expirationDateTime;
     }
 
@@ -44,9 +44,9 @@ class LargeFileTaskUploadSession implements Parsable, AdditionalDataHolder
     }
 
     /**
-     * @return DateTime
+     * @return DateTime|null
      */
-    public function getExpirationDateTime(): DateTime{
+    public function getExpirationDateTime(): ?DateTime{
         return $this->expirationDateTime;
     }
 

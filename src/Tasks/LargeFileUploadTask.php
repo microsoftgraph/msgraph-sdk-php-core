@@ -1,6 +1,8 @@
 <?php
 namespace Microsoft\Graph\Core\Tasks;
 
+use DateTime;
+use DateTimeInterface;
 use Exception;
 use GuzzleHttp\Psr7\Utils;
 use Http\Promise\Promise;
@@ -13,6 +15,7 @@ use Microsoft\Graph\Core\Models\LargeFileTaskUploadSession;
 use Microsoft\Kiota\Abstractions\RequestInformation;
 use Microsoft\Kiota\Http\GuzzleRequestAdapter;
 use Psr\Http\Message\StreamInterface;
+use RuntimeException;
 use SplQueue;
 
 class LargeFileUploadTask
@@ -79,7 +82,29 @@ class LargeFileUploadTask
     /**
      * @throws Exception
      */
+    private function uploadSessionExpired(): bool {
+        $now = new DateTime((new DateTime('now'))->format(DateTimeInterface::ATOM));
+        $expiry = $this->uploadSession->getExpirationDateTime();
+
+        if ($expiry === null){
+            throw new InvalidArgumentException('The upload session does not contain a valid expiry date.');
+        }
+        $then = new DateTime($expiry->format(DateTimeInterface::ATOM));
+        $interval = $now->diff($then);
+
+        if ($interval->invert !== 0){
+            return true;
+        }
+        return false;
+    }
+    /**
+     * @throws Exception
+     */
     public function upload(?callable $afterChunkUpload = null): void {
+
+        if ($this->uploadSessionExpired()){
+            throw new RuntimeException('The upload session is expired.');
+        }
         $q = new SplQueue();
 
         $start = 0;
