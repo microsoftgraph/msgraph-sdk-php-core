@@ -157,13 +157,6 @@ class LargeFileUploadTask
     }
 
     /**
-     * @return int
-     */
-    public function getMaxChunkSize(): int {
-        return $this->maxChunkSize;
-    }
-
-    /**
      * @return StreamInterface
      */
     public function getFile(): StreamInterface {

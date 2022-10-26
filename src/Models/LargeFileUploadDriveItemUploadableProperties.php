@@ -9,10 +9,8 @@ use Microsoft\Kiota\Abstractions\Serialization\SerializationWriter;
 class LargeFileUploadDriveItemUploadableProperties implements Parsable, AdditionalDataHolder
 {
     private ?string $name = null;
-    private ?int $fileSize = null;
     private array $additionalData = [];
     private ?string $description = null;
-    private ?LargeFileUploadConflictBehavior $conflictBehavior = null;
 
     public function setAdditionalData(array $value): void {
         $this->additionalData = $value;
@@ -22,6 +20,8 @@ class LargeFileUploadDriveItemUploadableProperties implements Parsable, Addition
     }
 
     public function serialize(SerializationWriter $writer): void {
+        $writer->writeStringValue('name', $this->name);
+        $writer->writeStringValue('description', $this->description);
         $writer->writeAdditionalData($this->additionalData);
     }
 
@@ -41,34 +41,6 @@ class LargeFileUploadDriveItemUploadableProperties implements Parsable, Addition
      */
     public function getName(): ?string {
         return $this->name;
-    }
-
-    /**
-     * @param LargeFileUploadConflictBehavior|null $conflictBehavior
-     */
-    public function setConflictBehavior(?LargeFileUploadConflictBehavior $conflictBehavior): void {
-        $this->conflictBehavior = $conflictBehavior;
-    }
-
-    /**
-     * @return LargeFileUploadConflictBehavior|null
-     */
-    public function getConflictBehavior(): ?LargeFileUploadConflictBehavior {
-        return $this->conflictBehavior;
-    }
-
-    /**
-     * @param int|null $fileSize
-     */
-    public function setFileSize(?int $fileSize): void {
-        $this->fileSize = $fileSize;
-    }
-
-    /**
-     * @return int|null
-     */
-    public function getFileSize(): ?int {
-        return $this->fileSize;
     }
 
     /**
