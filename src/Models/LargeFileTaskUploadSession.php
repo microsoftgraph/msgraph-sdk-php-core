@@ -51,9 +51,9 @@ class LargeFileTaskUploadSession implements Parsable, AdditionalDataHolder
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getUploadUrl(): string
+    public function getUploadUrl(): ?string
     {
         return $this->uploadUrl;
     }

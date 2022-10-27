@@ -108,7 +108,7 @@ class LargeFileUploadTask
         $q = new SplQueue();
 
         $start = 0;
-        $session = $this->nextChunk($this->stream, $start,max(0, min($this->maxChunkSize,  $this->fileSize - 1)));
+        $session = $this->nextChunk($this->stream, $start,max(0, min($this->maxChunkSize - 1,  $this->fileSize - 1)));
         $q->enqueue($session);
 
         while(!$q->isEmpty()){
@@ -207,6 +207,43 @@ class LargeFileUploadTask
                           function ($error) {
                              throw new Exception($error);
                      });
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function resume(LargeFileTaskUploadSession $uploadSession, ?callable $onRangeUploadComplete = null): void {
+        if ($this->uploadSessionExpired()) {
+            throw new RuntimeException('The upload session is expired.');
+        }
+        /** @var LargeFileTaskUploadSession $session */
+        $session = $this->getUploadStatus($uploadSession)->wait();
+        $nextRanges = $session->getNextExpectedRanges();
+
+        if (count($nextRanges) === 0) {
+            throw new RuntimeException('No more bytes expected.');
+        }
+        $nextRange = $nextRanges[0];
+        $this->nextRange = $nextRange;
+        $this->uploadSession =  $session;
+        $this->upload($onRangeUploadComplete);
+    }
+
+    private function getValidatedUploadUrl(LargeFileTaskUploadSession $uploadSession): string {
+        $result = $uploadSession->getUploadUrl();
+
+        if ($result === null || trim($result) === '') {
+            throw new RuntimeException('The upload URL cannot be empty.');
+        }
+        return $result;
+    }
+
+    private function getUploadStatus(LargeFileTaskUploadSession $uploadSession): Promise {
+        $info = new RequestInformation();
+        $info->httpMethod = HttpMethod::GET;
+        $url = $this->getValidatedUploadUrl($uploadSession);
+        $info->setUri($url);
+        return $this->adapter->sendAsync($info, [LargeFileTaskUploadSession::class, 'createFromDiscriminatorValue']);
     }
 
 }
