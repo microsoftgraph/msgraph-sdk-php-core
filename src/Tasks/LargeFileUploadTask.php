@@ -8,19 +8,19 @@ use GuzzleHttp\Psr7\Utils;
 use Http\Promise\Promise;
 use InvalidArgumentException;
 use Microsoft\Graph\Core\Models\LargeFileUploadCreateUploadSessionBody;
-use Microsoft\Kiota\Abstractions\Authentication\AnonymousAuthenticationProvider;
 use Microsoft\Kiota\Abstractions\HttpMethod;
 use Microsoft\Kiota\Abstractions\RequestAdapter;
 use Microsoft\Graph\Core\Models\LargeFileTaskUploadSession;
 use Microsoft\Kiota\Abstractions\RequestInformation;
-use Microsoft\Kiota\Http\GuzzleRequestAdapter;
+use Microsoft\Kiota\Abstractions\Serialization\Parsable;
 use Psr\Http\Message\StreamInterface;
 use RuntimeException;
 use SplQueue;
 
 class LargeFileUploadTask
 {
-    private LargeFileTaskUploadSession $uploadSession;
+    /** @var Parsable|LargeFileTaskUploadSession */
+    private $uploadSession;
     private RequestAdapter $adapter;
     private StreamInterface $stream;
     private int $uploadedChunks = 0;
@@ -28,7 +28,7 @@ class LargeFileUploadTask
     private ?string $nextRange = null;
     private int $fileSize;
     private int $maxChunkSize;
-    public function __construct(LargeFileTaskUploadSession $uploadSession, RequestAdapter $adapter, StreamInterface $stream, int $maxChunkSize = 5 * 1024 * 1024){
+    public function __construct(Parsable $uploadSession, RequestAdapter $adapter, StreamInterface $stream, int $maxChunkSize = 5 * 1024 * 1024){
         $this->uploadSession = $uploadSession;
         $this->adapter = $adapter;
         $this->stream = $stream;
@@ -38,9 +38,9 @@ class LargeFileUploadTask
     }
 
     /**
-    * @return LargeFileTaskUploadSession
+    * @return Parsable
      */
-    public function getUploadSession(): LargeFileTaskUploadSession {
+    public function getUploadSession(): Parsable {
         return $this->uploadSession;
     }
 
@@ -84,6 +84,10 @@ class LargeFileUploadTask
      */
     private function uploadSessionExpired(): bool {
         $now = new DateTime((new DateTime('now'))->format(DateTimeInterface::ATOM));
+
+        if (!method_exists($this->uploadSession, 'getExpirationDateTime')) {
+            throw new Exception();
+        }
         $expiry = $this->uploadSession->getExpirationDateTime();
 
         if ($expiry === null){
@@ -143,6 +147,10 @@ class LargeFileUploadTask
      * @throws Exception
      */
     private function nextChunk(StreamInterface $file, int $rangeStart = 0, int $rangeEnd = 0): Promise {
+
+        if (!method_exists($this->uploadSession, 'getUploadUrl')) {
+            throw new Exception();
+        }
         $uploadUrl = $this->uploadSession->getUploadUrl();
 
         if (empty($uploadUrl)) {
@@ -194,15 +202,25 @@ class LargeFileUploadTask
     public function cancel(): Promise {
         $requestInformation = new RequestInformation();
         $requestInformation->httpMethod = HttpMethod::DELETE;
-        $uploadUrl =  $this->uploadSession->getUploadUrl();
 
+        if (!method_exists($this->uploadSession, 'getUploadUrl')) {
+            throw new RuntimeException();
+        }
+        $uploadUrl = $this->uploadSession->getUploadUrl();
         if (empty($uploadUrl)) {
             throw new InvalidArgumentException('The upload session URL must not be empty.');
         }
         $requestInformation->setUri($uploadUrl);
         return $this->adapter->sendNoContentAsync($requestInformation)
                       ->then(function () {
-                          $this->uploadSession->setIsCancelled(true);
+                              if (method_exists($this->uploadSession, 'setIsCancelled')){
+                                  $this->uploadSession->setIsCancelled(true);
+                              }
+                              else if (method_exists($this->uploadSession, 'setAdditionalData') && method_exists($this->uploadSession, 'getAdditionalData')){
+                                  $current = $this->uploadSession->getAdditionalData();
+                                  $new = array_merge($current, ['isCancelled' => true]);
+                                  $this->uploadSession->setAdditionalData($new);
+                              }
                         },
                           function ($error) {
                              throw new Exception($error);
