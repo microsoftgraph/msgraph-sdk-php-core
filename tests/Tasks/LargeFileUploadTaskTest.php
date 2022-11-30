@@ -21,12 +21,14 @@ class LargeFileUploadTaskTest extends TestCase
     private Promise $promise;
     private LargeFileTaskUploadSession $session;
     private LargeFileUploadCreateUploadSessionBody $mockBody;
+    private \SplQueue $mockQueue;
     protected function setUp(): void {
         $this->largeFileUploadTask = $this->createMock(LargeFileUploadTask::class);
         $this->adapter = $this->createMock(RequestAdapter::class);
         $this->stream = $this->createMock(StreamInterface::class);
         $this->promise = $this->createMock(Promise::class);
         $this->mockBody = $this->createMock(LargeFileUploadCreateUploadSessionBody::class);
+        $this->mockQueue = $this->createMock(\SplQueue::class);
         $this->session = new LargeFileTaskUploadSession();
 
     }
@@ -39,22 +41,32 @@ class LargeFileUploadTaskTest extends TestCase
         $this->session->setExpirationDateTime(new DateTime('12-12-2090'));
         $this->session->setUploadUrl('https://upload.example.com/session/1');
         $this->session->setNextExpectedRanges(['0-100']);
-        $this->stream = new Stream(fopen('php://memory', 'rb'));
+        $this->stream = new Stream(fopen('php://memory', 'rb+'));
+        $this->stream->write(str_repeat("10101", 21));
         /** @phpstan-ignore-next-line */
         $this->adapter->method('sendAsync')
             ->willReturn($this->promise);
         /** @phpstan-ignore-next-line */
         $this->largeFileUploadTask->method('nextChunk')
             ->willReturn($this->promise);
-        $this->session->setNextExpectedRanges(['101-']);
+        /** @phpstan-ignore-next-line */
+        $this->promise->method('then')
+            ->willReturnCallback(function ($needed){
+                if (!is_null($needed) && is_callable($needed)) {
+                    call_user_func($needed, $this->session);
+                }
+            });
         /** @phpstan-ignore-next-line */
         $this->promise->method('wait')
             ->willReturn($this->session);
+        $this->session->setNextExpectedRanges([]);
+
         $session = $this->promise->wait();
         $lfu     = new LargeFileUploadTask($session, $this->adapter, $this->stream);
         $lfu->upload();
         $this->assertEquals($this->session, $lfu->getUploadSession());
         $this->assertEmpty([]);
+        $this->stream->close();
     }
 
     /**

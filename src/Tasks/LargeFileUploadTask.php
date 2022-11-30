@@ -126,8 +126,10 @@ class LargeFileUploadTask
                     return;
                 }
                 $this->uploadedChunks++;
-                $afterChunkUpload($this);
-                $this->setNextRange($nextRange[0]."-");
+                if (!is_null($afterChunkUpload)) {
+                    $afterChunkUpload($this);
+                }
+                $this->setNextRange($nextRange[0] . "-");
                 $nextChunkTask = $this->nextChunk($this->stream);
                 $q->enqueue($nextChunkTask);
             }, function ($error) {
