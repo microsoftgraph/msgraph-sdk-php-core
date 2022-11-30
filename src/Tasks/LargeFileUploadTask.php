@@ -146,7 +146,7 @@ class LargeFileUploadTask
     /**
      * @throws Exception
      */
-    private function nextChunk(StreamInterface $file, int $rangeStart = 0, int $rangeEnd = 0): Promise {
+    public function nextChunk(StreamInterface $file, int $rangeStart = 0, int $rangeEnd = 0): Promise {
 
         if (!method_exists($this->uploadSession, 'getUploadUrl')) {
             throw new Exception();
