@@ -82,7 +82,7 @@ class LargeFileUploadTask
     /**
      * @throws Exception
      */
-    private function uploadSessionExpired(): bool {
+    public function uploadSessionExpired(): bool {
         $now = new DateTime((new DateTime('now'))->format(DateTimeInterface::ATOM));
 
         if (!method_exists($this->uploadSession, 'getExpirationDateTime')) {
