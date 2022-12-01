@@ -57,9 +57,9 @@ class Error404GetUploadStatusException extends ApiException implements Additiona
 
     /**
      * Gets the error property value. The error property
-     * @return MainError|null
+     * @return Error404GetUploadStatusException|null
      */
-    public function getError(): ?MainError {
+    public function getError(): ?Error404GetUploadStatusException {
         return $this->getBackingStore()->get('error');
     }
 
