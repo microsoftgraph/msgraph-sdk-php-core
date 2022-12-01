@@ -71,7 +71,7 @@ class Error404GetUploadStatusException extends ApiException implements Additiona
     {
         $o = $this;
         return [
-            'error' => fn(ParseNode $n) => $o->setError($n->getObjectValue([MainError::class, 'createFromDiscriminatorValue'])),
+            'error' => fn(ParseNode $n) => $o->setError($n->getObjectValue([Error404GetUploadStatusException::class, 'createFromDiscriminatorValue'])),
         ];
     }
 
@@ -105,9 +105,9 @@ class Error404GetUploadStatusException extends ApiException implements Additiona
 
     /**
      * Sets the error property value. The error property
-     * @param MainError|null $value Value to set for the error property.
+     * @param Error404GetUploadStatusException|null $value Value to set for the error property.
      */
-    public function setError(?MainError $value): void
+    public function setError(?Error404GetUploadStatusException $value): void
     {
         $this->getBackingStore()->set('error', $value);
     }
