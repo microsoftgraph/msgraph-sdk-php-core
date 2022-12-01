@@ -12,6 +12,7 @@ use Microsoft\Kiota\Abstractions\HttpMethod;
 use Microsoft\Kiota\Abstractions\RequestAdapter;
 use Microsoft\Graph\Core\Models\LargeFileTaskUploadSession;
 use Microsoft\Kiota\Abstractions\RequestInformation;
+use Microsoft\Kiota\Abstractions\Serialization\AdditionalDataHolder;
 use Microsoft\Kiota\Abstractions\Serialization\Parsable;
 use Psr\Http\Message\StreamInterface;
 use RuntimeException;
@@ -230,26 +231,63 @@ class LargeFileUploadTask
     }
 
     /**
+     * @param Parsable $parsable
+     * @param string $property
+     * @return bool
+     */
+    private function additionalDataContains(Parsable $parsable, string $property): bool  {
+        if (!is_subclass_of($parsable, AdditionalDataHolder::class)) {
+            throw new InvalidArgumentException('The object passed does not contains property '.$property.' and does not implement AdditionalDataHolder');
+        }
+        if (isset($parsable->getAdditionalData()[$property])) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @param Parsable $parsable
+     * @param string $getterName
+     * @param string $propertyNameInAdditionalData
+     * @return array{bool, mixed}
+     */
+    private function checkValueExists(Parsable $parsable, string $getterName, string $propertyNameInAdditionalData): array {
+        if (method_exists($parsable, $getterName)) {
+            return [true, $parsable->{$getterName}()];
+        }
+        if (is_subclass_of($parsable, AdditionalDataHolder::class) && $this->additionalDataContains($parsable, $propertyNameInAdditionalData)) {
+            return [true, $parsable->getAdditionalData()[$propertyNameInAdditionalData]];
+        }
+        return [false, null];
+    }
+
+    /**
      * @throws Exception
      */
-    public function resume(LargeFileTaskUploadSession $uploadSession, ?callable $onRangeUploadComplete = null): void {
+    public function resume(Parsable $uploadSession, ?callable $onRangeUploadComplete = null): void {
         if ($this->uploadSessionExpired()) {
             throw new RuntimeException('The upload session is expired.');
         }
-        /** @var LargeFileTaskUploadSession $session */
-        $session = $this->getUploadStatus($uploadSession)->wait();
-        $nextRanges = $session->getNextExpectedRanges();
+        if (!method_exists($uploadSession, 'getNextExpectedRanges')) {
+            print_r($uploadSession);
+            throw new RuntimeException('The object passed does not contain a valid "nextExpectedRanges" property.');
+        }
+
+        $nextRanges = $uploadSession->getNextExpectedRanges();
 
         if (count($nextRanges) === 0) {
             throw new RuntimeException('No more bytes expected.');
         }
         $nextRange = $nextRanges[0];
         $this->nextRange = $nextRange;
-        $this->uploadSession =  $session;
+        $this->uploadSession =  $uploadSession;
         $this->upload($onRangeUploadComplete);
     }
 
-    private function getValidatedUploadUrl(LargeFileTaskUploadSession $uploadSession): string {
+    private function getValidatedUploadUrl(Parsable $uploadSession): string {
+        if (!method_exists($uploadSession, 'getUploadUrl')) {
+            throw new RuntimeException('The upload session does not contain a valid upload url');
+        }
         $result = $uploadSession->getUploadUrl();
 
         if ($result === null || trim($result) === '') {
@@ -258,7 +296,7 @@ class LargeFileUploadTask
         return $result;
     }
 
-    private function getUploadStatus(LargeFileTaskUploadSession $uploadSession): Promise {
+    private function getUploadStatus(Parsable $uploadSession): Promise {
         $info = new RequestInformation();
         $info->httpMethod = HttpMethod::GET;
         $url = $this->getValidatedUploadUrl($uploadSession);

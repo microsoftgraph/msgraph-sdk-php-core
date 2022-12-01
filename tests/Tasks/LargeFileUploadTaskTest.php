@@ -101,6 +101,9 @@ class LargeFileUploadTaskTest extends TestCase
         $this->assertFalse($lfu->uploadSessionExpired());
     }
 
+    /**
+     * @throws \Exception
+     */
     public function testCreateUploadSession(): void {
         /** @phpstan-ignore-next-line */
         $this->adapter->method('sendAsync')
@@ -119,7 +122,8 @@ class LargeFileUploadTaskTest extends TestCase
     }
 
     public function testCancel(): void {
-
+        $this->stream = new Stream(fopen('php://memory', 'rb+'));
+        $this->stream->write(str_repeat("10101", 21));
     }
 
     public function testResume(): void {
