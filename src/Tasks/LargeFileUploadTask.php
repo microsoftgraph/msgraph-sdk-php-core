@@ -7,10 +7,12 @@ use Exception;
 use GuzzleHttp\Psr7\Utils;
 use Http\Promise\Promise;
 use InvalidArgumentException;
+use Microsoft\Graph\Core\Errors\LargeFileUploadTaskErrors\Error404GetUploadStatusException;
+use Microsoft\Graph\Core\Errors\LargeFileUploadTaskErrors\Error405GetUploadStatusException;
+use Microsoft\Graph\Core\Models\LargeFileTaskUploadSession;
 use Microsoft\Graph\Core\Models\LargeFileUploadCreateUploadSessionBody;
 use Microsoft\Kiota\Abstractions\HttpMethod;
 use Microsoft\Kiota\Abstractions\RequestAdapter;
-use Microsoft\Graph\Core\Models\LargeFileTaskUploadSession;
 use Microsoft\Kiota\Abstractions\RequestInformation;
 use Microsoft\Kiota\Abstractions\Serialization\AdditionalDataHolder;
 use Microsoft\Kiota\Abstractions\Serialization\Parsable;
@@ -266,15 +268,14 @@ class LargeFileUploadTask
      */
     public function resume(Parsable $uploadSession, ?callable $onRangeUploadComplete = null): void {
         if ($this->uploadSessionExpired()) {
+            $this->uploadSession = $this->getUploadStatus($uploadSession)->wait();
             throw new RuntimeException('The upload session is expired.');
         }
         if (!method_exists($uploadSession, 'getNextExpectedRanges')) {
-            print_r($uploadSession);
             throw new RuntimeException('The object passed does not contain a valid "nextExpectedRanges" property.');
         }
 
         $nextRanges = $uploadSession->getNextExpectedRanges();
-
         if (count($nextRanges) === 0) {
             throw new RuntimeException('No more bytes expected.');
         }
@@ -301,7 +302,11 @@ class LargeFileUploadTask
         $info->httpMethod = HttpMethod::GET;
         $url = $this->getValidatedUploadUrl($uploadSession);
         $info->setUri($url);
-        return $this->adapter->sendAsync($info, [LargeFileTaskUploadSession::class, 'createFromDiscriminatorValue']);
+        $errorMappings = [
+            '405' => [Error405GetUploadStatusException::class, 'createFromDiscriminatorValue'],
+            '404' => [Error404GetUploadStatusException::class, 'createFromDiscriminatorValue']
+        ];
+        return $this->adapter->sendAsync($info, [LargeFileTaskUploadSession::class, 'createFromDiscriminatorValue'], null, $errorMappings);
     }
 
 }
