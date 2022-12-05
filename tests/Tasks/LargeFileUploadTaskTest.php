@@ -127,6 +127,9 @@ class LargeFileUploadTaskTest extends TestCase
         $this->assertEquals($this->session, $lfu->getUploadSession());
     }
 
+    /**
+     * @throws \Exception
+     */
     public function testCancel(): void {
         $this->stream = new Stream(fopen('php://memory', 'rb+'));
         $this->stream->write(str_repeat("10101", 21));
