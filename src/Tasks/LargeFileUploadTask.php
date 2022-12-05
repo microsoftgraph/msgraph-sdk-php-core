@@ -6,6 +6,7 @@ use DateTimeInterface;
 use Exception;
 use GuzzleHttp\Psr7\Utils;
 use Http\Promise\Promise;
+use Http\Promise\RejectedPromise;
 use InvalidArgumentException;
 use Microsoft\Graph\Core\Errors\LargeFileUploadTaskErrors\Error404GetUploadStatusException;
 use Microsoft\Graph\Core\Errors\LargeFileUploadTaskErrors\Error405GetUploadStatusException;
@@ -31,6 +32,7 @@ class LargeFileUploadTask
     private ?string $nextRange = null;
     private int $fileSize;
     private int $maxChunkSize;
+    private int $uploaded = 0;
     public function __construct(Parsable $uploadSession, RequestAdapter $adapter, StreamInterface $stream, int $maxChunkSize = 5 * 1024 * 1024){
         $this->uploadSession = $uploadSession;
         $this->adapter = $adapter;
@@ -83,15 +85,17 @@ class LargeFileUploadTask
     }
 
     /**
+     * @param Parsable|null $uploadSession
      * @throws Exception
      */
-    public function uploadSessionExpired(): bool {
+    public function uploadSessionExpired(?Parsable $uploadSession): bool {
         $now = new DateTime((new DateTime('now'))->format(DateTimeInterface::ATOM));
 
-        if (!method_exists($this->uploadSession, 'getExpirationDateTime')) {
-            throw new Exception();
+        $validatedValue = $this->checkValueExists($uploadSession ?? $this->uploadSession, 'getExpirationDateTime', ['ExpirationDateTime', 'expirationDateTime']);
+        if (!$validatedValue[0]) {
+            throw new Exception('The upload session does not contain an expiry datetime.');
         }
-        $expiry = $this->uploadSession->getExpirationDateTime();
+        $expiry = $validatedValue[1];
 
         if ($expiry === null){
             throw new InvalidArgumentException('The upload session does not contain a valid expiry date.');
@@ -109,7 +113,7 @@ class LargeFileUploadTask
      */
     public function upload(?callable $afterChunkUpload = null): void {
 
-        if ($this->uploadSessionExpired()){
+        if ($this->uploadSessionExpired($this->uploadSession)){
             throw new RuntimeException('The upload session is expired.');
         }
         $q = new SplQueue();
@@ -124,9 +128,10 @@ class LargeFileUploadTask
 
             $front->then(function (LargeFileTaskUploadSession $session) use (&$q, $afterChunkUpload){
                 $nextRange = $session->getNextExpectedRanges();
+                $this->uploaded = (int)explode('-', $nextRange[0] ?? ($this->fileSize.'-'))[0];
                 if (empty($nextRange)) {
                     echo "Upload finished!!!!\n";
-                    return;
+                    return $session;
                 }
                 $this->uploadedChunks++;
                 if (!is_null($afterChunkUpload)) {
@@ -135,6 +140,7 @@ class LargeFileUploadTask
                 $this->setNextRange($nextRange[0] . "-");
                 $nextChunkTask = $this->nextChunk($this->stream);
                 $q->enqueue($nextChunkTask);
+                return $session;
             }, function ($error) {
                 throw $error;
             });
@@ -152,11 +158,7 @@ class LargeFileUploadTask
      * @throws Exception
      */
     public function nextChunk(StreamInterface $file, int $rangeStart = 0, int $rangeEnd = 0): Promise {
-
-        if (!method_exists($this->uploadSession, 'getUploadUrl')) {
-            throw new Exception();
-        }
-        $uploadUrl = $this->uploadSession->getUploadUrl();
+        $uploadUrl = $this->getValidatedUploadUrl($this->uploadSession);
 
         if (empty($uploadUrl)) {
             throw new InvalidArgumentException('The upload session URL must not be empty.');
@@ -202,63 +204,65 @@ class LargeFileUploadTask
     }
 
     /**
+     * @return Promise
      * @throws \Exception
      */
     public function cancel(): Promise {
         $requestInformation = new RequestInformation();
         $requestInformation->httpMethod = HttpMethod::DELETE;
 
-        if (!method_exists($this->uploadSession, 'getUploadUrl')) {
-            throw new RuntimeException();
-        }
-        $uploadUrl = $this->uploadSession->getUploadUrl();
+        $uploadUrl = $this->getValidatedUploadUrl($this->uploadSession);
+
         if (empty($uploadUrl)) {
             throw new InvalidArgumentException('The upload session URL must not be empty.');
         }
         $requestInformation->setUri($uploadUrl);
-        return $this->adapter->sendNoContentAsync($requestInformation)
-                      ->then(function () {
-                              if (method_exists($this->uploadSession, 'setIsCancelled')){
-                                  $this->uploadSession->setIsCancelled(true);
-                              }
-                              else if (method_exists($this->uploadSession, 'setAdditionalData') && method_exists($this->uploadSession, 'getAdditionalData')){
-                                  $current = $this->uploadSession->getAdditionalData();
-                                  $new = array_merge($current, ['isCancelled' => true]);
-                                  $this->uploadSession->setAdditionalData($new);
-                              }
-                        },
-                          function ($error) {
-                             throw new Exception($error);
-                     });
+        return  $this->adapter->sendNoContentAsync($requestInformation)
+                              ->then(function ($result) {
+                                      if (method_exists($this->uploadSession, 'setIsCancelled')){
+                                          $this->uploadSession->setIsCancelled(true);
+                                      }
+                                      else if (method_exists($this->uploadSession, 'setAdditionalData') && method_exists($this->uploadSession, 'getAdditionalData')){
+                                          $current = $this->uploadSession->getAdditionalData();
+                                          $new = array_merge($current, ['isCancelled' => true]);
+                                          $this->uploadSession->setAdditionalData($new);
+                                      }
+                                      return $this->uploadSession;
+                              });
     }
 
     /**
      * @param Parsable $parsable
-     * @param string $property
-     * @return bool
+     * @param array<string> $propertyCandidates
+     * @return array{boolean,mixed}
      */
-    private function additionalDataContains(Parsable $parsable, string $property): bool  {
+    private function additionalDataContains(Parsable $parsable, array $propertyCandidates): array  {
         if (!is_subclass_of($parsable, AdditionalDataHolder::class)) {
-            throw new InvalidArgumentException('The object passed does not contains property '.$property.' and does not implement AdditionalDataHolder');
+            throw new InvalidArgumentException('The object passed does not contain propert(y|ies) ['.implode(',',$propertyCandidates).'] and does not implement AdditionalDataHolder');
         }
-        if (isset($parsable->getAdditionalData()[$property])) {
-            return true;
+        $additionalData = $parsable->getAdditionalData();
+        foreach ($propertyCandidates as $propertyCandidate) {
+            if (isset($additionalData[$propertyCandidate])) {
+                return [true, $additionalData[$propertyCandidate]];
+            }
         }
-        return false;
+        return [false, null];
     }
 
     /**
      * @param Parsable $parsable
      * @param string $getterName
-     * @param string $propertyNameInAdditionalData
+     * @param array<string> $propertyNamesInAdditionalData
      * @return array{bool, mixed}
      */
-    private function checkValueExists(Parsable $parsable, string $getterName, string $propertyNameInAdditionalData): array {
+    private function checkValueExists(Parsable $parsable, string $getterName, array $propertyNamesInAdditionalData): array {
+        $checkedAdditionalData = $this->additionalDataContains($parsable, $propertyNamesInAdditionalData);
+        if (is_subclass_of($parsable, AdditionalDataHolder::class) && $checkedAdditionalData[0]) {
+            return [true, $checkedAdditionalData[1]];
+        }
+
         if (method_exists($parsable, $getterName)) {
             return [true, $parsable->{$getterName}()];
-        }
-        if (is_subclass_of($parsable, AdditionalDataHolder::class) && $this->additionalDataContains($parsable, $propertyNameInAdditionalData)) {
-            return [true, $parsable->getAdditionalData()[$propertyNameInAdditionalData]];
         }
         return [false, null];
     }
@@ -267,15 +271,16 @@ class LargeFileUploadTask
      * @throws Exception
      */
     public function resume(Parsable $uploadSession, ?callable $onRangeUploadComplete = null): void {
-        if ($this->uploadSessionExpired()) {
+        if ($this->uploadSessionExpired($uploadSession)) {
             $this->uploadSession = $this->getUploadStatus($uploadSession)->wait();
             throw new RuntimeException('The upload session is expired.');
         }
-        if (!method_exists($uploadSession, 'getNextExpectedRanges')) {
+        $validatedValue = $this->checkValueExists($uploadSession, 'getNextExpectedRanges', ['NextExpectedRanges', 'nextExpectedRanges']);
+        if (!$validatedValue[0]) {
             throw new RuntimeException('The object passed does not contain a valid "nextExpectedRanges" property.');
         }
 
-        $nextRanges = $uploadSession->getNextExpectedRanges();
+        $nextRanges = $validatedValue[1];
         if (count($nextRanges) === 0) {
             throw new RuntimeException('No more bytes expected.');
         }
@@ -285,6 +290,10 @@ class LargeFileUploadTask
         $this->upload($onRangeUploadComplete);
     }
 
+    /**
+     * @param Parsable $uploadSession
+     * @return string
+     */
     private function getValidatedUploadUrl(Parsable $uploadSession): string {
         if (!method_exists($uploadSession, 'getUploadUrl')) {
             throw new RuntimeException('The upload session does not contain a valid upload url');
@@ -297,6 +306,10 @@ class LargeFileUploadTask
         return $result;
     }
 
+    /**
+     * @param Parsable $uploadSession
+     * @return Promise
+     */
     private function getUploadStatus(Parsable $uploadSession): Promise {
         $info = new RequestInformation();
         $info->httpMethod = HttpMethod::GET;
@@ -309,4 +322,24 @@ class LargeFileUploadTask
         return $this->adapter->sendAsync($info, [LargeFileTaskUploadSession::class, 'createFromDiscriminatorValue'], null, $errorMappings);
     }
 
+    /**
+     * @return string|null
+     */
+    public function getNextRange(): ?string {
+        return $this->nextRange;
+    }
+
+    /**
+     * @return int
+     */
+    public function getUploaded(): int {
+        return $this->uploaded;
+    }
+
+    /**
+     * @return int
+     */
+    public function getFileSize(): int {
+        return $this->fileSize;
+    }
 }

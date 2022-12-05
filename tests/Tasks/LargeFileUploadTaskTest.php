@@ -4,6 +4,7 @@ namespace Microsoft\Graph\Core\Test\Tasks;
 
 use DateTime;
 use GuzzleHttp\Psr7\Stream;
+use Http\Promise\FulfilledPromise;
 use Http\Promise\Promise;
 use Microsoft\Graph\Core\Models\LargeFileTaskUploadSession;
 use Microsoft\Graph\Core\Models\LargeFileUploadCreateUploadSessionBody;
@@ -12,6 +13,7 @@ use Microsoft\Kiota\Abstractions\RequestAdapter;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\StreamInterface;
 use RuntimeException;
+use SplQueue;
 
 class LargeFileUploadTaskTest extends TestCase
 {
@@ -21,15 +23,19 @@ class LargeFileUploadTaskTest extends TestCase
     private Promise $promise;
     private LargeFileTaskUploadSession $session;
     private LargeFileUploadCreateUploadSessionBody $mockBody;
-    private \SplQueue $mockQueue;
+    private SplQueue $mockQueue;
+    private LargeFileTaskUploadSession $mockSession;
     protected function setUp(): void {
         $this->largeFileUploadTask = $this->createMock(LargeFileUploadTask::class);
         $this->adapter = $this->createMock(RequestAdapter::class);
         $this->stream = $this->createMock(StreamInterface::class);
         $this->promise = $this->createMock(Promise::class);
         $this->mockBody = $this->createMock(LargeFileUploadCreateUploadSessionBody::class);
-        $this->mockQueue = $this->createMock(\SplQueue::class);
+        $this->mockQueue = $this->createMock(SplQueue::class);
         $this->session = new LargeFileTaskUploadSession();
+        $this->mockSession = $this->createMock(LargeFileTaskUploadSession::class);
+        $this->session->setUploadUrl('https://upload.example.com/session/1');
+        $this->mockSession->setUploadUrl('https://upload.example.com/session/1');
 
     }
 
@@ -98,7 +104,7 @@ class LargeFileUploadTaskTest extends TestCase
             ->willReturn($this->session);
         $session = $this->promise->wait();
         $lfu = new LargeFileUploadTask($session, $this->adapter, $this->stream);
-        $this->assertFalse($lfu->uploadSessionExpired());
+        $this->assertFalse($lfu->uploadSessionExpired($session));
     }
 
     /**
@@ -124,9 +130,34 @@ class LargeFileUploadTaskTest extends TestCase
     public function testCancel(): void {
         $this->stream = new Stream(fopen('php://memory', 'rb+'));
         $this->stream->write(str_repeat("10101", 21));
+        /** @phpstan-ignore-next-line */
+        $this->adapter->method('sendNoContentAsync')
+            ->willReturn($this->promise);
+        /** @phpstan-ignore-next-line */
+        $this->promise->method('then')
+            ->willReturnCallback(function ($needed){
+                if (!is_null($needed) && is_callable($needed)) {
+                    call_user_func($needed, $this->session);
+                }
+                return new FulfilledPromise($this->session);
+            });
+
+        $lfu = new LargeFileUploadTask($this->session, $this->adapter, $this->stream);
+        $this->assertFalse($this->session->getIsCancelled());
+        $lfu->cancel();
+        $this->assertTrue($this->session->getIsCancelled());
     }
 
+    /**
+     * @throws \Exception
+     */
     public function testResume(): void {
-
+        $this->stream = new Stream(fopen('php://memory', 'rb+'));
+        $this->stream->write(str_repeat("10101", 21));
+        $this->session->setNextExpectedRanges(['10-']);
+        $this->session->setExpirationDateTime(new DateTime('12-12-2090'));
+        $lfu = new LargeFileUploadTask($this->session, $this->adapter, $this->stream);
+        $lfu->resume($this->session);
+        $this->assertEquals('10-', $lfu->getNextRange());
     }
 }

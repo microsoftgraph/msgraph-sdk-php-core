@@ -76,9 +76,21 @@ class LargeFileTaskUploadSession implements Parsable, AdditionalDataHolder
         $this->additionalData = $value;
     }
 
-public static function createFromDiscriminatorValue(ParseNode $parseNode): LargeFileTaskUploadSession {
+    /**
+     * @param ParseNode $parseNode
+     * @return LargeFileTaskUploadSession
+     */
+    public static function createFromDiscriminatorValue(ParseNode $parseNode): LargeFileTaskUploadSession {
         return new LargeFileTaskUploadSession();
     }
+
+    /**
+     * @return bool
+     */
+    public function getIsCancelled(): bool {
+        return $this->isCancelled;
+    }
+
 
     public function serialize(SerializationWriter $writer): void {
         $writer->writeStringValue('uploadUrl', $this->uploadUrl);
