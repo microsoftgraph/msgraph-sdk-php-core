@@ -33,17 +33,31 @@ class LargeFileUploadTask
     private int $fileSize;
     private int $maxChunkSize;
     private int $uploaded = 0;
-    public function __construct(Parsable $uploadSession, RequestAdapter $adapter, StreamInterface $stream, int $maxChunkSize = 5 * 1024 * 1024){
+    public function __construct(Parsable $uploadSession, RequestAdapter $adapter, StreamInterface $stream, int $maxChunkSize = 320 * 1024){
         $this->uploadSession = $uploadSession;
         $this->adapter = $adapter;
         $this->stream = $stream;
         $this->fileSize = $stream->getSize();
+        $this->validateMaxChunkSize($maxChunkSize);
         $this->maxChunkSize = $maxChunkSize;
         $this->chunks = (int)ceil($this->fileSize / $maxChunkSize);
     }
 
     /**
-    * @return Parsable
+     * @param int $maxChunkSize
+     * @return void
+     */
+    private function validateMaxChunkSize(int $maxChunkSize): void {
+        if (($maxChunkSize % 320) !== 0) {
+            throw new InvalidArgumentException("The MAX_CHUNK_SIZE must be a multiple of 320Kb or 327,680 Bytes. ");
+        }
+        if ($maxChunkSize > 60 * 1024 * 1024) {
+            throw new InvalidArgumentException("The MAX_CHUNK_SIZE should not be greater than 60MiB.");
+        }
+    }
+
+    /**
+     * @return Parsable
      */
     public function getUploadSession(): Parsable {
         return $this->uploadSession;
