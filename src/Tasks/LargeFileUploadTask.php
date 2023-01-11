@@ -209,9 +209,6 @@ class LargeFileUploadTask
 
         $uploadUrl = $this->getValidatedUploadUrl($this->uploadSession);
 
-        if (empty($uploadUrl)) {
-            throw new InvalidArgumentException('The upload session URL must not be empty.');
-        }
         $requestInformation->setUri($uploadUrl);
         return  $this->adapter->sendNoContentAsync($requestInformation)
                               ->then(function ($result) {
