@@ -6,7 +6,7 @@ use DateTime;
 use GuzzleHttp\Psr7\Stream;
 use Http\Promise\FulfilledPromise;
 use Http\Promise\Promise;
-use Microsoft\Graph\Core\Models\LargeFileTaskUploadSession;
+use Microsoft\Graph\Core\Models\LargeFileUploadSession;
 use Microsoft\Graph\Core\Models\LargeFileUploadCreateUploadSessionBody;
 use Microsoft\Graph\Core\Tasks\LargeFileUploadTask;
 use Microsoft\Kiota\Abstractions\RequestAdapter;
@@ -21,10 +21,10 @@ class LargeFileUploadTaskTest extends TestCase
     private RequestAdapter $adapter;
     private StreamInterface $stream;
     private Promise $promise;
-    private LargeFileTaskUploadSession $session;
+    private LargeFileUploadSession $session;
     private LargeFileUploadCreateUploadSessionBody $mockBody;
     private SplQueue $mockQueue;
-    private LargeFileTaskUploadSession $mockSession;
+    private LargeFileUploadSession $mockSession;
     protected function setUp(): void {
         $this->largeFileUploadTask = $this->createMock(LargeFileUploadTask::class);
         $this->adapter = $this->createMock(RequestAdapter::class);
@@ -32,8 +32,8 @@ class LargeFileUploadTaskTest extends TestCase
         $this->promise = $this->createMock(Promise::class);
         $this->mockBody = $this->createMock(LargeFileUploadCreateUploadSessionBody::class);
         $this->mockQueue = $this->createMock(SplQueue::class);
-        $this->session = new LargeFileTaskUploadSession();
-        $this->mockSession = $this->createMock(LargeFileTaskUploadSession::class);
+        $this->session = new LargeFileUploadSession();
+        $this->mockSession = $this->createMock(LargeFileUploadSession::class);
         $this->session->setUploadUrl('https://upload.example.com/session/1');
         $this->mockSession->setUploadUrl('https://upload.example.com/session/1');
 

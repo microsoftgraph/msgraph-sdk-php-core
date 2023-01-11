@@ -10,7 +10,7 @@ use Http\Promise\RejectedPromise;
 use InvalidArgumentException;
 use Microsoft\Graph\Core\Errors\LargeFileUploadTaskErrors\Error404GetUploadStatusException;
 use Microsoft\Graph\Core\Errors\LargeFileUploadTaskErrors\Error405GetUploadStatusException;
-use Microsoft\Graph\Core\Models\LargeFileTaskUploadSession;
+use Microsoft\Graph\Core\Models\LargeFileUploadSession;
 use Microsoft\Graph\Core\Models\LargeFileUploadCreateUploadSessionBody;
 use Microsoft\Kiota\Abstractions\HttpMethod;
 use Microsoft\Kiota\Abstractions\RequestAdapter;
@@ -23,7 +23,7 @@ use SplQueue;
 
 class LargeFileUploadTask
 {
-    /** @var Parsable|LargeFileTaskUploadSession */
+    /** @var Parsable|LargeFileUploadSession */
     private $uploadSession;
     private RequestAdapter $adapter;
     private StreamInterface $stream;
@@ -38,22 +38,8 @@ class LargeFileUploadTask
         $this->adapter = $adapter;
         $this->stream = $stream;
         $this->fileSize = $stream->getSize();
-        $this->validateMaxChunkSize($maxChunkSize);
         $this->maxChunkSize = $maxChunkSize;
         $this->chunks = (int)ceil($this->fileSize / $maxChunkSize);
-    }
-
-    /**
-     * @param int $maxChunkSize
-     * @return void
-     */
-    private function validateMaxChunkSize(int $maxChunkSize): void {
-        if (($maxChunkSize % 320) !== 0) {
-            throw new InvalidArgumentException("The MAX_CHUNK_SIZE must be a multiple of 320Kb or 327,680 Bytes. ");
-        }
-        if ($maxChunkSize > 60 * 1024 * 1024) {
-            throw new InvalidArgumentException("The MAX_CHUNK_SIZE should not be greater than 60MiB.");
-        }
     }
 
     /**
@@ -66,7 +52,7 @@ class LargeFileUploadTask
     /**
      * @throws \Exception
      */
-    public static function createUploadSession(RequestAdapter $adapter, LargeFileUploadCreateUploadSessionBody $uploadSessionBody, string $url): Promise {
+    public static function createUploadSession(RequestAdapter $adapter, Parsable $requestBody, string $url): Promise {
         $requestInformation = new RequestInformation();
         $baseUrl = rtrim($adapter->getBaseUrl(), '/');
         $path = ltrim($url, '/');
@@ -74,8 +60,8 @@ class LargeFileUploadTask
         $newUrl = "{$baseUrl}/$path";
         $requestInformation->setUri($newUrl);
         $requestInformation->httpMethod = HttpMethod::POST;
-        $requestInformation->setContentFromParsable($adapter, 'application/json', $uploadSessionBody);
-        return $adapter->sendAsync($requestInformation, [LargeFileTaskUploadSession::class, 'createFromDiscriminatorValue']);
+        $requestInformation->setContentFromParsable($adapter, 'application/json', $requestBody);
+        return $adapter->sendAsync($requestInformation, [LargeFileUploadSession::class, 'createFromDiscriminatorValue']);
     }
     /**
      * @return RequestAdapter
@@ -140,7 +126,7 @@ class LargeFileUploadTask
             /** @var Promise $front */
             $front = $q->dequeue();
 
-            $front->then(function (LargeFileTaskUploadSession $session) use (&$q, $afterChunkUpload){
+            $front->then(function (LargeFileUploadSession $session) use (&$q, $afterChunkUpload){
                 $nextRange = $session->getNextExpectedRanges();
                 $this->uploaded = (int)explode('-', $nextRange[0] ?? ($this->fileSize.'-'))[0];
                 if (empty($nextRange)) {
@@ -207,7 +193,7 @@ class LargeFileUploadTask
         $info->headers = array_merge($info->headers, ['Content-Length' => strlen($chunkData)]);
 
         $info->setStreamContent(Utils::streamFor($chunkData));
-        return $this->adapter->sendAsync($info, [LargeFileTaskUploadSession::class, 'createFromDiscriminatorValue']);
+        return $this->adapter->sendAsync($info, [LargeFileUploadSession::class, 'createFromDiscriminatorValue']);
     }
 
     /**
@@ -286,7 +272,6 @@ class LargeFileUploadTask
      */
     public function resume(Parsable $uploadSession, ?callable $onRangeUploadComplete = null): void {
         if ($this->uploadSessionExpired($uploadSession)) {
-            $this->uploadSession = $this->getUploadStatus($uploadSession)->wait();
             throw new RuntimeException('The upload session is expired.');
         }
         $validatedValue = $this->checkValueExists($uploadSession, 'getNextExpectedRanges', ['NextExpectedRanges', 'nextExpectedRanges']);
@@ -318,22 +303,6 @@ class LargeFileUploadTask
             throw new RuntimeException('The upload URL cannot be empty.');
         }
         return $result;
-    }
-
-    /**
-     * @param Parsable $uploadSession
-     * @return Promise
-     */
-    private function getUploadStatus(Parsable $uploadSession): Promise {
-        $info = new RequestInformation();
-        $info->httpMethod = HttpMethod::GET;
-        $url = $this->getValidatedUploadUrl($uploadSession);
-        $info->setUri($url);
-        $errorMappings = [
-            '405' => [Error405GetUploadStatusException::class, 'createFromDiscriminatorValue'],
-            '404' => [Error404GetUploadStatusException::class, 'createFromDiscriminatorValue']
-        ];
-        return $this->adapter->sendAsync($info, [LargeFileTaskUploadSession::class, 'createFromDiscriminatorValue'], null, $errorMappings);
     }
 
     /**

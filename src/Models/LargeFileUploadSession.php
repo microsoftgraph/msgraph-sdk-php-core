@@ -7,7 +7,7 @@ use Microsoft\Kiota\Abstractions\Serialization\Parsable;
 use Microsoft\Kiota\Abstractions\Serialization\ParseNode;
 use Microsoft\Kiota\Abstractions\Serialization\SerializationWriter;
 
-class LargeFileTaskUploadSession implements Parsable, AdditionalDataHolder
+class LargeFileUploadSession implements Parsable, AdditionalDataHolder
 {
     private ?string $uploadUrl = null;
     private ?DateTime $expirationDateTime = null;
@@ -78,10 +78,10 @@ class LargeFileTaskUploadSession implements Parsable, AdditionalDataHolder
 
     /**
      * @param ParseNode $parseNode
-     * @return LargeFileTaskUploadSession
+     * @return LargeFileUploadSession
      */
-    public static function createFromDiscriminatorValue(ParseNode $parseNode): LargeFileTaskUploadSession {
-        return new LargeFileTaskUploadSession();
+    public static function createFromDiscriminatorValue(ParseNode $parseNode): LargeFileUploadSession {
+        return new LargeFileUploadSession();
     }
 
     /**
