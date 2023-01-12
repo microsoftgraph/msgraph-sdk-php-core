@@ -87,6 +87,7 @@ class LargeFileUploadTask
 
     /**
      * @param Parsable|null $uploadSession
+     * @return bool
      * @throws Exception
      */
     public function uploadSessionExpired(?Parsable $uploadSession): bool {
@@ -129,8 +130,10 @@ class LargeFileUploadTask
             /** @var Promise $session */
             $session = $q->dequeue();
 
-            $prm = $session->then(function (LargeFileUploadSession $lfuSession) use (&$q, $afterChunkUpload){
+            $promise = $session->then(function (LargeFileUploadSession $lfuSession) use (&$q, $afterChunkUpload){
                 $nextRange = $lfuSession->getNextExpectedRanges();
+                $oldUrl = $this->getValidatedUploadUrl($this->uploadSession);
+                $lfuSession->setUploadUrl($oldUrl);
                 $this->uploaded = (int)explode('-', $nextRange[0] ?? ($this->fileSize.'-'))[0];
                 if (empty($nextRange)) {
                     echo "Upload finished!!!!\n";
@@ -147,8 +150,9 @@ class LargeFileUploadTask
             }, function ($error) {
                 throw $error;
             });
-            if ($prm !== null)
-            $prm->wait(false);
+            if ($promise !== null) {
+                $promise->wait();
+            }
         }
         return $session;
     }
@@ -271,9 +275,11 @@ class LargeFileUploadTask
     }
 
     /**
+     * Resumes an upload task.
+     * @return Promise
      * @throws Exception
      */
-    public function resume(): void {
+    public function resume(): Promise {
         if ($this->uploadSessionExpired($this->uploadSession)) {
             throw new RuntimeException('The upload session is expired.');
         }
@@ -288,7 +294,7 @@ class LargeFileUploadTask
         }
         $nextRange = $nextRanges[0];
         $this->nextRange = $nextRange;
-        $this->upload();
+        return $this->upload();
     }
 
     /**
