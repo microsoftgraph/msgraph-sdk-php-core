@@ -112,7 +112,7 @@ class LargeFileUploadTask
     /**
      * @throws Exception
      */
-    public function upload(?callable $afterChunkUpload = null): void {
+    public function upload(?callable $afterChunkUpload = null): Promise {
 
         if ($this->uploadSessionExpired($this->uploadSession)){
             throw new RuntimeException('The upload session is expired.');
@@ -126,15 +126,15 @@ class LargeFileUploadTask
         $q->enqueue($session);
 
         while(!$q->isEmpty()){
-            /** @var Promise $front */
-            $front = $q->dequeue();
+            /** @var Promise $session */
+            $session = $q->dequeue();
 
-            $front->then(function (LargeFileUploadSession $session) use (&$q, $afterChunkUpload){
-                $nextRange = $session->getNextExpectedRanges();
+            $prm = $session->then(function (LargeFileUploadSession $lfuSession) use (&$q, $afterChunkUpload){
+                $nextRange = $lfuSession->getNextExpectedRanges();
                 $this->uploaded = (int)explode('-', $nextRange[0] ?? ($this->fileSize.'-'))[0];
                 if (empty($nextRange)) {
                     echo "Upload finished!!!!\n";
-                    return $session;
+                    return $lfuSession;
                 }
                 $this->uploadedChunks++;
                 if (!is_null($afterChunkUpload)) {
@@ -143,11 +143,14 @@ class LargeFileUploadTask
                 $this->setNextRange($nextRange[0] . "-");
                 $nextChunkTask = $this->nextChunk($this->stream);
                 $q->enqueue($nextChunkTask);
-                return $session;
+                return $lfuSession;
             }, function ($error) {
                 throw $error;
             });
+            if ($prm !== null)
+            $prm->wait(false);
         }
+        return $session;
     }
 
     /**
