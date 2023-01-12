@@ -146,7 +146,6 @@ class LargeFileUploadTask
                 $lfuSession->setUploadUrl($oldUrl);
                 $this->uploaded = (int)explode('-', $nextRange[0] ?? ($this->fileSize.'-'))[0];
                 if (empty($nextRange)) {
-                    echo "Upload finished!!!!\n";
                     return $lfuSession;
                 }
                 $this->uploadedChunks++;
