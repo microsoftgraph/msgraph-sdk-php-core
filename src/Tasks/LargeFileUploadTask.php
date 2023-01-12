@@ -31,7 +31,7 @@ class LargeFileUploadTask
     private int $uploaded = 0;
 
     /**
-     * @var callable|null $onChunkUploadComplete
+     * @var callable(LargeFileUploadSession): string|null $onChunkUploadComplete
      */
     private $onChunkUploadComplete = null;
     public function __construct(Parsable $uploadSession, RequestAdapter $adapter, StreamInterface $stream, int $maxChunkSize = 320 * 1024){
@@ -44,6 +44,7 @@ class LargeFileUploadTask
     }
 
     /**
+     * Get the upload session used for the upload task.
      * @return Parsable
      */
     public function getUploadSession(): Parsable {
@@ -51,6 +52,7 @@ class LargeFileUploadTask
     }
 
     /**
+     * Creates an upload session given the URL.
      * @throws \Exception
      */
     public static function createUploadSession(RequestAdapter $adapter, Parsable $requestBody, string $url): Promise {
@@ -65,6 +67,7 @@ class LargeFileUploadTask
         return $adapter->sendAsync($requestInformation, [LargeFileUploadSession::class, 'createFromDiscriminatorValue']);
     }
     /**
+     * Get the current request adapter used for the upload task.
      * @return RequestAdapter
      */
     public function getAdapter(): RequestAdapter {
@@ -72,6 +75,7 @@ class LargeFileUploadTask
     }
 
     /**
+     * Get the total number of chunks the file requires to fully upload.
      * @return int
      */
     public function getChunks(): int {
@@ -79,6 +83,7 @@ class LargeFileUploadTask
     }
 
     /**
+     * Get the number of chunks uploaded so far.
      * @return int
      */
     public function getUploadedChunks(): int {
@@ -86,6 +91,7 @@ class LargeFileUploadTask
     }
 
     /**
+     * Checks if the current upload session is expired.
      * @param Parsable|null $uploadSession
      * @return bool
      * @throws Exception
@@ -110,7 +116,11 @@ class LargeFileUploadTask
         }
         return false;
     }
+
     /**
+     * Perform the actual upload for the whole file in bits.
+     * @param callable(LargeFileUploadTask): void | null $afterChunkUpload
+     * @return Promise
      * @throws Exception
      */
     public function upload(?callable $afterChunkUpload = null): Promise {
@@ -130,7 +140,7 @@ class LargeFileUploadTask
             /** @var Promise $session */
             $session = $q->dequeue();
 
-            $promise = $session->then(function (LargeFileUploadSession $lfuSession) use (&$q, $afterChunkUpload){
+            $promise = $session->then(function (LargeFileUploadSession $lfuSession) use (&$q){
                 $nextRange = $lfuSession->getNextExpectedRanges();
                 $oldUrl = $this->getValidatedUploadUrl($this->uploadSession);
                 $lfuSession->setUploadUrl($oldUrl);
@@ -140,8 +150,8 @@ class LargeFileUploadTask
                     return $lfuSession;
                 }
                 $this->uploadedChunks++;
-                if (!is_null($afterChunkUpload)) {
-                    $afterChunkUpload($this);
+                if (!is_null($this->onChunkUploadComplete)) {
+                    call_user_func($this->onChunkUploadComplete, $this);
                 }
                 $this->setNextRange($nextRange[0] . "-");
                 $nextChunkTask = $this->nextChunk($this->stream);
@@ -165,6 +175,7 @@ class LargeFileUploadTask
     }
 
     /**
+     * Upload the next chunk of file.
      * @throws Exception
      */
     public function nextChunk(StreamInterface $file, int $rangeStart = 0, int $rangeEnd = 0): Promise {
@@ -207,6 +218,7 @@ class LargeFileUploadTask
     }
 
     /**
+     * Get the file stream.
      * @return StreamInterface
      */
     public function getFile(): StreamInterface {
@@ -214,6 +226,7 @@ class LargeFileUploadTask
     }
 
     /**
+     * Cancel an existing upload session from the File upload task.
      * @return Promise
      * @throws \Exception
      */
@@ -298,6 +311,7 @@ class LargeFileUploadTask
     }
 
     /**
+     * Validates the URL and returns it if it is valid otherwise throw an exception.
      * @param Parsable $uploadSession
      * @return string
      */
@@ -314,6 +328,7 @@ class LargeFileUploadTask
     }
 
     /**
+     * Get the next range required by the API.
      * @return string|null
      */
     public function getNextRange(): ?string {
@@ -321,6 +336,7 @@ class LargeFileUploadTask
     }
 
     /**
+     * Get the number of bytes uploaded.
      * @return int
      */
     public function getUploaded(): int {
@@ -328,6 +344,7 @@ class LargeFileUploadTask
     }
 
     /**
+     * Get the filesize of the file being uploaded.
      * @return int
      */
     public function getFileSize(): int {
