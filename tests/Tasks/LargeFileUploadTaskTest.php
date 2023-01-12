@@ -160,7 +160,7 @@ class LargeFileUploadTaskTest extends TestCase
         $this->session->setNextExpectedRanges(['10-']);
         $this->session->setExpirationDateTime(new DateTime('12-12-2090'));
         $lfu = new LargeFileUploadTask($this->session, $this->adapter, $this->stream);
-        $lfu->resume($this->session);
+        $lfu->resume();
         $this->assertEquals('10-', $lfu->getNextRange());
     }
 }

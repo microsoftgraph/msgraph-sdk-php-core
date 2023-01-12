@@ -29,6 +29,11 @@ class LargeFileUploadTask
     private int $fileSize;
     private int $maxChunkSize;
     private int $uploaded = 0;
+
+    /**
+     * @var callable|null $onChunkUploadComplete
+     */
+    private $onChunkUploadComplete = null;
     public function __construct(Parsable $uploadSession, RequestAdapter $adapter, StreamInterface $stream, int $maxChunkSize = 320 * 1024){
         $this->uploadSession = $uploadSession;
         $this->adapter = $adapter;
@@ -112,6 +117,8 @@ class LargeFileUploadTask
         if ($this->uploadSessionExpired($this->uploadSession)){
             throw new RuntimeException('The upload session is expired.');
         }
+
+        $this->onChunkUploadComplete ??= $afterChunkUpload;
         $q = new SplQueue();
 
         $start = 0;
@@ -263,11 +270,11 @@ class LargeFileUploadTask
     /**
      * @throws Exception
      */
-    public function resume(Parsable $uploadSession, ?callable $onRangeUploadComplete = null): void {
-        if ($this->uploadSessionExpired($uploadSession)) {
+    public function resume(): void {
+        if ($this->uploadSessionExpired($this->uploadSession)) {
             throw new RuntimeException('The upload session is expired.');
         }
-        $validatedValue = $this->checkValueExists($uploadSession, 'getNextExpectedRanges', ['NextExpectedRanges', 'nextExpectedRanges']);
+        $validatedValue = $this->checkValueExists($this->uploadSession, 'getNextExpectedRanges', ['NextExpectedRanges', 'nextExpectedRanges']);
         if (!$validatedValue[0]) {
             throw new RuntimeException('The object passed does not contain a valid "nextExpectedRanges" property.');
         }
@@ -278,8 +285,7 @@ class LargeFileUploadTask
         }
         $nextRange = $nextRanges[0];
         $this->nextRange = $nextRange;
-        $this->uploadSession =  $uploadSession;
-        $this->upload($onRangeUploadComplete);
+        $this->upload();
     }
 
     /**
