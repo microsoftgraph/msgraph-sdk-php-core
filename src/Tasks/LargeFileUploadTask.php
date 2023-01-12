@@ -34,7 +34,7 @@ class LargeFileUploadTask
      * @var callable(LargeFileUploadSession): string|null $onChunkUploadComplete
      */
     private $onChunkUploadComplete = null;
-    public function __construct(Parsable $uploadSession, RequestAdapter $adapter, StreamInterface $stream, int $maxChunkSize = 320 * 1024){
+    public function __construct(Parsable $uploadSession, RequestAdapter $adapter, StreamInterface $stream, int $maxChunkSize = 4 * 1024 * 1024){
         $this->uploadSession = $uploadSession;
         $this->adapter = $adapter;
         $this->stream = $stream;
