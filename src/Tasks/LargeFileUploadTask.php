@@ -130,17 +130,14 @@ class LargeFileUploadTask
         }
 
         $this->onChunkUploadComplete ??= $afterChunkUpload;
-        $q = new SplQueue();
 
         $start = 0;
         $session = $this->nextChunk($this->stream, $start,max(0, min($this->maxChunkSize - 1,  $this->fileSize - 1)));
-        $q->enqueue($session);
-
-        while(!$q->isEmpty()){
-            /** @var Promise $session */
-            $session = $q->dequeue();
-
-            $promise = $session->then(function (LargeFileUploadSession $lfuSession) use (&$q){
+        $processNext = $session;
+        $chunks = $this->chunks;
+        while($chunks > 0){
+            $session = $processNext;
+            $promise = $session->then(function (LargeFileUploadSession $lfuSession) use (&$processNext){
                 $nextRange = $lfuSession->getNextExpectedRanges();
                 $oldUrl = $this->getValidatedUploadUrl($this->uploadSession);
                 $lfuSession->setUploadUrl($oldUrl);
@@ -153,8 +150,7 @@ class LargeFileUploadTask
                     call_user_func($this->onChunkUploadComplete, $this);
                 }
                 $this->setNextRange($nextRange[0] . "-");
-                $nextChunkTask = $this->nextChunk($this->stream);
-                $q->enqueue($nextChunkTask);
+                $processNext = $this->nextChunk($this->stream);
                 return $lfuSession;
             }, function ($error) {
                 throw $error;
@@ -162,6 +158,7 @@ class LargeFileUploadTask
             if ($promise !== null) {
                 $promise->wait();
             }
+            $chunks--;
         }
         return $session;
     }
