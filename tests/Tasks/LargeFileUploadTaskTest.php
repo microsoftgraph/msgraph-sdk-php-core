@@ -10,6 +10,7 @@ use Microsoft\Graph\Core\Models\LargeFileUploadSession;
 use Microsoft\Graph\Core\Models\LargeFileUploadCreateUploadSessionBody;
 use Microsoft\Graph\Core\Tasks\LargeFileUploadTask;
 use Microsoft\Kiota\Abstractions\RequestAdapter;
+use Microsoft\Kiota\Abstractions\Serialization\Parsable;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\StreamInterface;
 use RuntimeException;
@@ -22,7 +23,7 @@ class LargeFileUploadTaskTest extends TestCase
     private StreamInterface $stream;
     private Promise $promise;
     private LargeFileUploadSession $session;
-    private LargeFileUploadCreateUploadSessionBody $mockBody;
+    private Parsable $mockBody;
     private SplQueue $mockQueue;
     private LargeFileUploadSession $mockSession;
     protected function setUp(): void {
@@ -30,7 +31,7 @@ class LargeFileUploadTaskTest extends TestCase
         $this->adapter = $this->createMock(RequestAdapter::class);
         $this->stream = $this->createMock(StreamInterface::class);
         $this->promise = $this->createMock(Promise::class);
-        $this->mockBody = $this->createMock(LargeFileUploadCreateUploadSessionBody::class);
+        $this->mockBody = $this->createMock(Parsable::class);
         $this->mockQueue = $this->createMock(SplQueue::class);
         $this->session = new LargeFileUploadSession();
         $this->mockSession = $this->createMock(LargeFileUploadSession::class);
