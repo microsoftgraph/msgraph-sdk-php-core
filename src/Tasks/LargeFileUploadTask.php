@@ -119,7 +119,8 @@ class LargeFileUploadTask
      * @throws Exception
      */
     public function upload(?callable $afterChunkUpload = null): Promise {
-
+        // Rewind at this point to take care of failures.
+        $this->stream->rewind();
         if ($this->uploadSessionExpired($this->uploadSession)){
             throw new RuntimeException('The upload session is expired.');
         }
@@ -180,7 +181,6 @@ class LargeFileUploadTask
         $rangeParts = explode('-', $this->nextRange);
         $start = intval($rangeParts[0]);
         $end = intval($rangeParts[1] ?? 0);
-        $file->rewind();
         if ($start === 0 && $end === 0) {
             $chunkData = $file->read($this->maxChunkSize);
             $end = min($this->maxChunkSize - 1, $this->fileSize - 1);
