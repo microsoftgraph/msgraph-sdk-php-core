@@ -23,7 +23,6 @@ class LargeFileUploadTask
     private $uploadSession;
     private RequestAdapter $adapter;
     private StreamInterface $stream;
-    private int $uploadedChunks = 0;
     private int $chunks;
     private ?string $nextRange = null;
     private int $fileSize;
@@ -84,20 +83,12 @@ class LargeFileUploadTask
     }
 
     /**
-     * Get the number of chunks uploaded so far.
-     * @return int
-     */
-    public function getUploadedChunks(): int {
-        return $this->uploadedChunks;
-    }
-
-    /**
      * Checks if the current upload session is expired.
      * @param Parsable|null $uploadSession
      * @return bool
      * @throws Exception
      */
-    public function uploadSessionExpired(?Parsable $uploadSession): bool {
+    private function uploadSessionExpired(?Parsable $uploadSession): bool {
         $now = new DateTime((new DateTime('now'))->format(DateTimeInterface::ATOM));
 
         $validatedValue = $this->checkValueExists($uploadSession ?? $this->uploadSession, 'getExpirationDateTime', ['ExpirationDateTime', 'expirationDateTime']);
@@ -131,12 +122,9 @@ class LargeFileUploadTask
         }
 
         $this->onChunkUploadComplete ??= $afterChunkUpload;
-
-        $start = 0;
-        $session = $this->nextChunk($this->stream, $start,max(0, min($this->maxChunkSize - 1,  $this->fileSize - 1)));
+        $session = $this->nextChunk($this->stream, 0,max(0, min($this->maxChunkSize - 1,  $this->fileSize - 1)));
         $processNext = $session;
-        $chunks = $this->chunks;
-        while($chunks > 0){
+        while($this->chunks > 0){
             $session = $processNext;
             $promise = $session->then(function (LargeFileUploadSession $lfuSession) use (&$processNext){
                 $nextRange = $lfuSession->getNextExpectedRanges();
@@ -146,7 +134,6 @@ class LargeFileUploadTask
                 if (empty($nextRange)) {
                     return $lfuSession;
                 }
-                $this->uploadedChunks++;
                 if (!is_null($this->onChunkUploadComplete)) {
                     call_user_func($this->onChunkUploadComplete, $this);
                 }
@@ -159,7 +146,7 @@ class LargeFileUploadTask
             if ($promise !== null) {
                 $promise->wait();
             }
-            $chunks--;
+            $this->chunks--;
         }
         return $session;
     }

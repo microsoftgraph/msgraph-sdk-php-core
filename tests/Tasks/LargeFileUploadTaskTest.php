@@ -95,21 +95,6 @@ class LargeFileUploadTaskTest extends TestCase
     /**
      * @throws \Exception
      */
-    public function testUploadSessionCheckExpiry(): void {
-        $this->session->setExpirationDateTime(new DateTime('12-12-2090'));
-        $this->stream = new Stream(fopen('php://memory', 'rb'));
-        $this->session->setUploadUrl('https://upload.example.com/session/1');
-        /** @phpstan-ignore-next-line */
-        $this->promise->method('wait')
-            ->willReturn($this->session);
-        $session = $this->promise->wait();
-        $lfu = new LargeFileUploadTask($session, $this->adapter, $this->stream);
-        $this->assertFalse($lfu->uploadSessionExpired($session));
-    }
-
-    /**
-     * @throws \Exception
-     */
     public function testCreateUploadSession(): void {
         /** @phpstan-ignore-next-line */
         $this->adapter->method('sendAsync')
