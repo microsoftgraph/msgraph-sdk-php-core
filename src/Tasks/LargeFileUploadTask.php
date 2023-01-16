@@ -53,9 +53,12 @@ class LargeFileUploadTask
     /**
      * Creates an upload session given the URL.
      * The URL should not include the hostname since that is already included in the baseUrl for the requestAdapter.
-     * @throws \Exception
+     * @param RequestAdapter $adapter
+     * @param Parsable|AdditionalDataHolder $requestBody
+     * @param string $url
+     * @return Promise
      */
-    public static function createUploadSession(RequestAdapter $adapter, Parsable $requestBody, string $url): Promise {
+    public static function createUploadSession(RequestAdapter $adapter, $requestBody, string $url): Promise {
         $requestInformation = new RequestInformation();
         $baseUrl = rtrim($adapter->getBaseUrl(), '/');
         $path = ltrim($url, '/');
@@ -212,7 +215,7 @@ class LargeFileUploadTask
     /**
      * Cancel an existing upload session from the File upload task.
      * @return Promise
-     * @throws \Exception
+     * @throws Exception
      */
     public function cancel(): Promise {
         $requestInformation = new RequestInformation();

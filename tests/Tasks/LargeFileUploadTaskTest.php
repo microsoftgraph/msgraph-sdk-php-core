@@ -6,6 +6,7 @@ use DateTime;
 use GuzzleHttp\Psr7\Stream;
 use Http\Promise\FulfilledPromise;
 use Http\Promise\Promise;
+use Microsoft\Graph\Core\Models\LargeFileUploadCreateSessionBody;
 use Microsoft\Graph\Core\Models\LargeFileUploadSession;
 use Microsoft\Graph\Core\Models\LargeFileUploadCreateUploadSessionBody;
 use Microsoft\Graph\Core\Tasks\LargeFileUploadTask;
@@ -31,7 +32,7 @@ class LargeFileUploadTaskTest extends TestCase
         $this->adapter = $this->createMock(RequestAdapter::class);
         $this->stream = $this->createMock(StreamInterface::class);
         $this->promise = $this->createMock(Promise::class);
-        $this->mockBody = $this->createMock(Parsable::class);
+        $this->mockBody = $this->createMock(LargeFileUploadCreateSessionBody::class);
         $this->mockQueue = $this->createMock(SplQueue::class);
         $this->session = new LargeFileUploadSession();
         $this->mockSession = $this->createMock(LargeFileUploadSession::class);
