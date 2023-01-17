@@ -129,7 +129,11 @@ class LargeFileUploadTask
         $this->onChunkUploadComplete ??= $afterChunkUpload;
         $session = $this->nextChunk($this->stream, 0,max(0, min($this->maxChunkSize - 1,  $this->fileSize - 1)));
         $processNext = $session;
-        $uploadedRange = [0];
+        /// The logic below is to be used to accurately determine the range uploaded
+        /// even in scenarios where we are resuming existing upload sessions.
+        $rangeParts = explode("-", $this->nextRange[0] ?? '0-');
+        $end = min(intval($rangeParts[0]) + $this->maxChunkSize - 1, $this->fileSize);
+        $uploadedRange = [$rangeParts[0], $end];
         while($this->chunks > 0){
             $session = $processNext;
             $promise = $session->then(function (LargeFileUploadSession $lfuSession) use (&$processNext, &$uploadedRange){
