@@ -19,7 +19,7 @@ jobs:
   validate-pull-request:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3.1.0
+    - uses: actions/checkout@v3.3.0
       with:
         submodules: 'true'
     - name: Setup PHP and Xdebug for Code Coverage report
