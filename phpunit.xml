@@ -10,6 +10,10 @@
 		<include>
 			<directory suffix=".php">src</directory>
 		</include>
+		<exclude>
+			<directory suffix=".php">src/Models</directory>
+			<directory suffix=".php">src/Errors</directory>
+		</exclude>
 		<report>
 			<html outputDirectory="coverage"/>
 		</report>
