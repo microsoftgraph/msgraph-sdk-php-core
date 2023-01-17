@@ -141,7 +141,7 @@ class LargeFileUploadTask
                 $oldUrl = $this->getValidatedUploadUrl($this->uploadSession);
                 $lfuSession->setUploadUrl($oldUrl);
                 if (!is_null($this->onChunkUploadComplete)) {
-                    call_user_func($this->onChunkUploadComplete, $uploadedRange, ...func_get_args());
+                    call_user_func($this->onChunkUploadComplete, $uploadedRange);
                 }
                 if (empty($nextRange)) {
                     return $lfuSession;
