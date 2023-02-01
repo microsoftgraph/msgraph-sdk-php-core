@@ -22,7 +22,7 @@ class GraphPhpLeagueAuthenticationProvider extends BaseBearerTokenAuthentication
 {
     /**
      * @param TokenRequestContext $tokenRequestContext
-     * @param array $scopes defaults to "https://[graph national cloud host]/.default scope
+     * @param array<string> $scopes defaults to ["https://[graph national cloud host]/.default"] scope
      */
     public function __construct(TokenRequestContext $tokenRequestContext, array $scopes = [])
     {
