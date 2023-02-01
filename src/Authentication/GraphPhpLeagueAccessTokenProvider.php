@@ -26,7 +26,7 @@ class GraphPhpLeagueAccessTokenProvider extends PhpLeagueAccessTokenProvider
 {
     /**
      * @param TokenRequestContext $tokenRequestContext
-     * @param array $scopes if left empty, it's set to /.default scope
+     * @param array<string> $scopes if left empty, it's set to ["https://[graph national cloud host]/.default"] scope
      */
     public function __construct(TokenRequestContext $tokenRequestContext, array $scopes = [])
     {
