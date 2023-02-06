@@ -18,6 +18,9 @@ defaults:
 jobs:
   validate-pull-request:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-versions: ['7.4', '8.0', '8.1', '8.2']
     steps:
     - uses: actions/checkout@v3.3.0
       with:
@@ -25,7 +28,7 @@ jobs:
     - name: Setup PHP and Xdebug for Code Coverage report
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '7.4'
+        php-version: ${{ matrix.php-versions }}
         coverage: xdebug
     - name: Validate composer file
       run: |
