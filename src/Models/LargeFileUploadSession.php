@@ -11,9 +11,11 @@ class LargeFileUploadSession implements Parsable, AdditionalDataHolder
 {
     private ?string $uploadUrl = null;
     private ?DateTime $expirationDateTime = null;
+    /** @var array<string, mixed> */
     private array $additionalData = [];
-    private bool $isCancelled = false;
-    private array $nextExpectedRanges = [];
+    private ?bool $isCancelled = false;
+    /** @var string[]|null  */
+    private ?array $nextExpectedRanges = [];
 
     /**
      * @param DateTime|null $expirationDateTime
@@ -23,23 +25,23 @@ class LargeFileUploadSession implements Parsable, AdditionalDataHolder
     }
 
     /**
-     * @param string $uploadUrl
+     * @param string|null $uploadUrl
      */
-    public function setUploadUrl(string $uploadUrl): void {
+    public function setUploadUrl(?string $uploadUrl): void {
         $this->uploadUrl = $uploadUrl;
     }
 
     /**
-     * @param array $nextExpectedRanges
+     * @param array<string>|null $nextExpectedRanges
      */
-    public function setNextExpectedRanges(array $nextExpectedRanges): void {
+    public function setNextExpectedRanges(?array $nextExpectedRanges): void {
         $this->nextExpectedRanges = $nextExpectedRanges;
     }
 
     /**
-     * @return array
+     * @return array<string>|null
      */
-    public function getNextExpectedRanges(): array {
+    public function getNextExpectedRanges(): ?array {
         return $this->nextExpectedRanges;
     }
 
@@ -59,18 +61,19 @@ class LargeFileUploadSession implements Parsable, AdditionalDataHolder
     }
 
     /**
-    * @param bool $isCancelled
+    * @param bool|null $isCancelled
     */
-    public function setIsCancelled(bool $isCancelled): void {
+    public function setIsCancelled(?bool $isCancelled): void {
             $this->isCancelled = $isCancelled;
     }
 
-    public function getAdditionalData(): array {
+    /** @inheritDoc */
+    public function getAdditionalData(): ?array {
         return $this->additionalData;
     }
 
     /**
-     * @param array $value
+     * @param array<string, mixed> $value
      */
     public function setAdditionalData(array $value): void {
         $this->additionalData = $value;
@@ -85,9 +88,9 @@ class LargeFileUploadSession implements Parsable, AdditionalDataHolder
     }
 
     /**
-     * @return bool
+     * @return bool|null
      */
-    public function getIsCancelled(): bool {
+    public function getIsCancelled(): ?bool {
         return $this->isCancelled;
     }
 
@@ -105,6 +108,7 @@ class LargeFileUploadSession implements Parsable, AdditionalDataHolder
             'uploadUrl' => fn (ParseNode $parseNode) => $this->setUploadUrl($parseNode->getStringValue()),
             'expirationDateTime' => fn (ParseNode $parseNode) => $this->setExpirationDateTime($parseNode->getDateTimeValue()),
             'isCancelled' => fn (ParseNode $parseNode) => $this->setIsCancelled($parseNode->getBooleanValue()),
+            /** @phpstan-ignore-next-line */
             'nextExpectedRanges' => fn (ParseNode $parseNode) => $this->setNextExpectedRanges($parseNode->getCollectionOfPrimitiveValues('string'))];
     }
 }

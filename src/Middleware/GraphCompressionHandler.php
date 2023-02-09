@@ -10,6 +10,7 @@ namespace Microsoft\Graph\Core\Middleware;
 
 
 use GuzzleHttp\Promise\PromiseInterface;
+use Microsoft\Kiota\Abstractions\RequestOption;
 use Microsoft\Kiota\Http\Middleware\CompressionHandler;
 use Psr\Http\Message\RequestInterface;
 
@@ -26,6 +27,11 @@ class GraphCompressionHandler extends CompressionHandler
 
     const FEATURE_FLAG = 0x00000040;
 
+    /**
+     * @param RequestInterface $request
+     * @param array<string, RequestOption> $options
+     * @return PromiseInterface
+     */
     public function __invoke(RequestInterface $request, array $options): PromiseInterface
     {
         $this->setFeatureFlag(self::FEATURE_FLAG, $options);

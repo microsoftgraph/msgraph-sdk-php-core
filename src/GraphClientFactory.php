@@ -160,10 +160,10 @@ final class GraphClientFactory extends KiotaClientFactory
     /**
      * Return default handler stack for Graph
      *
-     * @param null $handler final handler
+     * @param callable|null $handler final handler
      * @return HandlerStack
      */
-    public static function getDefaultHandlerStack($handler = null): HandlerStack
+    public static function getDefaultHandlerStack(callable $handler = null): HandlerStack
     {
         $handler = ($handler) ?: Utils::chooseHandler();
         $handlerStack = new HandlerStack($handler);
