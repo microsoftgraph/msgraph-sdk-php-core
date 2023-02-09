@@ -46,17 +46,17 @@ final class GraphClientFactory extends KiotaClientFactory
     /**
      * @var string Graph API host to use as base URL and for authentication
      */
-    private static $nationalCloud = NationalCloud::GLOBAL;
+    private static string $nationalCloud = NationalCloud::GLOBAL;
 
     /**
      * @var GraphClientFactory|null Store singleton instance of the GraphClientFactory
      */
-    private static $instance = null;
+    private static ?GraphClientFactory $instance = null;
 
     /**
      * @var GraphTelemetryOption|null telemetry config
      */
-    private static $graphTelemetryOption = null;
+    private static ?GraphTelemetryOption $graphTelemetryOption = null;
 
     /**
      * GraphClientFactory constructor.
@@ -105,7 +105,7 @@ final class GraphClientFactory extends KiotaClientFactory
     /**
      * Create Guzzle client configured for Graph
      *
-     * @param array $guzzleConfig
+     * @param array<string, mixed> $guzzleConfig
      * @return Client
      */
     public static function createWithConfig(array $guzzleConfig): Client
@@ -141,7 +141,7 @@ final class GraphClientFactory extends KiotaClientFactory
      */
     public static function createAdapter(): HttpClientInterface {
         return new class(self::create()) implements HttpClientInterface {
-            private $clientAdapter;
+            private GuzzleAdapter $clientAdapter;
 
             public function __construct(Client $guzzleClient) {
                 $this->clientAdapter = new GuzzleAdapter($guzzleClient);

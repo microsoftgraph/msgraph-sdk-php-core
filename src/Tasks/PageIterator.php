@@ -22,14 +22,15 @@ class PageIterator
     private RequestAdapter $requestAdapter;
     private bool $hasNext = false;
     private int $pauseIndex;
-    /** @var array{string, string} $constructorFunc */
+    /** @var array{string, string} $constructorCallable */
     private array $constructorCallable;
+    /** @var array<string, mixed> */
     private array $headers = [];
     /** @var array<RequestOption>|null  */
     private ?array $requestOptions = [];
 
     /**
-     * @param Parsable|array|object $response paged collection response
+     * @param Parsable|array<mixed>|object|null $response paged collection response
      * @param RequestAdapter $requestAdapter
      * @param array{string,string} $constructorCallable The method to construct a paged response object.
      * @throws JsonException
@@ -44,11 +45,10 @@ class PageIterator
             $this->currentPage = $page;
             $this->hasNext = true;
         }
-        $this->headers = [];
     }
 
     /**
-     * @param array $headers
+     * @param array<string, mixed> $headers
      */
     public function setHeaders(array $headers): void
     {
@@ -56,7 +56,7 @@ class PageIterator
     }
 
     /**
-     * @param array $requestOptions
+     * @param array<string, RequestOption> $requestOptions
      */
     public function setRequestOptions(array $requestOptions): void
     {
@@ -72,7 +72,7 @@ class PageIterator
     }
 
     /**
-     * @param callable(Parsable|array|object): bool $callback The callback function to apply on every entity. Pauses iteration if false is returned
+     * @param callable(Parsable|array<mixed>|object): bool $callback The callback function to apply on every entity. Pauses iteration if false is returned
      * @throws Exception
      */
     public function iterate(callable $callback): void {
@@ -102,12 +102,13 @@ class PageIterator
         }
 
         $response = $this->fetchNextPage();
+        /** @var Parsable $result */
         $result = $response->wait();
         return self::convertToPage($result);
     }
 
     /**
-     * @param $response
+     * @param object|array<mixed>|null $response
      * @return PageResult|null
      * @throws JsonException
      */
@@ -117,31 +118,30 @@ class PageIterator
             throw new InvalidArgumentException('$response cannot be null');
         }
 
+        $value = null;
         if (is_array($response)) {
             $value = $response['value'];
-        } else if(is_a($response, Parsable::class) && method_exists($response, 'getValue')) {
+        } elseif(is_object($response) && is_a($response, Parsable::class) &&
+            method_exists($response, 'getValue')) {
             $value = $response->getValue();
-        } else {
-            $value = $response->value;
+        } elseif(is_object($response)) {
+            $value = property_exists($response, 'value') ? $response->value : [];
         }
 
         if ($value === null) {
             throw new InvalidArgumentException('The response does not contain a value.');
         }
 
-        $parsablePage =  is_a($response, Parsable::class) ? $response : json_decode(json_encode($response,JSON_THROW_ON_ERROR), true);
+        $parsablePage =  (is_object($response) && is_a($response, Parsable::class)) ? $response : json_decode(json_encode($response,JSON_THROW_ON_ERROR), true);
         if (is_array($parsablePage)) {
             $page->setOdataNextLink($parsablePage['@odata.nextLink'] ?? '');
-        } else {
+        } elseif(is_object($parsablePage) && is_a($parsablePage, Parsable::class) && method_exists($parsablePage, 'getOdataNextLink')) {
             $page->setOdataNextLink($parsablePage->getOdataNextLink());
         }
         $page->setValue($value);
         return $page;
     }
-    private function fetchNextPage(): ?Promise {
-        /** @var Parsable $graphResponse */
-        $graphResponse = null;
-
+    private function fetchNextPage(): Promise {
         $nextLink = $this->currentPage->getOdataNextLink();
 
         if ($nextLink === null) {
@@ -171,7 +171,7 @@ class PageIterator
             return false;
         }
         for ($i = $this->pauseIndex; $i < count($pageItems); $i++){
-            $keepIterating = $callback($pageItems[$i]);
+            $keepIterating = $callback !== null ? $callback($pageItems[$i]) : true;
 
              if (!$keepIterating) {
                  $this->pauseIndex = $i + 1;

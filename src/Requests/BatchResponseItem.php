@@ -32,7 +32,7 @@ class BatchResponseItem implements Parsable
     private int $statusCode;
 
     /**
-     * @var array
+     * @var array<mixed>
      */
     private array $headers = [];
 
