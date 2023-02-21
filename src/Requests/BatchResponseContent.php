@@ -129,16 +129,15 @@ class BatchResponseContent implements Parsable
             throw new RuntimeException("Unable to get content-type header in response item");
         }
         $contentType = $response->getHeaders()['content-type'];
-        $contentTypeNew = is_array($contentType) ? implode(',', $contentType) : $contentType;
         $responseBody = $response->getBody() ?? Utils::streamFor(null);
         if ($parseNodeFactory) {
-            $parseNode = $parseNodeFactory->getRootParseNode($contentTypeNew, $responseBody);
+            $parseNode = $parseNodeFactory->getRootParseNode($contentType, $responseBody);
         } else {
             // Check the registry or default to Json deserialization
             try {
-                $parseNode = ParseNodeFactoryRegistry::getDefaultInstance()->getRootParseNode($contentTypeNew, $responseBody);
+                $parseNode = ParseNodeFactoryRegistry::getDefaultInstance()->getRootParseNode($contentType, $responseBody);
             } catch (UnexpectedValueException $ex) {
-                $parseNode = (new JsonParseNodeFactory())->getRootParseNode($contentTypeNew, $responseBody);
+                $parseNode = (new JsonParseNodeFactory())->getRootParseNode($contentType, $responseBody);
             }
         }
         return $parseNode->getObjectValue([$type, 'createFromDiscriminatorValue']);

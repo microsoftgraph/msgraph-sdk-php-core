@@ -8,6 +8,7 @@
 
 namespace Microsoft\Graph\Core\Requests;
 
+use GuzzleHttp\Psr7\Response;
 use Http\Promise\Promise;
 use Http\Promise\RejectedPromise;
 use Microsoft\Kiota\Abstractions\HttpMethod;
@@ -16,6 +17,7 @@ use Microsoft\Kiota\Abstractions\RequestAdapter;
 use Microsoft\Kiota\Abstractions\RequestInformation;
 use Microsoft\Kiota\Abstractions\ResponseHandler;
 use Microsoft\Kiota\Http\GuzzleRequestAdapter;
+use Microsoft\Kiota\Http\Middleware\Options\ResponseHandlerOption;
 use PHPStan\BetterReflection\Reflection\Adapter\ReflectionClass;
 use Psr\Http\Message\ResponseInterface;
 
@@ -52,15 +54,15 @@ class BatchRequestBuilder
      * @param BatchRequestBuilderPostRequestConfiguration|null $requestConfiguration
      * @return RequestInformation
      */
-    public function createPostRequestInformation(BatchRequestContent $body, ?BatchRequestBuilderPostRequestConfiguration $requestConfiguration = null): RequestInformation
+    public function toPostRequestInformation(BatchRequestContent $body, ?BatchRequestBuilderPostRequestConfiguration $requestConfiguration = null): RequestInformation
     {
         $requestInfo = new RequestInformation();
         $requestInfo->urlTemplate = $this->urlTemplate;
         $requestInfo->httpMethod = HttpMethod::POST;
-        $requestInfo->headers = ["Accept" => "application/json"];
+        $requestInfo->addHeader("Accept", "application/json");
         if ($requestConfiguration !== null) {
             if ($requestConfiguration->headers !== null) {
-                $requestInfo->headers = array_merge($requestInfo->headers, $requestConfiguration->headers);
+                $requestInfo->addHeaders($requestConfiguration->headers);
             }
             if ($requestConfiguration->options !== null) {
                 $requestInfo->addRequestOptions(...$requestConfiguration->options);
@@ -77,20 +79,20 @@ class BatchRequestBuilder
      */
     public function postAsync(BatchRequestContent $body, ?BatchRequestBuilderPostRequestConfiguration $requestConfig = null): Promise
     {
-        $requestInfo = $this->createPostRequestInformation($body, $requestConfig);
+        $requestInfo = $this->toPostRequestInformation($body, $requestConfig);
+        $requestInfo->addRequestOptions(new ResponseHandlerOption(new NativeResponseHandler()));
         try {
-            return $this->requestAdapter->sendAsync($requestInfo, [], new NativeResponseHandler())->wait()->then(
-                function (ResponseInterface $response) {
-                    $rootParseNode = $this->requestAdapter->getParseNodeFactory()->getRootParseNode('application/json', $response->getBody());
-                    /** @var BatchResponseContent $batchResponseContent */
-                    $batchResponseContent = $rootParseNode->getObjectValue([BatchResponseContent::class, 'create']);
-                    $batchResponseContent->setStatusCode($response->getStatusCode());
-                    $headers = [];
-                    foreach ($response->getHeaders() as $key => $value) {
-                        $headers[strtolower($key)] = strtolower(implode(",", $value));
+            return $this->requestAdapter->sendAsync($requestInfo, [BatchResponseContent::class, 'create'])->then(
+                function (Promise $promise) {
+                    $response = $promise->wait();
+                    if (is_object($response) && is_a($response, Response::class)) {
+                        $rootParseNode = $this->requestAdapter->getParseNodeFactory()->getRootParseNode('application/json', $response->getBody());
+                        /** @var BatchResponseContent $batchResponseContent */
+                        $batchResponseContent = $rootParseNode->getObjectValue([BatchResponseContent::class, 'create']);
+                        $batchResponseContent->setStatusCode($response->getStatusCode());
+                        $batchResponseContent->setHeaders($response->getHeaders());
+                        return $batchResponseContent;
                     }
-                    $batchResponseContent->setHeaders($headers);
-                    return $batchResponseContent;
                 }
             );
         } catch (\Exception $ex) {

@@ -32,7 +32,7 @@ class BatchRequestBuilderTest extends TestCase
                         [
                             "id" => 1,
                             "status" => 200,
-                            "headers" => ['content-type' => 'text/plain'],
+                            "headers" => ['content-type' => 'text/plain', 'content-length' => '10'],
                             "body" => "text"
                         ]
                     ]
@@ -64,7 +64,7 @@ class BatchRequestBuilderTest extends TestCase
         $guzzleClient = new Client(['handler' => $handlerStack]);
 
         $this->requestAdapter = new BaseGraphRequestAdapter(
-            null, new GraphTelemetryOption(), new JsonParseNodeFactory(), new JsonSerializationWriterFactory(), $guzzleClient
+            new GraphTelemetryOption(), null, new JsonParseNodeFactory(), new JsonSerializationWriterFactory(), $guzzleClient
         );
     }
 
@@ -77,10 +77,10 @@ class BatchRequestBuilderTest extends TestCase
         // Successful request
         $this->assertInstanceOf(BatchResponseContent::class, $response);
         $this->assertEquals(200, $response->getStatusCode());
-        $this->assertEquals(['content-type' => 'application/json'], $response->getHeaders());
+        $this->assertEquals(['content-type' => ['application/json']], $response->getHeaders());
         $this->assertEquals(1, $response->getResponses()[0]->getId());
         $this->assertEquals(200, $response->getResponses()[0]->getStatusCode());
-        $this->assertEquals(['content-type' => 'text/plain'], $response->getResponses()[0]->getHeaders());
+        $this->assertEquals(['content-type' => 'text/plain', 'content-length' => '10'], $response->getResponses()[0]->getHeaders());
         $this->assertEquals("text", $response->getResponses()[0]->getBody()->getContents());
 
         // Bad Request
