@@ -30,53 +30,11 @@ use UnexpectedValueException;
 class BatchResponseContent implements Parsable
 {
     /**
-     * @var array<string,string[]|string>
-     */
-    private ?array $headers = [];
-
-    /**
-     * @var int|null
-     */
-    private ?int $statusCode = null;
-
-    /**
      * @var array<string, BatchResponseItem>
      */
     private array $responses = [];
 
     public function __construct() {}
-
-    /**
-     * @return array<string, string[]|string>|null
-     */
-    public function getHeaders(): ?array
-    {
-        return $this->headers;
-    }
-
-    /**
-     * @param array<string, string[]|string>|null $headers
-     */
-    public function setHeaders(?array $headers): void
-    {
-        $this->headers = $headers;
-    }
-
-    /**
-     * @return int|null
-     */
-    public function getStatusCode(): ?int
-    {
-        return $this->statusCode;
-    }
-
-    /**
-     * @param int|null $statusCode
-     */
-    public function setStatusCode(?int $statusCode): void
-    {
-        $this->statusCode = $statusCode;
-    }
 
     /**
      * @return BatchResponseItem[]
@@ -125,7 +83,7 @@ class BatchResponseContent implements Parsable
             throw new InvalidArgumentException("Type passed must implement the Parsable interface");
         }
         $response = $this->responses[$requestId];
-        if (!array_key_exists('content-type', $response->getHeaders() ?? [])) {
+        if (!($response->getHeaders()['content-type'] ?? null)) {
             throw new RuntimeException("Unable to get content-type header in response item");
         }
         $contentType = $response->getHeaders()['content-type'];
@@ -156,7 +114,7 @@ class BatchResponseContent implements Parsable
         $writer->writeCollectionOfObjectValues('responses', $this->getResponses());
     }
 
-    public static function create(ParseNode $parseNode): BatchResponseContent
+    public static function createFromDiscriminatorValue(ParseNode $parseNode): BatchResponseContent
     {
         return new BatchResponseContent();
     }

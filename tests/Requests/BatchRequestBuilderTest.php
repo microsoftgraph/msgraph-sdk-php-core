@@ -76,8 +76,6 @@ class BatchRequestBuilderTest extends TestCase
 
         // Successful request
         $this->assertInstanceOf(BatchResponseContent::class, $response);
-        $this->assertEquals(200, $response->getStatusCode());
-        $this->assertEquals(['content-type' => ['application/json']], $response->getHeaders());
         $this->assertEquals(1, $response->getResponses()[0]->getId());
         $this->assertEquals(200, $response->getResponses()[0]->getStatusCode());
         $this->assertEquals(['content-type' => 'text/plain', 'content-length' => '10'], $response->getResponses()[0]->getHeaders());

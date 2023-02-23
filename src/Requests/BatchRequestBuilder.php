@@ -80,21 +80,8 @@ class BatchRequestBuilder
     public function postAsync(BatchRequestContent $body, ?BatchRequestBuilderPostRequestConfiguration $requestConfig = null): Promise
     {
         $requestInfo = $this->toPostRequestInformation($body, $requestConfig);
-        $requestInfo->addRequestOptions(new ResponseHandlerOption(new NativeResponseHandler()));
         try {
-            return $this->requestAdapter->sendAsync($requestInfo, [BatchResponseContent::class, 'create'])->then(
-                function (Promise $promise) {
-                    $response = $promise->wait();
-                    if (is_object($response) && is_a($response, Response::class)) {
-                        $rootParseNode = $this->requestAdapter->getParseNodeFactory()->getRootParseNode('application/json', $response->getBody());
-                        /** @var BatchResponseContent $batchResponseContent */
-                        $batchResponseContent = $rootParseNode->getObjectValue([BatchResponseContent::class, 'create']);
-                        $batchResponseContent->setStatusCode($response->getStatusCode());
-                        $batchResponseContent->setHeaders($response->getHeaders());
-                        return $batchResponseContent;
-                    }
-                }
-            );
+            return $this->requestAdapter->sendAsync($requestInfo, [BatchResponseContent::class, 'createFromDiscriminatorValue']);
         } catch (\Exception $ex) {
             return new RejectedPromise($ex);
         }
