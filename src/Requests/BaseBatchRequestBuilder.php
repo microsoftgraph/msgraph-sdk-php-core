@@ -30,7 +30,7 @@ class BaseBatchRequestBuilder
 
     /**
      * @var array<string, array{string, string}>|null Error models per status code range to deserialize failed batch request payloads to
-     * e.g. ['4XX' => [error model name, static factory method in error model]]
+     * e.g. ['4XX' => [Parsable that extends ApiException, static factory method in error model]]
      */
     private ?array $errorMappings;
 
