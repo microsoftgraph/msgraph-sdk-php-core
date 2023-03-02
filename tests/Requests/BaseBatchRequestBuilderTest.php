@@ -9,7 +9,7 @@ use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use Microsoft\Graph\Core\BaseGraphRequestAdapter;
 use Microsoft\Graph\Core\Middleware\Option\GraphTelemetryOption;
-use Microsoft\Graph\Core\Requests\BatchRequestBuilder;
+use Microsoft\Graph\Core\Requests\BaseBatchRequestBuilder;
 use Microsoft\Graph\Core\Requests\BatchRequestContent;
 use Microsoft\Graph\Core\Requests\BatchResponseContent;
 use Microsoft\Kiota\Abstractions\ApiException;
@@ -18,7 +18,7 @@ use Microsoft\Kiota\Serialization\Json\JsonParseNodeFactory;
 use Microsoft\Kiota\Serialization\Json\JsonSerializationWriterFactory;
 use PHPUnit\Framework\TestCase;
 
-class BatchRequestBuilderTest extends TestCase
+class BaseBatchRequestBuilderTest extends TestCase
 {
     private RequestAdapter $requestAdapter;
 
@@ -70,7 +70,7 @@ class BatchRequestBuilderTest extends TestCase
 
     public function testPostAsync()
     {
-        $requestBuilder = new BatchRequestBuilder($this->requestAdapter);
+        $requestBuilder = new BaseBatchRequestBuilder($this->requestAdapter);
         $requestContent = new BatchRequestContent();
         $response = $requestBuilder->postAsync($requestContent)->wait();
 
