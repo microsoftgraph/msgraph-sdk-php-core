@@ -37,7 +37,7 @@ class GraphTelemetryOption extends TelemetryOption
      * @param string $apiVersion
      * @param string $serviceLibraryVersion
      */
-    public function __construct(string $apiVersion = '', string $serviceLibraryVersion = '')
+    public function __construct(string $apiVersion = GraphConstants::V1_API_VERSION, string $serviceLibraryVersion = '')
     {
         $this->setApiVersion($apiVersion);
         $this->serviceLibraryVersion = $serviceLibraryVersion;

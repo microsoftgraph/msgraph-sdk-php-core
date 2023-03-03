@@ -32,7 +32,7 @@ class BatchResponseItem implements Parsable
     private ?int $statusCode = null;
 
     /**
-     * @var array<string, string[]|string>|null $headers
+     * @var array<string, string>|null $headers
      */
     private ?array $headers = [];
 
@@ -118,7 +118,7 @@ class BatchResponseItem implements Parsable
     }
 
     /**
-     * @return array<string, string[]|string>|null
+     * @return array<string, string>|null
      */
     public function getHeaders(): ?array
     {
@@ -126,7 +126,7 @@ class BatchResponseItem implements Parsable
     }
 
     /**
-     * @param array<string,string[]|string>|null $headers
+     * @param array<string,string>|null $headers
      */
     public function setHeaders(?array $headers): void
     {

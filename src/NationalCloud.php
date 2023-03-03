@@ -26,11 +26,11 @@ final class NationalCloud
     const CHINA = "https://microsoftgraph.chinacloudapi.cn";
 
     /**
-     * Unique hostnames from constant values [graph.microsoft.com, graph.microsoft.us, ...]
+     * Unique hostnames from constant values graph.microsoft.com, graph.microsoft.us, ...
      *
-     * @var array
+     * @var array<string, bool>
      */
-    private static $hosts = [];
+    private static array $hosts = [];
 
     /**
      * Checks if url contains a valid National Cloud host
@@ -46,7 +46,7 @@ final class NationalCloud
     /**
      * Checks if $urlParts contain a valid National Cloud host
      *
-     * @param array<string, string>|false $urlParts return value of parse_url()
+     * @param array<string, mixed>|false $urlParts return value of parse_url()
      * @return bool
      */
     public static function containsNationalCloudHostFromUrlParts($urlParts): bool {
@@ -55,7 +55,7 @@ final class NationalCloud
             && array_key_exists("scheme", $urlParts)
             && $urlParts["scheme"] == "https"
             && array_key_exists("host", $urlParts)
-            && array_key_exists(strtolower($urlParts["host"]), self::$hosts);
+            && array_key_exists(strtolower(strval($urlParts["host"])), self::$hosts);
     }
 
     /**
@@ -67,8 +67,11 @@ final class NationalCloud
             $constants = $reflectedClass->getConstants();
             foreach ($constants as $constName => $url) {
                 // Create associative array for O(1) key lookup
-                $hostname = parse_url($url)["host"];
-                self::$hosts[$hostname] = true;
+                $urlParts = parse_url(strval($url));
+                $hostname = $urlParts["host"] ?? null;
+                if ($hostname) {
+                    self::$hosts[strval($hostname)] = true;
+                }
             }
         }
     }

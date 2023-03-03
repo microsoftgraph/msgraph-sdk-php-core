@@ -28,13 +28,13 @@ use Microsoft\Kiota\Http\GuzzleRequestAdapter;
 class BaseGraphRequestAdapter extends GuzzleRequestAdapter
 {
     /**
+     * @param GraphTelemetryOption $telemetryOption
      * @param AuthenticationProvider|null $authenticationProvider
-     * @param GraphTelemetryOption|null $telemetryOption
      * @param ParseNodeFactory|null $parseNodeFactory
      * @param SerializationWriterFactory|null $serializationWriterFactory
      * @param Client|null $guzzleClient
      */
-    public function __construct(?AuthenticationProvider $authenticationProvider = null, ?GraphTelemetryOption $telemetryOption = null, ?ParseNodeFactory $parseNodeFactory = null, ?SerializationWriterFactory $serializationWriterFactory = null, ?Client $guzzleClient = null)
+    public function __construct(GraphTelemetryOption $telemetryOption, ?AuthenticationProvider $authenticationProvider = null, ?ParseNodeFactory $parseNodeFactory = null, ?SerializationWriterFactory $serializationWriterFactory = null, ?Client $guzzleClient = null)
     {
         $authenticationProvider = ($authenticationProvider) ?? new AnonymousAuthenticationProvider();
         $guzzleClient = ($guzzleClient) ?? GraphClientFactory::setTelemetryOption($telemetryOption)::create();

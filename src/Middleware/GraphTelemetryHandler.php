@@ -25,7 +25,7 @@ use Psr\Http\Message\RequestInterface;
  */
 class GraphTelemetryHandler extends TelemetryHandler
 {
-    private $graphTelemetryOption;
+    private GraphTelemetryOption $graphTelemetryOption;
 
     /**
      * Create new instance
@@ -43,7 +43,7 @@ class GraphTelemetryHandler extends TelemetryHandler
      * Handles the request
      *
      * @param RequestInterface $request
-     * @param array $options
+     * @param array<string, mixed> $options
      * @return PromiseInterface
      */
     public function __invoke(RequestInterface $request, array $options): PromiseInterface
@@ -51,7 +51,8 @@ class GraphTelemetryHandler extends TelemetryHandler
         // Merge custom request-level options with initial telemetry options
         if (array_key_exists(GraphTelemetryOption::class, $options)) {
             $graphTelemetryOption = $options[GraphTelemetryOption::class];
-            if (is_a($graphTelemetryOption, GraphTelemetryOption::class)) {
+            if (is_object($graphTelemetryOption) && is_a($graphTelemetryOption, GraphTelemetryOption::class)) {
+                // @phpstan-ignore-next-line
                 $this->graphTelemetryOption->override($options[GraphTelemetryOption::class]);
                 unset($options[GraphTelemetryOption::class]);
             }

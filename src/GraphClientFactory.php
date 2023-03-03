@@ -176,7 +176,7 @@ final class GraphClientFactory extends KiotaClientFactory
     /**
      * Returns Graph-specific config for Guzzle
      *
-     * @return array
+     * @return array<string, mixed>
      */
     private static function getDefaultConfig(): array {
         $config = [
@@ -189,9 +189,12 @@ final class GraphClientFactory extends KiotaClientFactory
             "base_uri" => self::$nationalCloud,
             'handler' => self::getDefaultHandlerStack()
         ];
-        if (extension_loaded('curl') && defined('CURL_VERSION_HTTP2') && (curl_version()["features"] & CURL_VERSION_HTTP2) == CURL_VERSION_HTTP2) {
-            // Enable HTTP/2 if curl extension exists and supports it
-            $config['version'] = '2';
+        if (extension_loaded('curl') && defined('CURL_VERSION_HTTP2')) {
+            $curlVersion = curl_version();
+            if ($curlVersion && ($curlVersion["features"] & CURL_VERSION_HTTP2) == CURL_VERSION_HTTP2) {
+                // Enable HTTP/2 if curl extension exists and supports it
+                $config['version'] = '2';
+            }
         }
         return $config;
     }

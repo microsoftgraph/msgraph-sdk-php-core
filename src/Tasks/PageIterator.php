@@ -10,8 +10,8 @@ use InvalidArgumentException;
 use JsonException;
 use Microsoft\Graph\Core\Models\PageResult;
 use Microsoft\Kiota\Abstractions\HttpMethod;
-use Microsoft\Kiota\Abstractions\NativeResponseHandler;
 use Microsoft\Kiota\Abstractions\RequestAdapter;
+use Microsoft\Kiota\Abstractions\RequestHeaders;
 use Microsoft\Kiota\Abstractions\RequestInformation;
 use Microsoft\Kiota\Abstractions\RequestOption;
 use Microsoft\Kiota\Abstractions\Serialization\Parsable;
@@ -24,8 +24,8 @@ class PageIterator
     private int $pauseIndex;
     /** @var array{string, string} $constructorCallable */
     private array $constructorCallable;
-    /** @var array<string, mixed> */
-    private array $headers = [];
+    /** @var RequestHeaders */
+    private RequestHeaders $headers;
     /** @var array<RequestOption>|null  */
     private ?array $requestOptions = [];
 
@@ -39,6 +39,7 @@ class PageIterator
         $this->requestAdapter = $requestAdapter;
         $this->constructorCallable = $constructorCallable;
         $this->pauseIndex = 0;
+        $this->headers = new RequestHeaders();
         $page = self::convertToPage($response);
 
         if ($page !== null) {
@@ -48,11 +49,11 @@ class PageIterator
     }
 
     /**
-     * @param array<string, mixed> $headers
+     * @param array<string, array<string>|string> $headers
      */
     public function setHeaders(array $headers): void
     {
-        $this->headers = $headers;
+        $this->headers->putAll($headers);
     }
 
     /**
@@ -155,7 +156,7 @@ class PageIterator
         $requestInfo = new RequestInformation();
         $requestInfo->httpMethod = HttpMethod::GET;
         $requestInfo->setUri($nextLink);
-        $requestInfo->headers = $this->headers;
+        $requestInfo->setHeaders($this->headers->getAll());
         if ($this->requestOptions !== null) {
             $requestInfo->addRequestOptions(...$this->requestOptions);
         }

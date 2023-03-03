@@ -79,7 +79,7 @@ class BatchRequestContentTest extends TestCase
 
     public function testSerialization()
     {
-        $this->requestInformation->headers = ['content-type' => 'application/json'];
+        $this->requestInformation->addHeaders(['accept' => 'application/json']);
         $batchRequestContent = new BatchRequestContent([$this->requestInformation]);
 
         $serializationWriter = new JsonSerializationWriter();
@@ -91,7 +91,7 @@ class BatchRequestContentTest extends TestCase
                     "id" => $batchRequestContent->getRequests()[0]->getId(),
                     "method" => $this->requestInformation->httpMethod,
                     "url" => '/v1/users',
-                    'headers' => ['content-type' => 'application/json'],
+                    'headers' => ['content-type' => 'application/octet-stream', 'accept' => 'application/json'],
                     "body" => urlencode("abcd")
                 ]
             ]
