@@ -9,16 +9,19 @@ use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use Microsoft\Graph\Core\BaseGraphRequestAdapter;
 use Microsoft\Graph\Core\Middleware\Option\GraphTelemetryOption;
-use Microsoft\Graph\Core\Requests\BatchRequestBuilder;
+use Microsoft\Graph\Core\Requests\BaseBatchRequestBuilder;
 use Microsoft\Graph\Core\Requests\BatchRequestContent;
 use Microsoft\Graph\Core\Requests\BatchResponseContent;
 use Microsoft\Kiota\Abstractions\ApiException;
 use Microsoft\Kiota\Abstractions\RequestAdapter;
+use Microsoft\Kiota\Abstractions\Serialization\Parsable;
+use Microsoft\Kiota\Abstractions\Serialization\ParseNode;
+use Microsoft\Kiota\Abstractions\Serialization\SerializationWriter;
 use Microsoft\Kiota\Serialization\Json\JsonParseNodeFactory;
 use Microsoft\Kiota\Serialization\Json\JsonSerializationWriterFactory;
 use PHPUnit\Framework\TestCase;
 
-class BatchRequestBuilderTest extends TestCase
+class BaseBatchRequestBuilderTest extends TestCase
 {
     private RequestAdapter $requestAdapter;
 
@@ -38,7 +41,7 @@ class BatchRequestBuilderTest extends TestCase
                     ]
                 ]))
             ),
-            new Response(400),
+            new Response(400, ['content-type' => 'application/json'], Utils::streamFor(json_encode(['errorMsg' => 'bad request']))),
             new Response(200,
                 ['content-type' => 'application/json'],
                 Utils::streamFor(json_encode([
@@ -70,7 +73,7 @@ class BatchRequestBuilderTest extends TestCase
 
     public function testPostAsync()
     {
-        $requestBuilder = new BatchRequestBuilder($this->requestAdapter);
+        $requestBuilder = new BaseBatchRequestBuilder($this->requestAdapter);
         $requestContent = new BatchRequestContent();
         $response = $requestBuilder->postAsync($requestContent)->wait();
 
@@ -100,4 +103,58 @@ class BatchRequestBuilderTest extends TestCase
         $this->assertEquals(424, $response->getResponse(2)->getStatusCode());
     }
 
+    public function testErrorMappingDeserialization()
+    {
+        $mappings = [
+            '4XX' => [TestErrorModel::class, 'create']
+        ];
+        $batch = new BaseBatchRequestBuilder($this->requestAdapter, $mappings);
+        // first response is successful
+        $response = $batch->postAsync(new BatchRequestContent())->wait();
+        // next response is 400
+        try {
+            $response = $batch->postAsync(new BatchRequestContent())->wait();
+        } catch (\Exception $ex) {
+            $this->assertInstanceOf(ApiException::class, $ex);
+            $this->assertInstanceOf(TestErrorModel::class, $ex);
+            $this->assertEquals("bad request", $ex->getErrorMsg());
+        }
+    }
+
+}
+
+class TestErrorModel extends ApiException implements Parsable
+{
+    private string $errorMsg;
+
+    public static function create(ParseNode $parseNode): TestErrorModel {
+        return new TestErrorModel();
+    }
+
+    public function serialize(SerializationWriter $writer): void
+    {
+    }
+
+    public function getFieldDeserializers(): array
+    {
+        return [
+            'errorMsg' => fn (ParseNode $n) => $this->setErrorMsg($n->getStringValue())
+        ];
+    }
+
+    /**
+     * @return string
+     */
+    public function getErrorMsg(): string
+    {
+        return $this->errorMsg;
+    }
+
+    /**
+     * @param string $errorMsg
+     */
+    public function setErrorMsg(string $errorMsg): void
+    {
+        $this->errorMsg = $errorMsg;
+    }
 }

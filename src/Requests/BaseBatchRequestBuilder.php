@@ -8,33 +8,31 @@
 
 namespace Microsoft\Graph\Core\Requests;
 
-use GuzzleHttp\Psr7\Response;
 use Http\Promise\Promise;
 use Http\Promise\RejectedPromise;
 use Microsoft\Kiota\Abstractions\HttpMethod;
-use Microsoft\Kiota\Abstractions\NativeResponseHandler;
 use Microsoft\Kiota\Abstractions\RequestAdapter;
 use Microsoft\Kiota\Abstractions\RequestInformation;
-use Microsoft\Kiota\Abstractions\ResponseHandler;
-use Microsoft\Kiota\Http\GuzzleRequestAdapter;
-use Microsoft\Kiota\Http\Middleware\Options\ResponseHandlerOption;
-use PHPStan\BetterReflection\Reflection\Adapter\ReflectionClass;
-use Psr\Http\Message\ResponseInterface;
 
 /**
- * Class BatchRequestBuilder
- *
- * @package Microsoft\Graph\Core
- * @copyright 2022 Microsoft Corporation
+ * Class BaseBatchRequestBuilder
+ * @package Microsoft\Graph\Core\Requests
+ * @copyright 2023 Microsoft Corporation
  * @license https://opensource.org/licenses/MIT MIT License
  * @link https://developer.microsoft.com/graph
  */
-class BatchRequestBuilder
+class BaseBatchRequestBuilder
 {
     /**
      * @var RequestAdapter
      */
     private RequestAdapter $requestAdapter;
+
+    /**
+     * @var array<string, array{string, string}>|null Error models per status code range to deserialize failed batch request payloads to
+     * e.g. ['4XX' => [Parsable that extends ApiException, static factory method in error model]]
+     */
+    private ?array $errorMappings;
 
     /**
      * @var string
@@ -43,10 +41,12 @@ class BatchRequestBuilder
 
     /**
      * @param RequestAdapter $requestAdapter
+     * @param array<string, array{string, string}>|null $errorMappings
      */
-    public function __construct(RequestAdapter $requestAdapter)
+    public function __construct(RequestAdapter $requestAdapter, array $errorMappings = null)
     {
         $this->requestAdapter = $requestAdapter;
+        $this->errorMappings = $errorMappings;
     }
 
     /**
@@ -81,7 +81,7 @@ class BatchRequestBuilder
     {
         $requestInfo = $this->toPostRequestInformation($body, $requestConfig);
         try {
-            return $this->requestAdapter->sendAsync($requestInfo, [BatchResponseContent::class, 'createFromDiscriminatorValue']);
+            return $this->requestAdapter->sendAsync($requestInfo, [BatchResponseContent::class, 'createFromDiscriminatorValue'], $this->errorMappings);
         } catch (\Exception $ex) {
             return new RejectedPromise($ex);
         }
