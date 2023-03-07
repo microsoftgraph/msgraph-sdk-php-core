@@ -35,7 +35,8 @@ class PageIterator
      * @param array{string,string} $constructorCallable The method to construct a paged response object.
      * @throws JsonException
      */
-    public function __construct($response, RequestAdapter $requestAdapter, array $constructorCallable) {
+    public function __construct($response, RequestAdapter $requestAdapter, array $constructorCallable)
+    {
         $this->requestAdapter = $requestAdapter;
         $this->constructorCallable = $constructorCallable;
         $this->pauseIndex = 0;
@@ -73,10 +74,12 @@ class PageIterator
     }
 
     /**
-     * @param callable(Parsable|array<mixed>|object): bool $callback The callback function to apply on every entity. Pauses iteration if false is returned
+     * @param callable(Parsable|array<mixed>|object): bool $callback The callback function
+     * to apply on every entity. Pauses iteration if false is returned
      * @throws Exception
      */
-    public function iterate(callable $callback): void {
+    public function iterate(callable $callback): void
+    {
         while(true) {
             $keepIterating = $this->enumerate($callback);
 
@@ -97,7 +100,8 @@ class PageIterator
     /**
      * @throws Exception
      */
-    public function next(): ?PageResult {
+    public function next(): ?PageResult
+    {
         if (empty($this->currentPage->getOdataNextLink())) {
             return null;
         }
@@ -113,7 +117,8 @@ class PageIterator
      * @return PageResult|null
      * @throws JsonException
      */
-    public static function convertToPage($response): ?PageResult {
+    public static function convertToPage($response): ?PageResult
+    {
         $page = new PageResult();
         if ($response === null) {
             throw new InvalidArgumentException('$response cannot be null');
@@ -122,10 +127,10 @@ class PageIterator
         $value = null;
         if (is_array($response)) {
             $value = $response['value'];
-        } elseif(is_object($response) && is_a($response, Parsable::class) &&
+        } elseif (is_object($response) && is_a($response, Parsable::class) &&
             method_exists($response, 'getValue')) {
             $value = $response->getValue();
-        } elseif(is_object($response)) {
+        } elseif (is_object($response)) {
             $value = property_exists($response, 'value') ? $response->value : [];
         }
 
@@ -136,13 +141,16 @@ class PageIterator
         $parsablePage =  (is_object($response) && is_a($response, Parsable::class)) ? $response : json_decode(json_encode($response,JSON_THROW_ON_ERROR), true);
         if (is_array($parsablePage)) {
             $page->setOdataNextLink($parsablePage['@odata.nextLink'] ?? '');
-        } elseif(is_object($parsablePage) && is_a($parsablePage, Parsable::class) && method_exists($parsablePage, 'getOdataNextLink')) {
+        } elseif (is_object($parsablePage) &&
+            is_a($parsablePage, Parsable::class) &&
+            method_exists($parsablePage, 'getOdataNextLink')) {
             $page->setOdataNextLink($parsablePage->getOdataNextLink());
         }
         $page->setValue($value);
         return $page;
     }
-    private function fetchNextPage(): Promise {
+    private function fetchNextPage(): Promise
+    {
         $nextLink = $this->currentPage->getOdataNextLink();
 
         if ($nextLink === null) {
@@ -164,7 +172,8 @@ class PageIterator
         return $this->requestAdapter->sendAsync($requestInfo, $this->constructorCallable);
     }
 
-    public function enumerate(?callable $callback): ?bool {
+    public function enumerate(?callable $callback): ?bool
+    {
         $keepIterating = true;
 
         $pageItems = $this->currentPage->getValue();
@@ -182,7 +191,8 @@ class PageIterator
         return $keepIterating;
     }
 
-    public function hasNext(): bool {
+    public function hasNext(): bool
+    {
         return $this->hasNext;
     }
 }
