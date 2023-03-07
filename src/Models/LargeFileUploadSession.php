@@ -20,35 +20,40 @@ class LargeFileUploadSession implements Parsable, AdditionalDataHolder
     /**
      * @param DateTime|null $expirationDateTime
      */
-    public function setExpirationDateTime(?DateTime $expirationDateTime): void {
+    public function setExpirationDateTime(?DateTime $expirationDateTime): void
+    {
         $this->expirationDateTime = $expirationDateTime;
     }
 
     /**
      * @param string|null $uploadUrl
      */
-    public function setUploadUrl(?string $uploadUrl): void {
+    public function setUploadUrl(?string $uploadUrl): void
+    {
         $this->uploadUrl = $uploadUrl;
     }
 
     /**
      * @param array<string>|null $nextExpectedRanges
      */
-    public function setNextExpectedRanges(?array $nextExpectedRanges): void {
+    public function setNextExpectedRanges(?array $nextExpectedRanges): void
+    {
         $this->nextExpectedRanges = $nextExpectedRanges;
     }
 
     /**
      * @return array<string>|null
      */
-    public function getNextExpectedRanges(): ?array {
+    public function getNextExpectedRanges(): ?array
+    {
         return $this->nextExpectedRanges;
     }
 
     /**
      * @return DateTime|null
      */
-    public function getExpirationDateTime(): ?DateTime{
+    public function getExpirationDateTime(): ?DateTime
+    {
         return $this->expirationDateTime;
     }
 
@@ -63,19 +68,22 @@ class LargeFileUploadSession implements Parsable, AdditionalDataHolder
     /**
     * @param bool|null $isCancelled
     */
-    public function setIsCancelled(?bool $isCancelled): void {
+    public function setIsCancelled(?bool $isCancelled): void
+    {
             $this->isCancelled = $isCancelled;
     }
 
     /** @inheritDoc */
-    public function getAdditionalData(): ?array {
+    public function getAdditionalData(): ?array
+    {
         return $this->additionalData;
     }
 
     /**
      * @param array<string, mixed> $value
      */
-    public function setAdditionalData(array $value): void {
+    public function setAdditionalData(array $value): void
+    {
         $this->additionalData = $value;
     }
 
@@ -83,19 +91,22 @@ class LargeFileUploadSession implements Parsable, AdditionalDataHolder
      * @param ParseNode $parseNode
      * @return LargeFileUploadSession
      */
-    public static function createFromDiscriminatorValue(ParseNode $parseNode): LargeFileUploadSession {
+    public static function createFromDiscriminatorValue(ParseNode $parseNode): LargeFileUploadSession
+    {
         return new LargeFileUploadSession();
     }
 
     /**
      * @return bool|null
      */
-    public function getIsCancelled(): ?bool {
+    public function getIsCancelled(): ?bool
+    {
         return $this->isCancelled;
     }
 
 
-    public function serialize(SerializationWriter $writer): void {
+    public function serialize(SerializationWriter $writer): void
+    {
         $writer->writeStringValue('uploadUrl', $this->uploadUrl);
         $writer->writeDateTimeValue('expirationDateTime', $this->expirationDateTime);
         $writer->writeBooleanValue('isCancelled', $this->isCancelled);
@@ -103,7 +114,8 @@ class LargeFileUploadSession implements Parsable, AdditionalDataHolder
         $writer->writeAdditionalData($this->additionalData);
     }
 
-    public function getFieldDeserializers(): array {
+    public function getFieldDeserializers(): array
+    {
         return [
             'uploadUrl' => fn (ParseNode $parseNode) => $this->setUploadUrl($parseNode->getStringValue()),
             'expirationDateTime' => fn (ParseNode $parseNode) => $this->setExpirationDateTime($parseNode->getDateTimeValue()),

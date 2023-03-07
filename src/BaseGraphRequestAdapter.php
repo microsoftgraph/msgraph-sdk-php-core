@@ -34,7 +34,11 @@ class BaseGraphRequestAdapter extends GuzzleRequestAdapter
      * @param SerializationWriterFactory|null $serializationWriterFactory
      * @param Client|null $guzzleClient
      */
-    public function __construct(GraphTelemetryOption $telemetryOption, ?AuthenticationProvider $authenticationProvider = null, ?ParseNodeFactory $parseNodeFactory = null, ?SerializationWriterFactory $serializationWriterFactory = null, ?Client $guzzleClient = null)
+    public function __construct(GraphTelemetryOption $telemetryOption,
+                                ?AuthenticationProvider $authenticationProvider = null,
+                                ?ParseNodeFactory $parseNodeFactory = null,
+                                ?SerializationWriterFactory $serializationWriterFactory = null,
+                                ?Client $guzzleClient = null)
     {
         $authenticationProvider = ($authenticationProvider) ?? new AnonymousAuthenticationProvider();
         $guzzleClient = ($guzzleClient) ?? GraphClientFactory::setTelemetryOption($telemetryOption)::create();

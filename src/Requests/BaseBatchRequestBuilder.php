@@ -29,7 +29,8 @@ class BaseBatchRequestBuilder
     private RequestAdapter $requestAdapter;
 
     /**
-     * @var array<string, array{string, string}>|null Error models per status code range to deserialize failed batch request payloads to
+     * @var array<string, array{string, string}>|null Error models per status code range to deserialize
+     *  failed batch request payloads to
      * e.g. ['4XX' => [Parsable that extends ApiException, static factory method in error model]]
      */
     private ?array $errorMappings;
@@ -54,7 +55,8 @@ class BaseBatchRequestBuilder
      * @param BatchRequestBuilderPostRequestConfiguration|null $requestConfiguration
      * @return RequestInformation
      */
-    public function toPostRequestInformation(BatchRequestContent $body, ?BatchRequestBuilderPostRequestConfiguration $requestConfiguration = null): RequestInformation
+    public function toPostRequestInformation(BatchRequestContent $body,
+                                             ?BatchRequestBuilderPostRequestConfiguration $requestConfiguration = null): RequestInformation
     {
         $requestInfo = new RequestInformation();
         $requestInfo->urlTemplate = $this->urlTemplate;
@@ -77,11 +79,14 @@ class BaseBatchRequestBuilder
      * @param BatchRequestBuilderPostRequestConfiguration|null $requestConfig
      * @return Promise
      */
-    public function postAsync(BatchRequestContent $body, ?BatchRequestBuilderPostRequestConfiguration $requestConfig = null): Promise
+    public function postAsync(BatchRequestContent $body,
+                              ?BatchRequestBuilderPostRequestConfiguration $requestConfig = null): Promise
     {
         $requestInfo = $this->toPostRequestInformation($body, $requestConfig);
         try {
-            return $this->requestAdapter->sendAsync($requestInfo, [BatchResponseContent::class, 'createFromDiscriminatorValue'], $this->errorMappings);
+            return $this->requestAdapter->sendAsync($requestInfo,
+                [BatchResponseContent::class, 'createFromDiscriminatorValue'],
+                $this->errorMappings);
         } catch (\Exception $ex) {
             return new RejectedPromise($ex);
         }
