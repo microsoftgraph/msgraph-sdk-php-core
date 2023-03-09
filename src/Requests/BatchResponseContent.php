@@ -8,12 +8,16 @@
 
 namespace Microsoft\Graph\Core\Requests;
 
+use GuzzleHttp\Psr7\Utils;
+use InvalidArgumentException;
 use Microsoft\Kiota\Abstractions\Serialization\Parsable;
 use Microsoft\Kiota\Abstractions\Serialization\ParseNode;
 use Microsoft\Kiota\Abstractions\Serialization\ParseNodeFactory;
 use Microsoft\Kiota\Abstractions\Serialization\ParseNodeFactoryRegistry;
 use Microsoft\Kiota\Abstractions\Serialization\SerializationWriter;
 use Microsoft\Kiota\Serialization\Json\JsonParseNodeFactory;
+use RuntimeException;
+use UnexpectedValueException;
 
 /**
  * Class BatchResponseContent
@@ -26,53 +30,11 @@ use Microsoft\Kiota\Serialization\Json\JsonParseNodeFactory;
 class BatchResponseContent implements Parsable
 {
     /**
-     * @var array
-     */
-    private array $headers = [];
-
-    /**
-     * @var int
-     */
-    private int $statusCode;
-
-    /**
      * @var array<string, BatchResponseItem>
      */
     private array $responses = [];
 
     public function __construct() {}
-
-    /**
-     * @return array
-     */
-    public function getHeaders(): array
-    {
-        return $this->headers;
-    }
-
-    /**
-     * @param array $headers
-     */
-    public function setHeaders(array $headers): void
-    {
-        $this->headers = $headers;
-    }
-
-    /**
-     * @return int
-     */
-    public function getStatusCode(): int
-    {
-        return $this->statusCode;
-    }
-
-    /**
-     * @param int $statusCode
-     */
-    public function setStatusCode(int $statusCode): void
-    {
-        $this->statusCode = $statusCode;
-    }
 
     /**
      * @return BatchResponseItem[]
@@ -98,7 +60,7 @@ class BatchResponseContent implements Parsable
     public function getResponse(string $requestId): BatchResponseItem
     {
         if (!array_key_exists($requestId, $this->responses)) {
-            throw new \InvalidArgumentException("No response found for id: {$requestId}");
+            throw new InvalidArgumentException("No response found for id: {$requestId}");
         }
         return $this->responses[$requestId];
     }
@@ -114,25 +76,26 @@ class BatchResponseContent implements Parsable
     public function getResponseBody(string $requestId, string $type, ?ParseNodeFactory $parseNodeFactory = null): ?Parsable
     {
         if (!array_key_exists($requestId, $this->responses)) {
-            throw new \InvalidArgumentException("No response found for id: {$requestId}");
+            throw new InvalidArgumentException("No response found for id: {$requestId}");
         }
         $interfaces = class_implements($type);
         if (!$interfaces || !in_array(Parsable::class, $interfaces)) {
-            throw new \InvalidArgumentException("Type passed must implement the Parsable interface");
+            throw new InvalidArgumentException("Type passed must implement the Parsable interface");
         }
         $response = $this->responses[$requestId];
-        if (!array_key_exists('content-type', $response->getHeaders())) {
-            throw new \RuntimeException("Unable to get content-type header in response item");
+        if (!($response->getHeaders()['content-type'] ?? null)) {
+            throw new RuntimeException("Unable to get content-type header in response item");
         }
         $contentType = $response->getHeaders()['content-type'];
+        $responseBody = $response->getBody() ?? Utils::streamFor(null);
         if ($parseNodeFactory) {
-            $parseNode = $parseNodeFactory->getRootParseNode($contentType, $response->getBody());
+            $parseNode = $parseNodeFactory->getRootParseNode($contentType, $responseBody);
         } else {
             // Check the registry or default to Json deserialization
             try {
-                $parseNode = ParseNodeFactoryRegistry::getDefaultInstance()->getRootParseNode($contentType, $response->getBody());
-            } catch (\UnexpectedValueException $ex) {
-                $parseNode = (new JsonParseNodeFactory())->getRootParseNode($contentType, $response->getBody());
+                $parseNode = ParseNodeFactoryRegistry::getDefaultInstance()->getRootParseNode($contentType, $responseBody);
+            } catch (UnexpectedValueException $ex) {
+                $parseNode = (new JsonParseNodeFactory())->getRootParseNode($contentType, $responseBody);
             }
         }
         return $parseNode->getObjectValue([$type, 'createFromDiscriminatorValue']);
@@ -141,6 +104,7 @@ class BatchResponseContent implements Parsable
     public function getFieldDeserializers(): array
     {
         return [
+            /** @phpstan-ignore-next-line */
             'responses' => fn (ParseNode $n) => $this->setResponses($n->getCollectionOfObjectValues([BatchResponseItem::class, 'create']))
         ];
     }
@@ -150,7 +114,7 @@ class BatchResponseContent implements Parsable
         $writer->writeCollectionOfObjectValues('responses', $this->getResponses());
     }
 
-    public static function create(ParseNode $parseNode): BatchResponseContent
+    public static function createFromDiscriminatorValue(ParseNode $parseNode): BatchResponseContent
     {
         return new BatchResponseContent();
     }

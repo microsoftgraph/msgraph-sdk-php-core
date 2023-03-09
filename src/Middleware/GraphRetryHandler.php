@@ -10,6 +10,7 @@ namespace Microsoft\Graph\Core\Middleware;
 
 
 use GuzzleHttp\Promise\PromiseInterface;
+use Microsoft\Kiota\Abstractions\RequestOption;
 use Microsoft\Kiota\Http\Middleware\RetryHandler;
 use Psr\Http\Message\RequestInterface;
 
@@ -28,7 +29,7 @@ class GraphRetryHandler extends RetryHandler
 
     /**
      * @param RequestInterface $request
-     * @param array $options
+     * @param array<string, RequestOption>  $options
      * @return PromiseInterface
      */
     public function __invoke(RequestInterface $request, array $options): PromiseInterface

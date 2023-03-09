@@ -46,17 +46,17 @@ final class GraphClientFactory extends KiotaClientFactory
     /**
      * @var string Graph API host to use as base URL and for authentication
      */
-    private static $nationalCloud = NationalCloud::GLOBAL;
+    private static string $nationalCloud = NationalCloud::GLOBAL;
 
     /**
      * @var GraphClientFactory|null Store singleton instance of the GraphClientFactory
      */
-    private static $instance = null;
+    private static ?GraphClientFactory $instance = null;
 
     /**
      * @var GraphTelemetryOption|null telemetry config
      */
-    private static $graphTelemetryOption = null;
+    private static ?GraphTelemetryOption $graphTelemetryOption = null;
 
     /**
      * GraphClientFactory constructor.
@@ -105,7 +105,7 @@ final class GraphClientFactory extends KiotaClientFactory
     /**
      * Create Guzzle client configured for Graph
      *
-     * @param array $guzzleConfig
+     * @param array<string, mixed> $guzzleConfig
      * @return Client
      */
     public static function createWithConfig(array $guzzleConfig): Client
@@ -141,7 +141,7 @@ final class GraphClientFactory extends KiotaClientFactory
      */
     public static function createAdapter(): HttpClientInterface {
         return new class(self::create()) implements HttpClientInterface {
-            private $clientAdapter;
+            private GuzzleAdapter $clientAdapter;
 
             public function __construct(Client $guzzleClient) {
                 $this->clientAdapter = new GuzzleAdapter($guzzleClient);
@@ -160,10 +160,10 @@ final class GraphClientFactory extends KiotaClientFactory
     /**
      * Return default handler stack for Graph
      *
-     * @param null $handler final handler
+     * @param callable|null $handler final handler
      * @return HandlerStack
      */
-    public static function getDefaultHandlerStack($handler = null): HandlerStack
+    public static function getDefaultHandlerStack(callable $handler = null): HandlerStack
     {
         $handler = ($handler) ?: Utils::chooseHandler();
         $handlerStack = new HandlerStack($handler);
@@ -176,7 +176,7 @@ final class GraphClientFactory extends KiotaClientFactory
     /**
      * Returns Graph-specific config for Guzzle
      *
-     * @return array
+     * @return array<string, mixed>
      */
     private static function getDefaultConfig(): array {
         $config = [
@@ -189,9 +189,12 @@ final class GraphClientFactory extends KiotaClientFactory
             "base_uri" => self::$nationalCloud,
             'handler' => self::getDefaultHandlerStack()
         ];
-        if (extension_loaded('curl') && defined('CURL_VERSION_HTTP2') && (curl_version()["features"] & CURL_VERSION_HTTP2) == CURL_VERSION_HTTP2) {
-            // Enable HTTP/2 if curl extension exists and supports it
-            $config['version'] = '2';
+        if (extension_loaded('curl') && defined('CURL_VERSION_HTTP2')) {
+            $curlVersion = curl_version();
+            if ($curlVersion && ($curlVersion["features"] & CURL_VERSION_HTTP2) == CURL_VERSION_HTTP2) {
+                // Enable HTTP/2 if curl extension exists and supports it
+                $config['version'] = '2';
+            }
         }
         return $config;
     }

@@ -11,42 +11,49 @@ class LargeFileUploadSession implements Parsable, AdditionalDataHolder
 {
     private ?string $uploadUrl = null;
     private ?DateTime $expirationDateTime = null;
+    /** @var array<string, mixed> */
     private array $additionalData = [];
-    private bool $isCancelled = false;
-    private array $nextExpectedRanges = [];
+    private ?bool $isCancelled = false;
+    /** @var string[]|null  */
+    private ?array $nextExpectedRanges = [];
 
     /**
      * @param DateTime|null $expirationDateTime
      */
-    public function setExpirationDateTime(?DateTime $expirationDateTime): void {
+    public function setExpirationDateTime(?DateTime $expirationDateTime): void
+    {
         $this->expirationDateTime = $expirationDateTime;
     }
 
     /**
-     * @param string $uploadUrl
+     * @param string|null $uploadUrl
      */
-    public function setUploadUrl(string $uploadUrl): void {
+    public function setUploadUrl(?string $uploadUrl): void
+    {
         $this->uploadUrl = $uploadUrl;
     }
 
     /**
-     * @param array $nextExpectedRanges
+     * @param array<string>|null $nextExpectedRanges
      */
-    public function setNextExpectedRanges(array $nextExpectedRanges): void {
+    public function setNextExpectedRanges(?array $nextExpectedRanges): void
+    {
         $this->nextExpectedRanges = $nextExpectedRanges;
     }
 
     /**
-     * @return array
+     * @return array<string>|null
      */
-    public function getNextExpectedRanges(): array {
+    public function getNextExpectedRanges(): ?array
+    {
         return $this->nextExpectedRanges;
     }
 
     /**
      * @return DateTime|null
      */
-    public function getExpirationDateTime(): ?DateTime{
+    public function getExpirationDateTime(): ?DateTime
+    {
         return $this->expirationDateTime;
     }
 
@@ -59,20 +66,24 @@ class LargeFileUploadSession implements Parsable, AdditionalDataHolder
     }
 
     /**
-    * @param bool $isCancelled
+    * @param bool|null $isCancelled
     */
-    public function setIsCancelled(bool $isCancelled): void {
+    public function setIsCancelled(?bool $isCancelled): void
+    {
             $this->isCancelled = $isCancelled;
     }
 
-    public function getAdditionalData(): array {
+    /** @inheritDoc */
+    public function getAdditionalData(): ?array
+    {
         return $this->additionalData;
     }
 
     /**
-     * @param array $value
+     * @param array<string, mixed> $value
      */
-    public function setAdditionalData(array $value): void {
+    public function setAdditionalData(array $value): void
+    {
         $this->additionalData = $value;
     }
 
@@ -80,19 +91,22 @@ class LargeFileUploadSession implements Parsable, AdditionalDataHolder
      * @param ParseNode $parseNode
      * @return LargeFileUploadSession
      */
-    public static function createFromDiscriminatorValue(ParseNode $parseNode): LargeFileUploadSession {
+    public static function createFromDiscriminatorValue(ParseNode $parseNode): LargeFileUploadSession
+    {
         return new LargeFileUploadSession();
     }
 
     /**
-     * @return bool
+     * @return bool|null
      */
-    public function getIsCancelled(): bool {
+    public function getIsCancelled(): ?bool
+    {
         return $this->isCancelled;
     }
 
 
-    public function serialize(SerializationWriter $writer): void {
+    public function serialize(SerializationWriter $writer): void
+    {
         $writer->writeStringValue('uploadUrl', $this->uploadUrl);
         $writer->writeDateTimeValue('expirationDateTime', $this->expirationDateTime);
         $writer->writeBooleanValue('isCancelled', $this->isCancelled);
@@ -100,11 +114,13 @@ class LargeFileUploadSession implements Parsable, AdditionalDataHolder
         $writer->writeAdditionalData($this->additionalData);
     }
 
-    public function getFieldDeserializers(): array {
+    public function getFieldDeserializers(): array
+    {
         return [
             'uploadUrl' => fn (ParseNode $parseNode) => $this->setUploadUrl($parseNode->getStringValue()),
             'expirationDateTime' => fn (ParseNode $parseNode) => $this->setExpirationDateTime($parseNode->getDateTimeValue()),
             'isCancelled' => fn (ParseNode $parseNode) => $this->setIsCancelled($parseNode->getBooleanValue()),
+            /** @phpstan-ignore-next-line */
             'nextExpectedRanges' => fn (ParseNode $parseNode) => $this->setNextExpectedRanges($parseNode->getCollectionOfPrimitiveValues('string'))];
     }
 }
