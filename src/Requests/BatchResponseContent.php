@@ -30,26 +30,30 @@ use UnexpectedValueException;
 class BatchResponseContent implements Parsable
 {
     /**
-     * @var array<string, BatchResponseItem>
+     * @var array<string, BatchResponseItem>|null
      */
-    private array $responses = [];
+    private ?array $responses = [];
 
     public function __construct() {}
 
     /**
-     * @return BatchResponseItem[]
+     * @return BatchResponseItem[]|null
      */
-    public function getResponses(): array
+    public function getResponses(): ?array
     {
-        return array_values($this->responses);
+        return is_null($this->responses) ? null : array_values($this->responses);
     }
 
     /**
-     * @param BatchResponseItem[] $responses
+     * @param BatchResponseItem[]|null $responses
      */
-    public function setResponses(array $responses): void
+    public function setResponses(?array $responses): void
     {
-        array_map(fn ($response) => $this->responses[$response->getId()] = $response, $responses);
+        if (is_array($responses)) {
+            array_map(fn ($response) => $this->responses[$response->getId()] = $response, $responses);
+            return;
+        }
+        $this->responses = $responses;
     }
 
     /**
@@ -59,7 +63,7 @@ class BatchResponseContent implements Parsable
      */
     public function getResponse(string $requestId): BatchResponseItem
     {
-        if (!array_key_exists($requestId, $this->responses)) {
+        if (!$this->responses || !array_key_exists($requestId, $this->responses)) {
             throw new InvalidArgumentException("No response found for id: {$requestId}");
         }
         return $this->responses[$requestId];
@@ -76,7 +80,7 @@ class BatchResponseContent implements Parsable
      */
     public function getResponseBody(string $requestId, string $type, ?ParseNodeFactory $parseNodeFactory = null): ?Parsable
     {
-        if (!array_key_exists($requestId, $this->responses)) {
+        if (!$this->responses || !array_key_exists($requestId, $this->responses)) {
             throw new InvalidArgumentException("No response found for id: {$requestId}");
         }
         $interfaces = class_implements($type);
