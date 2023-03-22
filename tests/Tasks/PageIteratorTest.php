@@ -110,7 +110,7 @@ class PageIteratorTest extends TestCase
         ]);
         $this->handlerStack = HandlerStack::create($this->mock);
         $this->testClient = new Client(['handler' => $this->handlerStack]);
-        $this->firstPageContent = json_decode($this->testClient->get('/')->getBody()->getContents());
+        $this->firstPageContent = json_decode($this->testClient->get('/')->getBody()->getContents(), true);
     }
 
     /**
