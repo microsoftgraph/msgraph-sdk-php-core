@@ -10,6 +10,7 @@ namespace Microsoft\Graph\Core\Requests;
 
 use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
+use Microsoft\Kiota\Abstractions\RequestInformation;
 use Microsoft\Kiota\Abstractions\Serialization\Parsable;
 use Microsoft\Kiota\Abstractions\Serialization\ParseNode;
 use Microsoft\Kiota\Abstractions\Serialization\ParseNodeFactory;
@@ -88,10 +89,10 @@ class BatchResponseContent implements Parsable
             throw new InvalidArgumentException("Type passed must implement the Parsable interface");
         }
         $response = $this->responses[$requestId];
-        if (!($response->getHeaders()['content-type'] ?? null)) {
+        $contentType = $response->getContentType();
+        if (!$contentType) {
             throw new RuntimeException("Unable to get content-type header in response item");
         }
-        $contentType = $response->getHeaders()['content-type'];
         $responseBody = $response->getBody() ?? Utils::streamFor(null);
         if ($parseNodeFactory) {
             $parseNode = $parseNodeFactory->getRootParseNode($contentType, $responseBody);
