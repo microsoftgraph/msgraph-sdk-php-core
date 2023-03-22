@@ -68,10 +68,11 @@ class BatchResponseContent implements Parsable
     /**
      * Deserializes a response item's body to $type. $type MUST implement Parsable
      *
+     * @template T of Parsable
      * @param string $requestId
-     * @param string $type Parsable class name
+     * @param class-string<T> $type Parsable class name
      * @param ParseNodeFactory|null $parseNodeFactory checks the ParseNodeFactoryRegistry by default
-     * @return Parsable|null
+     * @return T|null
      */
     public function getResponseBody(string $requestId, string $type, ?ParseNodeFactory $parseNodeFactory = null): ?Parsable
     {
@@ -104,7 +105,6 @@ class BatchResponseContent implements Parsable
     public function getFieldDeserializers(): array
     {
         return [
-            /** @phpstan-ignore-next-line */
             'responses' => fn (ParseNode $n) => $this->setResponses($n->getCollectionOfObjectValues([BatchResponseItem::class, 'create']))
         ];
     }
