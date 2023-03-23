@@ -73,7 +73,7 @@ class BatchRequestItemTest extends TestCase
             "url" => '/users',
             "dependsOn" => [$batchRequestItem2->getId(), $batchRequestItem3->getId()],
             "headers" => ['host' => 'graph.microsoft.com', 'key' => 'value1, value2'],
-            "body" => urlencode($this->psrRequest->getBody()->getContents())
+            "body" => ['key' => 'val']
         ], JSON_UNESCAPED_SLASHES);
 
         $this->assertEquals($expectedJson, $jsonSerializationWriter->getSerializedContent()->getContents());

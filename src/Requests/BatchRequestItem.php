@@ -239,6 +239,6 @@ class BatchRequestItem implements Parsable
             $headers[$key] = implode(", ", $val);
         }
         $writer->writeAnyValue('headers', $headers);
-        $writer->writeStringValue('body', ($this->getBody()) ? urlencode($this->getBody()->getContents()) : null);
+        $writer->writeAnyValue('body', ($this->getBody()) ? json_decode($this->getBody()->getContents()) : null);
     }
 }
