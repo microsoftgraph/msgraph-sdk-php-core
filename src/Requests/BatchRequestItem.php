@@ -16,6 +16,7 @@ use Microsoft\Kiota\Abstractions\Serialization\SerializationWriter;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Ramsey\Uuid\Uuid;
+use RuntimeException;
 
 /**
  * Class BatchRequestItem
@@ -131,7 +132,12 @@ class BatchRequestItem implements Parsable
             throw new \InvalidArgumentException("Invalid URL {$url}");
         }
         // Set relative URL
-        $this->url = "{$urlParts['path']}";
+        // Remove API version
+        $urlWithoutVersion = preg_replace("/\/(v1.0|beta)/", '',"{$urlParts['path']}");
+        if (!$urlWithoutVersion) {
+            throw new RuntimeException("Error occurred during regex replacement of API version in URL string: $url");
+        }
+        $this->url = $urlWithoutVersion;
         $this->url .= (array_key_exists('query', $urlParts)) ? "?{$urlParts['query']}" : '';
         $this->url .= (array_key_exists('fragment', $urlParts)) ? "#{$urlParts['fragment']}" : '';
     }
