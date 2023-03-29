@@ -15,7 +15,7 @@ class BatchResponseContentTest extends TestCase
     {
         $responseItem = new BatchResponseItem();
         $responseItem->setId('1');
-        $responseItem->setHeaders(['content-type' => 'application/json']);
+        $responseItem->setHeaders(['Content-Type' => 'application/json']);
         $responseItem->setBody(Utils::streamFor(json_encode([
             'id' => '123',
             'name' => 'xyz'

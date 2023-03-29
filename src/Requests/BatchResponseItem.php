@@ -148,4 +148,17 @@ class BatchResponseItem implements Parsable
     {
         $this->body = $body;
     }
+
+    /**
+     * Case-insensitively checks for Content-Type header key and returns value
+     * @return string|null
+     */
+    public function getContentType(): ?string
+    {
+        if ($this->headers) {
+            $headers = array_change_key_case($this->headers);
+            return $headers['content-type'] ?? null;
+        }
+        return null;
+    }
 }
