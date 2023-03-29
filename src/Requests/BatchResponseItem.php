@@ -156,11 +156,8 @@ class BatchResponseItem implements Parsable
     public function getContentType(): ?string
     {
         if ($this->headers) {
-            foreach ($this->headers as $key => $val) {
-                if (strtolower($key) === 'content-type') {
-                    return $val;
-                }
-            }
+            $headers = array_change_key_case($this->headers);
+            return $headers['content-type'] ?? null;
         }
         return null;
     }
