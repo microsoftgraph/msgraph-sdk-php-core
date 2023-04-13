@@ -69,15 +69,15 @@ class BatchResponseContent implements Parsable
     }
 
     /**
-     * Deserializes a response item's body to $type. $type MUST implement Parsable
+     * Deserializes a response item's body to $type. $type MUST implement Parsable.
+     * Uses the ParseNodeFactory registry to get the required Parse Node implementation
      *
      * @template T of Parsable
      * @param string $requestId
      * @param class-string<T> $type Parsable class name
-     * @param ParseNodeFactory|null $parseNodeFactory checks the ParseNodeFactoryRegistry by default
      * @return T|null
      */
-    public function getResponseBody(string $requestId, string $type, ?ParseNodeFactory $parseNodeFactory = null): ?Parsable
+    public function getResponseBody(string $requestId, string $type): ?Parsable
     {
         if (!$this->responses || !array_key_exists($requestId, $this->responses)) {
             throw new InvalidArgumentException("No response found for id: {$requestId}");
@@ -93,24 +93,23 @@ class BatchResponseContent implements Parsable
         }
         $responseBody = $response->getBody() ?? Utils::streamFor(null);
         try {
-            if ($parseNodeFactory) {
-                $parseNode = $parseNodeFactory->getRootParseNode($contentType, $responseBody);
-            } else {
-                try {
-                    $parseNode = ParseNodeFactoryRegistry::getDefaultInstance()->getRootParseNode($contentType, $responseBody);
-                } catch (Exception $ex) {
-                    // Responses to requests with base 64 encoded stream bodies are base 64 encoded
-                    // Tries to decode the response body and retries deserialization
-                    $responseBody->rewind();
-                    $base64DecodedBody = Utils::streamFor(base64_decode($responseBody->getContents()));
-                    $parseNode = ParseNodeFactoryRegistry::getDefaultInstance()->getRootParseNode($contentType, $base64DecodedBody);
-                    // Update response body only after we're sure decoding worked
-                    $response->setBody($base64DecodedBody);
-                }
+            try {
+                $parseNode = ParseNodeFactoryRegistry::getDefaultInstance()->getRootParseNode($contentType, $responseBody);
+            } catch (Exception $ex) {
+                // Responses to requests with base 64 encoded stream bodies are base 64 encoded
+                // Tries to decode the response body and retries deserialization
+                $responseBody->rewind();
+                $base64DecodedBody = Utils::streamFor(base64_decode($responseBody->getContents()));
+                $parseNode = ParseNodeFactoryRegistry::getDefaultInstance()
+                    ->getRootParseNode($contentType, $base64DecodedBody);
+                // Update response body only after we're sure decoding worked
+                $response->setBody($base64DecodedBody);
             }
             return $parseNode->getObjectValue([$type, 'createFromDiscriminatorValue']);
         } catch (Exception $ex) {
-            throw new RuntimeException("Unable to deserialize batch response for request Id: $requestId to $type");
+            throw new InvalidArgumentException(
+                "Unable to deserialize batch response for request Id: $requestId to $type"
+            );
         }
     }
 

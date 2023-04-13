@@ -78,4 +78,14 @@ class BatchRequestItemTest extends TestCase
 
         $this->assertEquals($expectedJson, $jsonSerializationWriter->getSerializedContent()->getContents());
     }
+
+    public function testSettingInvalidUrl(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $item = new BatchRequestItem($this->requestInformation);
+        $item->setId('1243');
+        $item->setMethod('GET');
+        $item->setUrl('');
+        $item->setHeaders([]);
+    }
 }
