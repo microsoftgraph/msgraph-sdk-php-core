@@ -10,6 +10,7 @@ namespace Microsoft\Graph\Core\Requests;
 
 use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
+use Microsoft\Kiota\Abstractions\RequestInformation;
 use Microsoft\Kiota\Abstractions\Serialization\Parsable;
 use Microsoft\Kiota\Abstractions\Serialization\ParseNode;
 use Microsoft\Kiota\Abstractions\Serialization\ParseNodeFactory;
@@ -30,26 +31,30 @@ use UnexpectedValueException;
 class BatchResponseContent implements Parsable
 {
     /**
-     * @var array<string, BatchResponseItem>
+     * @var array<string, BatchResponseItem>|null
      */
-    private array $responses = [];
+    private ?array $responses = [];
 
     public function __construct() {}
 
     /**
-     * @return BatchResponseItem[]
+     * @return BatchResponseItem[]|null
      */
-    public function getResponses(): array
+    public function getResponses(): ?array
     {
-        return array_values($this->responses);
+        return is_null($this->responses) ? null : array_values($this->responses);
     }
 
     /**
-     * @param BatchResponseItem[] $responses
+     * @param BatchResponseItem[]|null $responses
      */
-    public function setResponses(array $responses): void
+    public function setResponses(?array $responses): void
     {
-        array_map(fn ($response) => $this->responses[$response->getId()] = $response, $responses);
+        if (is_array($responses)) {
+            array_map(fn ($response) => $this->responses[$response->getId()] = $response, $responses);
+            return;
+        }
+        $this->responses = $responses;
     }
 
     /**
@@ -59,7 +64,7 @@ class BatchResponseContent implements Parsable
      */
     public function getResponse(string $requestId): BatchResponseItem
     {
-        if (!array_key_exists($requestId, $this->responses)) {
+        if (!$this->responses || !array_key_exists($requestId, $this->responses)) {
             throw new InvalidArgumentException("No response found for id: {$requestId}");
         }
         return $this->responses[$requestId];
@@ -68,14 +73,15 @@ class BatchResponseContent implements Parsable
     /**
      * Deserializes a response item's body to $type. $type MUST implement Parsable
      *
+     * @template T of Parsable
      * @param string $requestId
-     * @param string $type Parsable class name
+     * @param class-string<T> $type Parsable class name
      * @param ParseNodeFactory|null $parseNodeFactory checks the ParseNodeFactoryRegistry by default
-     * @return Parsable|null
+     * @return T|null
      */
     public function getResponseBody(string $requestId, string $type, ?ParseNodeFactory $parseNodeFactory = null): ?Parsable
     {
-        if (!array_key_exists($requestId, $this->responses)) {
+        if (!$this->responses || !array_key_exists($requestId, $this->responses)) {
             throw new InvalidArgumentException("No response found for id: {$requestId}");
         }
         $interfaces = class_implements($type);
@@ -83,10 +89,10 @@ class BatchResponseContent implements Parsable
             throw new InvalidArgumentException("Type passed must implement the Parsable interface");
         }
         $response = $this->responses[$requestId];
-        if (!($response->getHeaders()['content-type'] ?? null)) {
+        $contentType = $response->getContentType();
+        if (!$contentType) {
             throw new RuntimeException("Unable to get content-type header in response item");
         }
-        $contentType = $response->getHeaders()['content-type'];
         $responseBody = $response->getBody() ?? Utils::streamFor(null);
         if ($parseNodeFactory) {
             $parseNode = $parseNodeFactory->getRootParseNode($contentType, $responseBody);
@@ -104,7 +110,6 @@ class BatchResponseContent implements Parsable
     public function getFieldDeserializers(): array
     {
         return [
-            /** @phpstan-ignore-next-line */
             'responses' => fn (ParseNode $n) => $this->setResponses($n->getCollectionOfObjectValues([BatchResponseItem::class, 'create']))
         ];
     }

@@ -16,13 +16,18 @@ use Microsoft\Kiota\Abstractions\RequestInformation;
 use Microsoft\Kiota\Abstractions\RequestOption;
 use Microsoft\Kiota\Abstractions\Serialization\Parsable;
 
+/**
+ * @template T of Parsable
+ */
 class PageIterator
 {
     private PageResult $currentPage;
     private RequestAdapter $requestAdapter;
     private bool $hasNext = false;
     private int $pauseIndex;
-    /** @var array{string, string} $constructorCallable */
+    /**
+     * @var array{class-string<T>, string} $constructorCallable
+    */
     private array $constructorCallable;
     /** @var RequestHeaders */
     private RequestHeaders $headers;
@@ -32,7 +37,7 @@ class PageIterator
     /**
      * @param Parsable|array<mixed>|object|null $response paged collection response
      * @param RequestAdapter $requestAdapter
-     * @param array{string,string} $constructorCallable The method to construct a paged response object.
+     * @param array{class-string<T>,string} $constructorCallable The method to construct a paged response object.
      * @throws JsonException
      */
     public function __construct($response, RequestAdapter $requestAdapter, array $constructorCallable)

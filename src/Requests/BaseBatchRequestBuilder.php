@@ -13,9 +13,11 @@ use Http\Promise\RejectedPromise;
 use Microsoft\Kiota\Abstractions\HttpMethod;
 use Microsoft\Kiota\Abstractions\RequestAdapter;
 use Microsoft\Kiota\Abstractions\RequestInformation;
+use Microsoft\Kiota\Abstractions\Serialization\Parsable;
 
 /**
  * Class BaseBatchRequestBuilder
+ * @template T of Parsable
  * @package Microsoft\Graph\Core\Requests
  * @copyright 2023 Microsoft Corporation
  * @license https://opensource.org/licenses/MIT MIT License
@@ -29,7 +31,7 @@ class BaseBatchRequestBuilder
     private RequestAdapter $requestAdapter;
 
     /**
-     * @var array<string, array{string, string}>|null Error models per status code range to deserialize
+     * @var array<string, array{class-string<T>, string}>|null Error models per status code range to deserialize
      *  failed batch request payloads to
      * e.g. ['4XX' => [Parsable that extends ApiException, static factory method in error model]]
      */
@@ -42,7 +44,7 @@ class BaseBatchRequestBuilder
 
     /**
      * @param RequestAdapter $requestAdapter
-     * @param array<string, array{string, string}>|null $errorMappings
+     * @param array<string, array{class-string<T>, string}>|null $errorMappings
      */
     public function __construct(RequestAdapter $requestAdapter, array $errorMappings = null)
     {
