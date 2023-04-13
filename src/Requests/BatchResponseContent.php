@@ -100,8 +100,11 @@ class BatchResponseContent implements Parsable
             // Check the registry or default to Json deserialization
             try {
                 $parseNode = ParseNodeFactoryRegistry::getDefaultInstance()->getRootParseNode($contentType, $responseBody);
-            } catch (UnexpectedValueException $ex) {
-                $parseNode = (new JsonParseNodeFactory())->getRootParseNode($contentType, $responseBody);
+            } catch (\Exception $ex) {
+                $responseBody->rewind();
+                $response->setBody(Utils::streamFor(base64_decode($responseBody->getContents())));
+                $responseBody = $response->getBody() ?? Utils::streamFor(null);
+                $parseNode = ParseNodeFactoryRegistry::getDefaultInstance()->getRootParseNode($contentType, $responseBody);
             }
         }
         return $parseNode->getObjectValue([$type, 'createFromDiscriminatorValue']);
