@@ -8,17 +8,15 @@
 
 namespace Microsoft\Graph\Core\Requests;
 
+use Exception;
 use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
-use Microsoft\Kiota\Abstractions\RequestInformation;
 use Microsoft\Kiota\Abstractions\Serialization\Parsable;
 use Microsoft\Kiota\Abstractions\Serialization\ParseNode;
 use Microsoft\Kiota\Abstractions\Serialization\ParseNodeFactory;
 use Microsoft\Kiota\Abstractions\Serialization\ParseNodeFactoryRegistry;
 use Microsoft\Kiota\Abstractions\Serialization\SerializationWriter;
-use Microsoft\Kiota\Serialization\Json\JsonParseNodeFactory;
 use RuntimeException;
-use UnexpectedValueException;
 
 /**
  * Class BatchResponseContent
@@ -100,18 +98,19 @@ class BatchResponseContent implements Parsable
             } else {
                 try {
                     $parseNode = ParseNodeFactoryRegistry::getDefaultInstance()->getRootParseNode($contentType, $responseBody);
-                } catch (\Exception $ex) {
+                } catch (Exception $ex) {
                     // Responses to requests with base 64 encoded stream bodies are base 64 encoded
-                    // Tries to decode the response body before retrying deserialization, else exception thrown
+                    // Tries to decode the response body and retries deserialization
                     $responseBody->rewind();
                     $base64DecodedBody = Utils::streamFor(base64_decode($responseBody->getContents()));
                     $parseNode = ParseNodeFactoryRegistry::getDefaultInstance()->getRootParseNode($contentType, $base64DecodedBody);
+                    // Update response body only after we're sure decoding worked
                     $response->setBody($base64DecodedBody);
                 }
             }
             return $parseNode->getObjectValue([$type, 'createFromDiscriminatorValue']);
-        } catch (\Exception $ex) {
-            throw new \RuntimeException("Unable to deserialize batch response for request Id: $requestId to $type");
+        } catch (Exception $ex) {
+            throw new RuntimeException("Unable to deserialize batch response for request Id: $requestId to $type");
         }
     }
 

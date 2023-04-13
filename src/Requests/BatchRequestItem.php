@@ -240,7 +240,7 @@ class BatchRequestItem implements Parsable
         }
         $writer->writeAnyValue('headers', $headers);
         if ($this->getBody()) {
-            // API expects JSON object or base 64 URL encoded value for the body
+            // API expects JSON object or base 64 encoded value for the body
             // We JSON decode the stream contents so that the body is not written as a string
             $jsonObject = json_decode($this->getBody()->getContents(), true);
             $isJsonString = $jsonObject && (json_last_error() === JSON_ERROR_NONE);
