@@ -5,6 +5,8 @@ namespace Microsoft\Graph\Core\Test\Requests;
 use GuzzleHttp\Psr7\Utils;
 use Microsoft\Graph\Core\Requests\BatchResponseContent;
 use Microsoft\Graph\Core\Requests\BatchResponseItem;
+use Microsoft\Kiota\Abstractions\Serialization\ParseNodeFactoryRegistry;
+use Microsoft\Kiota\Serialization\Json\JsonParseNodeFactory;
 use PHPUnit\Framework\TestCase;
 
 class BatchResponseContentTest extends TestCase
@@ -25,6 +27,8 @@ class BatchResponseContentTest extends TestCase
         ];
         $this->batchResponseContent = new BatchResponseContent();
         $this->batchResponseContent->setResponses($responses);
+        ParseNodeFactoryRegistry::getDefaultInstance()
+            ->contentTypeAssociatedFactories['application/json'] = new JsonParseNodeFactory();
         parent::setUp();
     }
 

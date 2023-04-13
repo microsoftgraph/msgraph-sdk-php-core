@@ -94,20 +94,25 @@ class BatchResponseContent implements Parsable
             throw new RuntimeException("Unable to get content-type header in response item");
         }
         $responseBody = $response->getBody() ?? Utils::streamFor(null);
-        if ($parseNodeFactory) {
-            $parseNode = $parseNodeFactory->getRootParseNode($contentType, $responseBody);
-        } else {
-            // Check the registry or default to Json deserialization
-            try {
-                $parseNode = ParseNodeFactoryRegistry::getDefaultInstance()->getRootParseNode($contentType, $responseBody);
-            } catch (\Exception $ex) {
-                $responseBody->rewind();
-                $response->setBody(Utils::streamFor(base64_decode($responseBody->getContents())));
-                $responseBody = $response->getBody() ?? Utils::streamFor(null);
-                $parseNode = ParseNodeFactoryRegistry::getDefaultInstance()->getRootParseNode($contentType, $responseBody);
+        try {
+            if ($parseNodeFactory) {
+                $parseNode = $parseNodeFactory->getRootParseNode($contentType, $responseBody);
+            } else {
+                try {
+                    $parseNode = ParseNodeFactoryRegistry::getDefaultInstance()->getRootParseNode($contentType, $responseBody);
+                } catch (\Exception $ex) {
+                    // Responses to requests with base 64 encoded stream bodies are base 64 encoded
+                    // Tries to decode the response body before retrying deserialization, else exception thrown
+                    $responseBody->rewind();
+                    $base64DecodedBody = Utils::streamFor(base64_decode($responseBody->getContents()));
+                    $parseNode = ParseNodeFactoryRegistry::getDefaultInstance()->getRootParseNode($contentType, $base64DecodedBody);
+                    $response->setBody($base64DecodedBody);
+                }
             }
+            return $parseNode->getObjectValue([$type, 'createFromDiscriminatorValue']);
+        } catch (\Exception $ex) {
+            throw new \RuntimeException("Unable to deserialize batch response for request Id: $requestId to $type");
         }
-        return $parseNode->getObjectValue([$type, 'createFromDiscriminatorValue']);
     }
 
     public function getFieldDeserializers(): array
