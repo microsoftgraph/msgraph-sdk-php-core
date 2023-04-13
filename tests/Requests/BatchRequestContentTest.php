@@ -21,7 +21,7 @@ class BatchRequestContentTest extends TestCase
         $this->requestInformation = new RequestInformation();
         $this->requestInformation->httpMethod = "POST";
         $this->requestInformation->setUri(new Uri("/v1/users"));
-        $this->requestInformation->setStreamContent(Utils::streamFor("abcd"));
+        $this->requestInformation->setStreamContent(Utils::streamFor('{"key": "value"}'));
 
         $this->requests = [$this->requestInformation, $this->requestInformation, $this->requestInformation];
     }
@@ -92,7 +92,7 @@ class BatchRequestContentTest extends TestCase
                     "method" => $this->requestInformation->httpMethod,
                     "url" => '/v1/users',
                     'headers' => ['content-type' => 'application/octet-stream', 'accept' => 'application/json'],
-                    "body" => urlencode("abcd")
+                    "body" => ['key' => 'value']
                 ]
             ]
         ], JSON_UNESCAPED_SLASHES);

@@ -239,6 +239,13 @@ class BatchRequestItem implements Parsable
             $headers[$key] = implode(", ", $val);
         }
         $writer->writeAnyValue('headers', $headers);
-        $writer->writeAnyValue('body', ($this->getBody()) ? json_decode($this->getBody()->getContents()) : null);
+        if ($this->getBody()) {
+            // API expects JSON object or base 64 URL encoded value for the body
+            // We JSON decode the stream contents so that the body is not written as a string
+            $jsonObject = json_decode($this->getBody()->getContents(), true);
+            $isJsonString = $jsonObject && (json_last_error() === JSON_ERROR_NONE);
+            $this->getBody()->rewind();
+            $writer->writeAnyValue('body', $isJsonString ? $jsonObject : base64_encode($this->getBody()->getContents()));
+        }
     }
 }
