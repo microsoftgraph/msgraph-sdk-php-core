@@ -23,6 +23,7 @@ class LargeFileUploadCreateSessionBody implements Parsable, AdditionalDataHolder
      * @inheritDoc
      */
     public function getAdditionalData(): ?array {
+        /** @phpstan-ignore-next-line */
         return $this->backingStore->get('additionalData');
     }
 

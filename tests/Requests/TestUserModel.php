@@ -19,7 +19,11 @@ class TestUserModel implements Parsable
     private string $id;
     private string $name;
 
-    public function __construct() {}
+    public function __construct(string $id = '', string $name = '')
+    {
+        $this->id = $id;
+        $this->name = $name;
+    }
 
     /**
      * @return string

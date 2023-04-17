@@ -1,13 +1,14 @@
 # Get started with the Microsoft Graph Core SDK for PHP
 
 [![Latest Stable Version](https://poser.pugx.org/microsoft/microsoft-graph-core/version)](https://packagist.org/packages/microsoft/microsoft-graph-core)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=microsoftgraph_msgraph-sdk-php-core&metric=coverage)](https://sonarcloud.io/dashboard?id=microsoftgraph_msgraph-sdk-php-core)
 
 ## Install the Core Library
 To install the `microsoft-graph-core` library with Composer, either run `composer require microsoft/microsoft-graph-core`, or edit your `composer.json` file:
 ```
 {
     "require": {
-        "microsoft/microsoft-graph-core": "^2.0.0-RC4"
+        "microsoft/microsoft-graph-core": "^2.0.0-RC7"
     }
 }
 ```

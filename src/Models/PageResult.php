@@ -31,7 +31,7 @@ class PageResult
     }
 
     /**
-     * @param array|null $value
+     * @param array<mixed>|null $value
      */
     public function setValue(?array $value): void {
         $this->value = $value;

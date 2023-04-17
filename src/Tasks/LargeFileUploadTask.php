@@ -15,7 +15,6 @@ use Microsoft\Kiota\Abstractions\Serialization\AdditionalDataHolder;
 use Microsoft\Kiota\Abstractions\Serialization\Parsable;
 use Psr\Http\Message\StreamInterface;
 use RuntimeException;
-use SplQueue;
 
 class LargeFileUploadTask
 {
@@ -29,17 +28,19 @@ class LargeFileUploadTask
     private int $maxChunkSize;
 
     /**
-     * @var callable(LargeFileUploadSession): string|null $onChunkUploadComplete
+     * @var callable(array{int, int}): void | null $onChunkUploadComplete
      */
     private $onChunkUploadComplete = null;
     public function __construct(Parsable $uploadSession, RequestAdapter $adapter, StreamInterface $stream, int $maxChunkSize = 4 * 1024 * 1024){
         $this->uploadSession = $uploadSession;
         $this->adapter = $adapter;
         $this->stream = $stream;
-        $this->fileSize = $stream->getSize();
+        $this->fileSize = $stream->getSize() ?? 0;
         $this->maxChunkSize = $maxChunkSize;
-        $this->nextRange = $this->checkValueExists($uploadSession, 'getNextExpectedRange',
-            ['nextExpectedRange', 'NextExpectedRange'])[1];
+        /** @var string[] $cleanedValue */
+        $cleanedValue = $this->checkValueExists($uploadSession, 'getNextExpectedRange',
+            ['nextExpectedRange', 'NextExpectedRange']);
+        $this->nextRange = $cleanedValue[0];
         $this->chunks = (int)ceil($this->fileSize / $maxChunkSize);
     }
 
@@ -55,7 +56,7 @@ class LargeFileUploadTask
      * Creates an upload session given the URL.
      * The URL should not include the hostname since that is already included in the baseUrl for the requestAdapter.
      * @param RequestAdapter $adapter
-     * @param Parsable|AdditionalDataHolder $requestBody
+     * @param Parsable&AdditionalDataHolder $requestBody
      * @param string $url
      * @return Promise
      */
@@ -63,8 +64,7 @@ class LargeFileUploadTask
         $requestInformation = new RequestInformation();
         $baseUrl = rtrim($adapter->getBaseUrl(), '/');
         $path = ltrim($url, '/');
-
-        $newUrl = "{$baseUrl}/$path";
+        $newUrl = "$baseUrl/$path";
         $requestInformation->setUri($newUrl);
         $requestInformation->httpMethod = HttpMethod::POST;
         $requestInformation->setContentFromParsable($adapter, 'application/json', $requestBody);
@@ -99,6 +99,7 @@ class LargeFileUploadTask
         if (!$validatedValue[0]) {
             throw new Exception('The upload session does not contain an expiry datetime.');
         }
+        /** @var DateTime|null $expiry */
         $expiry = $validatedValue[1];
 
         if ($expiry === null){
@@ -115,7 +116,7 @@ class LargeFileUploadTask
 
     /**
      * Perform the actual upload for the whole file in bits.
-     * @param callable(LargeFileUploadTask): void | null $afterChunkUpload
+     * @param callable(array{int, int}): void | null $afterChunkUpload
      * @return Promise
      * @throws Exception
      */
@@ -186,7 +187,7 @@ class LargeFileUploadTask
         if (empty($this->nextRange)) {
             $this->setNextRange($rangeStart.'-'.$rangeEnd);
         }
-        $rangeParts = explode('-', $this->nextRange);
+        $rangeParts = explode('-', ($this->nextRange ?? '-'));
         $start = intval($rangeParts[0]);
         $end = intval($rangeParts[1] ?? 0);
         if ($start === 0 && $end === 0) {
@@ -205,8 +206,8 @@ class LargeFileUploadTask
             $chunkData = $file->read($end - $start + 1);
 
         }
-        $info->headers = array_merge($info->headers, ['Content-Range' => 'bytes '.($start).'-'.($end).'/'.$this->fileSize]);
-        $info->headers = array_merge($info->headers, ['Content-Length' => strlen($chunkData)]);
+        $info->setHeaders(array_merge($info->getHeaders()->getAll(), ['Content-Range' => 'bytes '.($start).'-'.($end).'/'.$this->fileSize]));
+        $info->setHeaders(array_merge($info->getHeaders()->getAll(), ['Content-Length' => (string) strlen($chunkData)]));
 
         $info->setStreamContent(Utils::streamFor($chunkData));
         return $this->adapter->sendAsync($info, [LargeFileUploadSession::class, 'createFromDiscriminatorValue']);
@@ -291,11 +292,12 @@ class LargeFileUploadTask
         if ($this->uploadSessionExpired($this->uploadSession)) {
             throw new RuntimeException('The upload session is expired.');
         }
+        /** @var array{bool,mixed} $validatedValue */
         $validatedValue = $this->checkValueExists($this->uploadSession, 'getNextExpectedRanges', ['NextExpectedRanges', 'nextExpectedRanges']);
         if (!$validatedValue[0]) {
             throw new RuntimeException('The object passed does not contain a valid "nextExpectedRanges" property.');
         }
-
+        /** @var string[] $nextRanges */
         $nextRanges = $validatedValue[1];
         if (count($nextRanges) === 0) {
             throw new RuntimeException('No more bytes expected.');

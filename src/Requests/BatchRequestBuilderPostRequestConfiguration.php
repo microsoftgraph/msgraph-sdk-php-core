@@ -21,12 +21,12 @@ use Microsoft\Kiota\Abstractions\RequestOption;
 class BatchRequestBuilderPostRequestConfiguration
 {
     /**
-     * @var array<string, string>|null $headers Request headers
+     * @var array<string, array<string>|string>|null $headers Request headers
      */
     public ?array $headers = null;
 
     /**
-     * @var array<string, RequestOption>|null $options Request options
+     * @var array<RequestOption>|null $options Request options
      */
     public ?array $options = null;
 }
