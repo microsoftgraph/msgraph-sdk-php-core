@@ -8,6 +8,7 @@
 
 namespace Microsoft\Graph\Core\Requests;
 
+use InvalidArgumentException;
 use League\Uri\Contracts\UriException;
 use Microsoft\Kiota\Abstractions\RequestHeaders;
 use Microsoft\Kiota\Abstractions\RequestInformation;
@@ -82,7 +83,7 @@ class BatchRequestItem implements Parsable
     public function __construct(RequestInformation $requestInformation, string $id = "", ?array $dependsOn = null)
     {
         if (!$requestInformation->httpMethod) {
-            throw new \InvalidArgumentException("HTTP method cannot be NULL/empty");
+            throw new InvalidArgumentException("HTTP method cannot be NULL/empty");
         }
         $this->id = ($id) ?: Uuid::uuid4();
         $this->method = $requestInformation->httpMethod;
@@ -129,13 +130,15 @@ class BatchRequestItem implements Parsable
         // Set relative URL
         $urlParts = parse_url($url);
         if (!$urlParts || !array_key_exists('path', $urlParts)) {
-            throw new \InvalidArgumentException("Invalid URL {$url}");
+            throw new InvalidArgumentException("Invalid URL {$url}");
         }
         // Set relative URL
         // Remove API version
-        $urlWithoutVersion = preg_replace("/\/(v1.0|beta)/", '',"{$urlParts['path']}");
+        $urlWithoutVersion = preg_replace("/\/(v1.0|beta)/", '', "{$urlParts['path']}");
         if (!$urlWithoutVersion) {
-            throw new RuntimeException("Error occurred during regex replacement of API version in URL string: $url");
+            throw new InvalidArgumentException(
+                "Error occurred during regex replacement of API version in URL string: $url"
+            );
         }
         $this->url = $urlWithoutVersion;
         $this->url .= (array_key_exists('query', $urlParts)) ? "?{$urlParts['query']}" : '';
@@ -239,6 +242,16 @@ class BatchRequestItem implements Parsable
             $headers[$key] = implode(", ", $val);
         }
         $writer->writeAnyValue('headers', $headers);
-        $writer->writeAnyValue('body', ($this->getBody()) ? json_decode($this->getBody()->getContents()) : null);
+        if ($this->getBody()) {
+            // API expects JSON object or base 64 encoded value for the body
+            // We JSON decode the stream contents so that the body is not written as a string
+            $jsonObject = json_decode($this->getBody()->getContents(), true);
+            $isJsonString = $jsonObject && (json_last_error() === JSON_ERROR_NONE);
+            $this->getBody()->rewind();
+            $writer->writeAnyValue(
+                'body',
+                $isJsonString ? $jsonObject : base64_encode($this->getBody()->getContents())
+            );
+        }
     }
 }

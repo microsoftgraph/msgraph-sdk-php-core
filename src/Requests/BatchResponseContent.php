@@ -8,17 +8,15 @@
 
 namespace Microsoft\Graph\Core\Requests;
 
+use Exception;
 use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
-use Microsoft\Kiota\Abstractions\RequestInformation;
 use Microsoft\Kiota\Abstractions\Serialization\Parsable;
 use Microsoft\Kiota\Abstractions\Serialization\ParseNode;
 use Microsoft\Kiota\Abstractions\Serialization\ParseNodeFactory;
 use Microsoft\Kiota\Abstractions\Serialization\ParseNodeFactoryRegistry;
 use Microsoft\Kiota\Abstractions\Serialization\SerializationWriter;
-use Microsoft\Kiota\Serialization\Json\JsonParseNodeFactory;
 use RuntimeException;
-use UnexpectedValueException;
 
 /**
  * Class BatchResponseContent
@@ -71,15 +69,15 @@ class BatchResponseContent implements Parsable
     }
 
     /**
-     * Deserializes a response item's body to $type. $type MUST implement Parsable
+     * Deserializes a response item's body to $type. $type MUST implement Parsable.
+     * Uses the ParseNodeFactory registry to get the required Parse Node implementation
      *
      * @template T of Parsable
      * @param string $requestId
      * @param class-string<T> $type Parsable class name
-     * @param ParseNodeFactory|null $parseNodeFactory checks the ParseNodeFactoryRegistry by default
      * @return T|null
      */
-    public function getResponseBody(string $requestId, string $type, ?ParseNodeFactory $parseNodeFactory = null): ?Parsable
+    public function getResponseBody(string $requestId, string $type): ?Parsable
     {
         if (!$this->responses || !array_key_exists($requestId, $this->responses)) {
             throw new InvalidArgumentException("No response found for id: {$requestId}");
@@ -94,17 +92,25 @@ class BatchResponseContent implements Parsable
             throw new RuntimeException("Unable to get content-type header in response item");
         }
         $responseBody = $response->getBody() ?? Utils::streamFor(null);
-        if ($parseNodeFactory) {
-            $parseNode = $parseNodeFactory->getRootParseNode($contentType, $responseBody);
-        } else {
-            // Check the registry or default to Json deserialization
+        try {
             try {
                 $parseNode = ParseNodeFactoryRegistry::getDefaultInstance()->getRootParseNode($contentType, $responseBody);
-            } catch (UnexpectedValueException $ex) {
-                $parseNode = (new JsonParseNodeFactory())->getRootParseNode($contentType, $responseBody);
+            } catch (Exception $ex) {
+                // Responses to requests with base 64 encoded stream bodies are base 64 encoded
+                // Tries to decode the response body and retries deserialization
+                $responseBody->rewind();
+                $base64DecodedBody = Utils::streamFor(base64_decode($responseBody->getContents()));
+                $parseNode = ParseNodeFactoryRegistry::getDefaultInstance()
+                    ->getRootParseNode($contentType, $base64DecodedBody);
+                // Update response body only after we're sure decoding worked
+                $response->setBody($base64DecodedBody);
             }
+            return $parseNode->getObjectValue([$type, 'createFromDiscriminatorValue']);
+        } catch (Exception $ex) {
+            throw new InvalidArgumentException(
+                "Unable to deserialize batch response for request Id: $requestId to $type"
+            );
         }
-        return $parseNode->getObjectValue([$type, 'createFromDiscriminatorValue']);
     }
 
     public function getFieldDeserializers(): array
