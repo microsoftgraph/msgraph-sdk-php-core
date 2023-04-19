@@ -5,9 +5,9 @@ namespace Microsoft\Graph\Core\Models;
 class PageResult
 {
     /** @var string|null $odataNextLink */
-    private ?string $odataNextLink;
+    private ?string $odataNextLink = null;
     /** @var array<mixed>|null $value  */
-    private ?array $value;
+    private ?array $value = null;
 
     /**
      * @return string|null
