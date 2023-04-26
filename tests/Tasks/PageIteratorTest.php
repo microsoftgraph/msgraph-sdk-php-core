@@ -25,6 +25,7 @@ class PageIteratorTest extends TestCase
     private RequestAdapter $mockRequestAdapter;
     private RequestInformation $requestInfoMock;
     private $firstPageContent;
+    private UsersResponse $initialUsersData;
 
     /**
      * @throws GuzzleException
@@ -103,6 +104,7 @@ class PageIteratorTest extends TestCase
                 ]
             }
             ';
+        $this->initialUsersData = (new JsonParseNode(json_decode($firstPageData, true)))->getObjectValue([UsersResponse::class, 'createFromDiscriminatorValue']);
         $this->mockRequestAdapter->method('sendAsync')
             ->willReturn($usersPage);
         $this->mock = new MockHandler([
@@ -178,5 +180,14 @@ class PageIteratorTest extends TestCase
         });
 
         $this->assertInstanceOf(User::class, $usersArray[0]);
+    }
+
+    public function testCanDeriveConstructorCallable(): void {
+        $pageIterator = new PageIterator($this->initialUsersData, $this->mockRequestAdapter);
+        $pageIterator->iterate(function ($value) {
+            $this->assertInstanceOf(User::class, $value);
+            $this->assertNotEmpty($value->getId());
+            return true;
+        });
     }
 }

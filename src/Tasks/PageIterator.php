@@ -38,12 +38,13 @@ class PageIterator
      * @param Parsable|array<mixed>|object|null $response paged collection response
      * @param RequestAdapter $requestAdapter
      * @param array{class-string<T>,string} $constructorCallable The method to construct a paged response object.
+     * Defaults to the constructor callable of $response
      * @throws JsonException
      */
-    public function __construct($response, RequestAdapter $requestAdapter, array $constructorCallable)
+    public function __construct($response, RequestAdapter $requestAdapter, ?array $constructorCallable = null)
     {
         $this->requestAdapter = $requestAdapter;
-        $this->constructorCallable = $constructorCallable;
+        $this->constructorCallable = ($constructorCallable) ?: [get_class($response)."::class", 'createFromDiscriminatorValue'];
         $this->pauseIndex = 0;
         $this->headers = new RequestHeaders();
         $page = self::convertToPage($response);

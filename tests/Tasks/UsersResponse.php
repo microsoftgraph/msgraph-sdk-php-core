@@ -38,7 +38,7 @@ class UsersResponse implements Parsable
         $this->value = $value;
     }
 
-    public static function createFromDiscriminator(ParseNode $parseNode): UsersResponse {
+    public static function createFromDiscriminatorValue(ParseNode $parseNode): UsersResponse {
         return new UsersResponse();
     }
 }
