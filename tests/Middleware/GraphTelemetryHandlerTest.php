@@ -2,15 +2,19 @@
 
 namespace Microsoft\Graph\Core\Core\Test\Middleware;
 
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\Utils;
 use Microsoft\Graph\Core\GraphConstants;
 use Microsoft\Graph\Core\GraphClientFactory;
 use Microsoft\Graph\Core\Middleware\GraphMiddleware;
 use Microsoft\Graph\Core\Middleware\Option\GraphTelemetryOption;
+use Microsoft\Kiota\Http\Middleware\Options\CompressionOption;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 
 class GraphTelemetryHandlerTest extends TestCase
 {
@@ -105,5 +109,40 @@ class GraphTelemetryHandlerTest extends TestCase
 
         $guzzleClient = GraphClientFactory::createWithMiddleware($handlerStack);
         return $guzzleClient->get("/", $requestOptions);
+    }
+    /**
+     * @throws GuzzleException
+     */
+    public function testRequestOptionsOverrideForCompression(): void
+    {
+        $compressionOption = new CompressionOption([CompressionOption::gzip()]);
+        $requestOptions = [
+            CompressionOption::class => $compressionOption,
+            'body' => Utils::streamFor("{Some JSOn}")
+        ];
+        $mockResponse = [
+            function (RequestInterface $request) {
+                $this->assertTrue($request->hasHeader('Content-Encoding'));
+                $this->assertEquals("gzip", $request->getHeaderLine('Content-Encoding'));
+                return new Response(200);
+            }
+        ];
+        $this->executeMockRequestWithCompressionHandler($mockResponse, $compressionOption, $requestOptions);
+    }
+    /**
+     * @param array<mixed> $mockResponses
+     * @param CompressionOption|null $compressionOption
+     * @param array<string, mixed> $requestOptions
+     * @return ResponseInterface
+     * @throws GuzzleException
+     */
+    private function executeMockRequestWithCompressionHandler(array $mockResponses, ?CompressionOption $compressionOption = null, array $requestOptions = []): ResponseInterface
+    {
+        $mockHandler = new MockHandler($mockResponses);
+        $handlerStack = new HandlerStack($mockHandler);
+        $handlerStack->push(GraphMiddleware::compression($compressionOption));
+
+        $guzzleClient = GraphClientFactory::createWithMiddleware($handlerStack);
+        return $guzzleClient->post("/", $requestOptions);
     }
 }
