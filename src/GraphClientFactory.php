@@ -15,10 +15,12 @@ use GuzzleHttp\RequestOptions;
 use GuzzleHttp\Utils;
 use Http\Adapter\Guzzle7\Client as GuzzleAdapter;
 use Http\Promise\Promise;
+use InvalidArgumentException;
 use Microsoft\Graph\Core\Middleware\GraphMiddleware;
 use Microsoft\Graph\Core\Middleware\GraphRetryHandler;
 use Microsoft\Graph\Core\Middleware\Option\GraphTelemetryOption;
 use Microsoft\Kiota\Http\KiotaClientFactory;
+use Microsoft\Kiota\Http\Middleware\Options\UrlReplaceOption;
 use Microsoft\Kiota\Http\Middleware\RetryHandler;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -60,6 +62,9 @@ final class GraphClientFactory extends KiotaClientFactory
      */
     private static ?GraphTelemetryOption $graphTelemetryOption = null;
 
+    /** @var array<string, string> $urlReplacementPairs  */
+    private static array $urlReplacementPairs = [ "/users/me-token-to-replace" => "/me" ];
+
     /**
      * GraphClientFactory constructor.
      */
@@ -82,11 +87,11 @@ final class GraphClientFactory extends KiotaClientFactory
      *
      * @param string $nationalCloud
      * @return $this
-     * @throws \InvalidArgumentException if $nationalCloud is empty or an invalid national cloud Host
+     * @throws InvalidArgumentException if $nationalCloud is empty or an invalid national cloud Host
      */
     public static function setNationalCloud(string $nationalCloud = NationalCloud::GLOBAL): GraphClientFactory {
         if (!$nationalCloud || !NationalCloud::containsNationalCloudHost($nationalCloud)) {
-            throw new \InvalidArgumentException("Invalid national cloud passed. See https://docs.microsoft.com/en-us/graph/deployments#microsoft-graph-and-graph-explorer-service-root-endpoints.");
+            throw new InvalidArgumentException("Invalid national cloud passed. See https://docs.microsoft.com/en-us/graph/deployments#microsoft-graph-and-graph-explorer-service-root-endpoints.");
         }
         self::$nationalCloud = $nationalCloud;
         return self::getInstance();
@@ -145,9 +150,11 @@ final class GraphClientFactory extends KiotaClientFactory
     public static function getDefaultHandlerStack(callable $handler = null): HandlerStack
     {
         $handlerStack = parent::getDefaultHandlerStack();
+        
         if ($handler) {
             $handlerStack->setHandler($handler);
         }
+        $handlerStack->unshift(GraphMiddleware::urlReplace(new UrlReplaceOption(true, self::$urlReplacementPairs)));
         // Replace default retry handler
         $handlerStack->before(
             RetryHandler::HANDLER_NAME,
