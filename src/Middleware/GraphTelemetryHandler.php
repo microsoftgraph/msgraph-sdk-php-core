@@ -25,6 +25,10 @@ use Psr\Http\Message\RequestInterface;
  */
 class GraphTelemetryHandler extends TelemetryHandler
 {
+    public const HANDLER_NAME = 'graphTelemetryHandler';
+    /**
+     * @var GraphTelemetryOption
+     */
     private GraphTelemetryOption $graphTelemetryOption;
 
     /**

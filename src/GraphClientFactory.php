@@ -16,8 +16,10 @@ use GuzzleHttp\Utils;
 use Http\Adapter\Guzzle7\Client as GuzzleAdapter;
 use Http\Promise\Promise;
 use Microsoft\Graph\Core\Middleware\GraphMiddleware;
+use Microsoft\Graph\Core\Middleware\GraphRetryHandler;
 use Microsoft\Graph\Core\Middleware\Option\GraphTelemetryOption;
 use Microsoft\Kiota\Http\KiotaClientFactory;
+use Microsoft\Kiota\Http\Middleware\RetryHandler;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -165,10 +167,17 @@ final class GraphClientFactory extends KiotaClientFactory
      */
     public static function getDefaultHandlerStack(callable $handler = null): HandlerStack
     {
-        $handler = ($handler) ?: Utils::chooseHandler();
-        $handlerStack = new HandlerStack($handler);
-        $handlerStack->push(GraphMiddleware::retry());
-        $handlerStack->push(GuzzleMiddleware::redirect());
+        $handlerStack = parent::getDefaultHandlerStack();
+        if ($handler) {
+            $handlerStack->setHandler($handler);
+        }
+        // Replace default retry handler
+        $handlerStack->before(
+            RetryHandler::HANDLER_NAME,
+            GraphMiddleware::retry(),
+            GraphRetryHandler::HANDLER_NAME
+        );
+        $handlerStack->remove(RetryHandler::HANDLER_NAME);
         $handlerStack->push(GraphMiddleware::graphTelemetry(self::$graphTelemetryOption));
         return $handlerStack;
     }
