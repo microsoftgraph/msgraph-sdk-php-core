@@ -184,10 +184,7 @@ final class GraphClientFactory extends KiotaClientFactory
 
     private static function getDefaultUrlReplaceOption(): UrlReplaceOption
     {
-        if (self::$urlReplaceOption === null) {
-            self::$urlReplaceOption = new UrlReplaceOption(true, self::$urlReplacementPairs);
-        }
-        return self::$urlReplaceOption;
+        return self::$urlReplaceOption = new UrlReplaceOption(true, self::$urlReplacementPairs);
     }
 
     /**
