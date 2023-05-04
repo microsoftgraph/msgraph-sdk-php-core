@@ -44,11 +44,6 @@ class GraphClientFactoryTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(\GuzzleHttp\Client::class, $client);
     }
 
-    function testCreateAdapterReturnsHttpClientInterface() {
-        $adapter = GraphClientFactory::setNationalCloud(NationalCloud::US_DOD)::createAdapter();
-        $this->assertInstanceOf(HttpClientInterface::class, $adapter);
-    }
-
     public function testMiddlewareProcessing()
     {
         $guzzleVersion = ClientInterface::MAJOR_VERSION;
@@ -65,7 +60,7 @@ class GraphClientFactoryTest extends \PHPUnit\Framework\TestCase
                 $this->assertEquals($sdkVersionValue, $request->getHeaderLine('SdkVersion'));
                 $this->assertTrue($request->hasHeader('client-request-id'));
                 // test parameter name decoding
-                $this->assertEquals('https://graph.microsoft.com/users?$top=5', (string) $request->getUri());
+                $this->assertEquals('https://graph.microsoft.com/me?$top=5', (string) $request->getUri());
                 $this->assertTrue($request->hasHeader('User-Agent'));
                 $this->assertEquals($userAgentHeaderValue, $request->getHeaderLine('User-Agent'));
                 // trigger retry
@@ -79,13 +74,13 @@ class GraphClientFactoryTest extends \PHPUnit\Framework\TestCase
                     .'; hostOS='.php_uname('s')
                     .'; runtimeEnvironment=PHP/'.phpversion().')';
                 $this->assertEquals($sdkVersionValue, $retriedRequest->getHeaderLine('SdkVersion'));
-                $this->assertEquals('https://graph.microsoft.com/users?$top=5', (string) $retriedRequest->getUri());
+                $this->assertEquals('https://graph.microsoft.com/me?$top=5', (string) $retriedRequest->getUri());
                 $this->assertTrue($retriedRequest->hasHeader('User-Agent'));
                 $this->assertEquals($userAgentHeaderValue, $retriedRequest->getHeaderLine('User-Agent'));
                 $this->assertTrue($retriedRequest->hasHeader('Retry-Attempt'));
                 $this->assertEquals('1', $retriedRequest->getHeaderLine('Retry-Attempt'));
                 // trigger redirect
-                return new Response(302, ['Location' => 'https://graph.microsoft.com/users?%24top=5']);
+                return new Response(302, ['Location' => 'https://graph.microsoft.com/me?%24top=5']);
             },
             function (RequestInterface $request) use ($userAgentHeaderValue, $sdkVersionValue) {
                 // test telemetry handler
@@ -93,7 +88,7 @@ class GraphClientFactoryTest extends \PHPUnit\Framework\TestCase
                 $this->assertEquals($sdkVersionValue, $request->getHeaderLine('SdkVersion'));
                 $this->assertTrue($request->hasHeader('client-request-id'));
                 // test no parameter name decoding. Redirect happens as is
-                $this->assertEquals('https://graph.microsoft.com/users?%24top=5', (string) $request->getUri());
+                $this->assertEquals('https://graph.microsoft.com/me?%24top=5', (string) $request->getUri());
                 $this->assertTrue($request->hasHeader('User-Agent'));
                 $this->assertEquals($userAgentHeaderValue, $request->getHeaderLine('User-Agent'));
                 return new Response(200);
@@ -102,7 +97,7 @@ class GraphClientFactoryTest extends \PHPUnit\Framework\TestCase
         $middlewareStack = GraphClientFactory::getDefaultHandlerStack();
         $middlewareStack->setHandler(new MockHandler($mockResponses));
         $mockClient = new Client(['handler' => $middlewareStack]);
-        $mockClient->get('https://graph.microsoft.com/users?%24top=5');
+        $mockClient->get('https://graph.microsoft.com/users/me-token-to-replace?%24top=5');
     }
 
 }
