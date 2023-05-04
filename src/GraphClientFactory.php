@@ -137,29 +137,6 @@ final class GraphClientFactory extends KiotaClientFactory
     }
 
     /**
-     * Creates an HttpClientInterface implementation that wraps around a Guzzle client
-     *
-     * @return HttpClientInterface
-     */
-    public static function createAdapter(): HttpClientInterface {
-        return new class(self::create()) implements HttpClientInterface {
-            private GuzzleAdapter $clientAdapter;
-
-            public function __construct(Client $guzzleClient) {
-                $this->clientAdapter = new GuzzleAdapter($guzzleClient);
-            }
-
-            public function sendRequest(RequestInterface $request): ResponseInterface {
-                return $this->clientAdapter->sendRequest($request);
-            }
-
-            public function sendAsyncRequest(RequestInterface $request): Promise {
-                return $this->clientAdapter->sendAsyncRequest($request);
-            }
-        };
-    }
-
-    /**
      * Return default handler stack for Graph
      *
      * @param callable|null $handler final handler
