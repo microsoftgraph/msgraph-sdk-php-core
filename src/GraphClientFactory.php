@@ -91,7 +91,9 @@ final class GraphClientFactory extends KiotaClientFactory
      */
     public static function setNationalCloud(string $nationalCloud = NationalCloud::GLOBAL): GraphClientFactory {
         if (!$nationalCloud || !NationalCloud::containsNationalCloudHost($nationalCloud)) {
-            throw new InvalidArgumentException("Invalid national cloud passed. See https://docs.microsoft.com/en-us/graph/deployments#microsoft-graph-and-graph-explorer-service-root-endpoints.");
+            throw new InvalidArgumentException(
+                "Invalid national cloud passed. See https://learn.microsoft.com/en-us/graph/deployments."
+            );
         }
         self::$nationalCloud = $nationalCloud;
         return self::getInstance();
@@ -150,7 +152,6 @@ final class GraphClientFactory extends KiotaClientFactory
     public static function getDefaultHandlerStack(callable $handler = null): HandlerStack
     {
         $handlerStack = parent::getDefaultHandlerStack();
-        
         if ($handler) {
             $handlerStack->setHandler($handler);
         }
