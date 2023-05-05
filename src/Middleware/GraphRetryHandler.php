@@ -25,7 +25,8 @@ class GraphRetryHandler extends RetryHandler
 {
     use FeatureFlagTrait;
 
-    const FEATURE_FLAG = 0x00000002;
+    public const HANDLER_NAME = 'graphRetryHandler';
+    public const FEATURE_FLAG = 0x00000002;
 
     /**
      * @param RequestInterface $request
