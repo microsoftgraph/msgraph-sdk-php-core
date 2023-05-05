@@ -26,7 +26,7 @@ class PageIterator
     private bool $hasNext = false;
     private int $pauseIndex;
     /**
-     * @var array{class-string<T>, string} $constructorCallable
+     * @var array{class-string<Parsable>, string} $constructorCallable
     */
     private array $constructorCallable;
     /** @var RequestHeaders */
@@ -37,12 +37,17 @@ class PageIterator
     /**
      * @param Parsable|array<mixed>|object|null $response paged collection response
      * @param RequestAdapter $requestAdapter
-     * @param array{class-string<T>,string} $constructorCallable The method to construct a paged response object.
+     * @param array{class-string<Parsable>,string}|null $constructorCallable The method to construct a paged response object.
      * @throws JsonException
      */
-    public function __construct($response, RequestAdapter $requestAdapter, array $constructorCallable)
+    public function __construct($response, RequestAdapter $requestAdapter, ?array $constructorCallable = null)
     {
         $this->requestAdapter = $requestAdapter;
+        if ($response instanceof Parsable && !$constructorCallable) {
+            $constructorCallable = [get_class($response), 'createFromDiscriminatorValue'];
+        } else if($constructorCallable === null){
+            $constructorCallable = [PageResult::class, 'createFromDiscriminatorValue'];
+        }
         $this->constructorCallable = $constructorCallable;
         $this->pauseIndex = 0;
         $this->headers = new RequestHeaders();
