@@ -37,7 +37,8 @@ class PageIterator
     /**
      * @param Parsable|array<mixed>|object|null $response paged collection response
      * @param RequestAdapter $requestAdapter
-     * @param array{class-string<Parsable>,string}|null $constructorCallable The method to construct a paged response object.
+     * @param array{class-string<Parsable>,string}|null $constructorCallable
+     * The method to construct a paged response object.
      * @throws JsonException
      */
     public function __construct($response, RequestAdapter $requestAdapter, ?array $constructorCallable = null)
@@ -45,7 +46,7 @@ class PageIterator
         $this->requestAdapter = $requestAdapter;
         if ($response instanceof Parsable && !$constructorCallable) {
             $constructorCallable = [get_class($response), 'createFromDiscriminatorValue'];
-        } else if($constructorCallable === null){
+        } elseif ($constructorCallable === null) {
             $constructorCallable = [PageResult::class, 'createFromDiscriminatorValue'];
         }
         $this->constructorCallable = $constructorCallable;
@@ -148,7 +149,7 @@ class PageIterator
             throw new InvalidArgumentException('The response does not contain a value.');
         }
 
-        $parsablePage =  ($response instanceof Parsable) ? $response : json_decode(json_encode($response,JSON_THROW_ON_ERROR), true);
+        $parsablePage =  ($response instanceof Parsable) ? $response : json_decode(json_encode($response, JSON_THROW_ON_ERROR), true);
         if (is_array($parsablePage)) {
             $page->setOdataNextLink($parsablePage['@odata.nextLink'] ?? '');
         } elseif ($parsablePage instanceof Parsable &&
