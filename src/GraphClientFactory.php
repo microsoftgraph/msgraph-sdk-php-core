@@ -10,11 +10,7 @@ namespace Microsoft\Graph\Core;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Middleware as GuzzleMiddleware;
 use GuzzleHttp\RequestOptions;
-use GuzzleHttp\Utils;
-use Http\Adapter\Guzzle7\Client as GuzzleAdapter;
-use Http\Promise\Promise;
 use InvalidArgumentException;
 use Microsoft\Graph\Core\Middleware\GraphMiddleware;
 use Microsoft\Graph\Core\Middleware\GraphRetryHandler;
@@ -22,8 +18,6 @@ use Microsoft\Graph\Core\Middleware\Option\GraphTelemetryOption;
 use Microsoft\Kiota\Http\KiotaClientFactory;
 use Microsoft\Kiota\Http\Middleware\Options\UrlReplaceOption;
 use Microsoft\Kiota\Http\Middleware\RetryHandler;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
 
 /**
  * Class GraphClientFactory

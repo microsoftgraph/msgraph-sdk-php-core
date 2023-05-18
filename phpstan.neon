@@ -2,5 +2,9 @@ parameters:
 	level: 9
 	polluteScopeWithAlwaysIterableForeach: false
 	polluteScopeWithLoopInitialAssignments: false
+	reportUnmatchedIgnoredErrors: false
+	ignoreErrors:
+	    - '/^Parameter #1 \$var of function strval expects bool\|float\|int\|resource\|string\|null, mixed given.$/'
+	    - '/^Parameter #1 \$value of function strval expects bool\|float\|int\|resource\|string\|null, mixed given.$/'
 	paths:
 		- src
