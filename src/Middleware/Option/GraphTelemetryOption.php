@@ -26,10 +26,11 @@ use Ramsey\Uuid\Uuid;
  */
 class GraphTelemetryOption extends TelemetryOption
 {
+    public const DEFAULT_FEATURE_FLAG = 0x00000000;
     private string $apiVersion;
     private string $serviceLibraryVersion;
     private string $clientRequestId = '';
-    private int $featureFlag = 0x00000000;
+    private int $featureFlag = self::DEFAULT_FEATURE_FLAG;
 
     /**
      * Create new instance
@@ -88,7 +89,7 @@ class GraphTelemetryOption extends TelemetryOption
      */
     public function setFeatureFlag(int $featureFlag): void
     {
-        $this->featureFlag = $this->featureFlag | $featureFlag;
+        $this->featureFlag = self::DEFAULT_FEATURE_FLAG | $featureFlag;
     }
 
     /**

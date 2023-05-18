@@ -10,16 +10,14 @@ namespace Microsoft\Graph\Core;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Middleware as GuzzleMiddleware;
 use GuzzleHttp\RequestOptions;
-use GuzzleHttp\Utils;
-use Http\Adapter\Guzzle7\Client as GuzzleAdapter;
-use Http\Promise\Promise;
+use InvalidArgumentException;
 use Microsoft\Graph\Core\Middleware\GraphMiddleware;
+use Microsoft\Graph\Core\Middleware\GraphRetryHandler;
 use Microsoft\Graph\Core\Middleware\Option\GraphTelemetryOption;
 use Microsoft\Kiota\Http\KiotaClientFactory;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
+use Microsoft\Kiota\Http\Middleware\Options\UrlReplaceOption;
+use Microsoft\Kiota\Http\Middleware\RetryHandler;
 
 /**
  * Class GraphClientFactory
@@ -58,6 +56,9 @@ final class GraphClientFactory extends KiotaClientFactory
      */
     private static ?GraphTelemetryOption $graphTelemetryOption = null;
 
+    /** @var array<string, string> $urlReplacementPairs  */
+    private static array $urlReplacementPairs = [ "/users/me-token-to-replace" => "/me" ];
+
     /**
      * GraphClientFactory constructor.
      */
@@ -80,11 +81,13 @@ final class GraphClientFactory extends KiotaClientFactory
      *
      * @param string $nationalCloud
      * @return $this
-     * @throws \InvalidArgumentException if $nationalCloud is empty or an invalid national cloud Host
+     * @throws InvalidArgumentException if $nationalCloud is empty or an invalid national cloud Host
      */
     public static function setNationalCloud(string $nationalCloud = NationalCloud::GLOBAL): GraphClientFactory {
         if (!$nationalCloud || !NationalCloud::containsNationalCloudHost($nationalCloud)) {
-            throw new \InvalidArgumentException("Invalid national cloud passed. See https://docs.microsoft.com/en-us/graph/deployments#microsoft-graph-and-graph-explorer-service-root-endpoints.");
+            throw new InvalidArgumentException(
+                "Invalid national cloud passed. See https://learn.microsoft.com/en-us/graph/deployments."
+            );
         }
         self::$nationalCloud = $nationalCloud;
         return self::getInstance();
@@ -135,29 +138,6 @@ final class GraphClientFactory extends KiotaClientFactory
     }
 
     /**
-     * Creates an HttpClientInterface implementation that wraps around a Guzzle client
-     *
-     * @return HttpClientInterface
-     */
-    public static function createAdapter(): HttpClientInterface {
-        return new class(self::create()) implements HttpClientInterface {
-            private GuzzleAdapter $clientAdapter;
-
-            public function __construct(Client $guzzleClient) {
-                $this->clientAdapter = new GuzzleAdapter($guzzleClient);
-            }
-
-            public function sendRequest(RequestInterface $request): ResponseInterface {
-                return $this->clientAdapter->sendRequest($request);
-            }
-
-            public function sendAsyncRequest(RequestInterface $request): Promise {
-                return $this->clientAdapter->sendAsyncRequest($request);
-            }
-        };
-    }
-
-    /**
      * Return default handler stack for Graph
      *
      * @param callable|null $handler final handler
@@ -165,10 +145,18 @@ final class GraphClientFactory extends KiotaClientFactory
      */
     public static function getDefaultHandlerStack(callable $handler = null): HandlerStack
     {
-        $handler = ($handler) ?: Utils::chooseHandler();
-        $handlerStack = new HandlerStack($handler);
-        $handlerStack->push(GraphMiddleware::retry());
-        $handlerStack->push(GuzzleMiddleware::redirect());
+        $handlerStack = parent::getDefaultHandlerStack();
+        if ($handler) {
+            $handlerStack->setHandler($handler);
+        }
+        $handlerStack->unshift(GraphMiddleware::urlReplace(new UrlReplaceOption(true, self::$urlReplacementPairs)));
+        // Replace default retry handler
+        $handlerStack->before(
+            RetryHandler::HANDLER_NAME,
+            GraphMiddleware::retry(),
+            GraphRetryHandler::HANDLER_NAME
+        );
+        $handlerStack->remove(RetryHandler::HANDLER_NAME);
         $handlerStack->push(GraphMiddleware::graphTelemetry(self::$graphTelemetryOption));
         return $handlerStack;
     }

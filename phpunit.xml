@@ -5,6 +5,9 @@
 			<directory>tests</directory>
 		</testsuite>
 	</testsuites>
+	<php>
+		<ini name="memory_limit" value="512M" />
+	</php>
 	<coverage includeUncoveredFiles="true"
 				pathCoverage="true">
 		<include>

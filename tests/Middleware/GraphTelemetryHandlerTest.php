@@ -89,12 +89,13 @@ class GraphTelemetryHandlerTest extends TestCase
             function (RequestInterface $request) use ($expectedSdkVersionValue) {
                 $this->assertTrue($request->hasHeader('SdkVersion'));
                 $this->assertEquals($expectedSdkVersionValue, $request->getHeaderLine('SdkVersion'));
+                $this->assertEquals('/me/messages', $request->getUri()->getPath());
                 return new Response(200);
             }
         ];
         $mockHandler = new MockHandler($mockResponse);
         $guzzleClient = GraphClientFactory::createWithMiddleware(GraphClientFactory::getDefaultHandlerStack($mockHandler));
-        $guzzleClient->get("/");
+        $guzzleClient->get("/users/me-token-to-replace/messages");
     }
 
     private function executeMockRequestWithGraphTelemetryHandler(array $mockResponses, ?GraphTelemetryOption $graphTelemetryOption = null, array $requestOptions = [])
