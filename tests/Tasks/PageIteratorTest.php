@@ -187,6 +187,25 @@ class PageIteratorTest extends TestCase
     }
 
     /**
+     * @throws \Exception
+     */
+    public function testCanPaginateWithoutCallableClass(): void {
+        $pageIterator = new PageIterator($this->firstPageContent, $this->mockRequestAdapter);
+        $count = 0;
+        $usersArray = [];
+        $pageIterator->iterate(function ($value) use (&$count,&$usersArray)  {
+            $parseNode = new JsonParseNode($value);
+            /** @var User $user */
+            $user = $parseNode->getObjectValue([User::class, 'createFromDiscriminator']);
+            $usersArray []= $user;
+            $count++;
+            return true;
+        });
+
+        $this->assertInstanceOf(User::class, $usersArray[0]);
+    }
+
+    /**
      * @throws \JsonException
      * @throws \Exception
      */
