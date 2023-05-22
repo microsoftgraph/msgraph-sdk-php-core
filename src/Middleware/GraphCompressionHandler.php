@@ -25,7 +25,8 @@ class GraphCompressionHandler extends CompressionHandler
 {
     use FeatureFlagTrait;
 
-    const FEATURE_FLAG = 0x00000040;
+    public const HANDLER_NAME = 'graphCompressionHandler';
+    public const FEATURE_FLAG = 0x00000040;
 
     /**
      * @param RequestInterface $request
