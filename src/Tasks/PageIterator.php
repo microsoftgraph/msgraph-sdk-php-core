@@ -26,7 +26,7 @@ class PageIterator
     private bool $hasNext = false;
     private int $pauseIndex;
     /**
-     * @var array{class-string<T>, string} $constructorCallable
+     * @var array{class-string<Parsable>, string} $constructorCallable
     */
     private array $constructorCallable;
     /** @var RequestHeaders */
@@ -37,12 +37,18 @@ class PageIterator
     /**
      * @param Parsable|array<mixed>|object|null $response paged collection response
      * @param RequestAdapter $requestAdapter
-     * @param array{class-string<T>,string} $constructorCallable The method to construct a paged response object.
+     * @param array{class-string<Parsable>,string}|null $constructorCallable
+     * The method to construct a paged response object.
      * @throws JsonException
      */
-    public function __construct($response, RequestAdapter $requestAdapter, array $constructorCallable)
+    public function __construct($response, RequestAdapter $requestAdapter, ?array $constructorCallable = null)
     {
         $this->requestAdapter = $requestAdapter;
+        if ($response instanceof Parsable && !$constructorCallable) {
+            $constructorCallable = [get_class($response), 'createFromDiscriminatorValue'];
+        } elseif ($constructorCallable === null) {
+            $constructorCallable = [PageResult::class, 'createFromDiscriminatorValue'];
+        }
         $this->constructorCallable = $constructorCallable;
         $this->pauseIndex = 0;
         $this->headers = new RequestHeaders();
@@ -131,8 +137,8 @@ class PageIterator
 
         $value = null;
         if (is_array($response)) {
-            $value = $response['value'];
-        } elseif (is_object($response) && is_a($response, Parsable::class) &&
+            $value = $response['value'] ?? ['value' => []];
+        } elseif ($response instanceof Parsable &&
             method_exists($response, 'getValue')) {
             $value = $response->getValue();
         } elseif (is_object($response)) {
@@ -143,11 +149,10 @@ class PageIterator
             throw new InvalidArgumentException('The response does not contain a value.');
         }
 
-        $parsablePage =  (is_object($response) && is_a($response, Parsable::class)) ? $response : json_decode(json_encode($response,JSON_THROW_ON_ERROR), true);
+        $parsablePage =  ($response instanceof Parsable) ? $response : json_decode(json_encode($response, JSON_THROW_ON_ERROR), true);
         if (is_array($parsablePage)) {
             $page->setOdataNextLink($parsablePage['@odata.nextLink'] ?? '');
-        } elseif (is_object($parsablePage) &&
-            is_a($parsablePage, Parsable::class) &&
+        } elseif ($parsablePage instanceof Parsable &&
             method_exists($parsablePage, 'getOdataNextLink')) {
             $page->setOdataNextLink($parsablePage->getOdataNextLink());
         }
