@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Promise\Promise;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use Http\Promise\FulfilledPromise;
@@ -24,6 +25,7 @@ class PageIteratorTest extends TestCase
     private Client $testClient;
     private RequestAdapter $mockRequestAdapter;
     private RequestInformation $requestInfoMock;
+    private ?array $nextPageContent = null;
     private $firstPageContent;
 
     /**
@@ -104,7 +106,7 @@ class PageIteratorTest extends TestCase
             }
             ';
         $this->mockRequestAdapter->method('sendAsync')
-            ->willReturn($usersPage);
+            ->willReturn(($this->nextPageContent !== null ? new FulfilledPromise($this->nextPageContent) : $usersPage));
         $this->mock = new MockHandler([
             new Response(200, ['X-Foo' => 'Bar'], $firstPageData),
         ]);
@@ -119,7 +121,7 @@ class PageIteratorTest extends TestCase
     public function testHandlerCanWork(): void {
         $pageIterator = new PageIterator($this->firstPageContent, $this->mockRequestAdapter, [UsersResponse::class, 'createFromDiscriminator']);
         $count = 0;
-        $pageIterator->iterate(function ($value) use (&$count)  {
+        $pageIterator->iterate(function () use (&$count)  {
             $count++;
             return true;
         });
@@ -147,6 +149,10 @@ class PageIteratorTest extends TestCase
         $this->assertEquals(4, $count);
     }
 
+    /**
+     * @throws \JsonException
+     * @throws \Exception
+     */
     public function testCanPauseIteration(): void {
         $pageIterator = new PageIterator($this->firstPageContent, $this->mockRequestAdapter, [UsersResponse::class, 'createFromDiscriminator']);
         $count = 0;
@@ -178,5 +184,44 @@ class PageIteratorTest extends TestCase
         });
 
         $this->assertInstanceOf(User::class, $usersArray[0]);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testCanPaginateWithoutCallableClass(): void {
+        $pageIterator = new PageIterator($this->firstPageContent, $this->mockRequestAdapter);
+        $count = 0;
+        $usersArray = [];
+        $pageIterator->iterate(function ($value) use (&$count,&$usersArray)  {
+            $parseNode = new JsonParseNode($value);
+            /** @var User $user */
+            $user = $parseNode->getObjectValue([User::class, 'createFromDiscriminator']);
+            $usersArray []= $user;
+            $count++;
+            return true;
+        });
+
+        $this->assertInstanceOf(User::class, $usersArray[0]);
+    }
+
+    /**
+     * @throws \JsonException
+     * @throws \Exception
+     */
+    public function testCanGetFromParsablePageObject(): void
+    {
+        $parsable = (new JsonParseNode($this->firstPageContent))->getObjectValue([UsersResponse::class, 'createFromDiscriminator']);
+        $pageIterator = new PageIterator($parsable, $this->mockRequestAdapter, [UsersResponse::class, 'createFromDiscriminator']);
+        $count = 0;
+        $this->nextPageContent = [];
+        $data = [];
+        $pageIterator->iterate(static function($value) use (&$count, &$data) {
+            $data []= $value;
+            $count++;
+            return $count < 2;
+        });
+        $this->assertEquals(2, $count);
+        $this->assertInstanceOf(User::class, $data[0]);
     }
 }
