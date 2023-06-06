@@ -45,8 +45,14 @@ class GraphPhpLeagueAccessTokenProvider extends PhpLeagueAccessTokenProvider
         string $nationalCloud = NationalCloud::GLOBAL
     )
     {
-        $allowedHosts = ["graph.microsoft.com", "graph.microsoft.us", "dod-graph.microsoft.us", "graph.microsoft.de",
-            "microsoftgraph.chinacloudapi.cn", "canary.graph.microsoft.com"];
+        $allowedHosts = [
+            "graph.microsoft.com",
+            "graph.microsoft.us",
+            "dod-graph.microsoft.us",
+            "microsoftgraph.chinacloudapi.cn",
+            "canary.graph.microsoft.com",
+            "graph.microsoft-ppe.com"
+        ];
         if (!array_key_exists($nationalCloud, self::NATIONAL_CLOUD_TO_AZURE_AD_ENDPOINT)) {
             throw new InvalidArgumentException(
                 "No valid Azure AD endpoint linked for nationalCloud=$nationalCloud"
