@@ -8,6 +8,7 @@
 
 namespace Microsoft\Graph\Core\Authentication;
 
+use Microsoft\Graph\Core\NationalCloud;
 use Microsoft\Kiota\Abstractions\Authentication\BaseBearerTokenAuthenticationProvider;
 use Microsoft\Kiota\Authentication\Oauth\TokenRequestContext;
 
@@ -23,10 +24,16 @@ class GraphPhpLeagueAuthenticationProvider extends BaseBearerTokenAuthentication
     /**
      * @param TokenRequestContext $tokenRequestContext
      * @param array<string> $scopes defaults to ["https://[graph national cloud host]/.default"] scope
+     * @param string $nationalCloud defaults to https://graph.microsoft.com. See
+     * https://learn.microsoft.com/en-us/graph/deployments
      */
-    public function __construct(TokenRequestContext $tokenRequestContext, array $scopes = [])
+    public function __construct(
+        TokenRequestContext $tokenRequestContext,
+        array $scopes = [],
+        string $nationalCloud = NationalCloud::GLOBAL
+    )
     {
-        $accessTokenProvider = new GraphPhpLeagueAccessTokenProvider($tokenRequestContext, $scopes);
+        $accessTokenProvider = new GraphPhpLeagueAccessTokenProvider($tokenRequestContext, $scopes, $nationalCloud);
         parent::__construct($accessTokenProvider);
     }
 }

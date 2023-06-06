@@ -9,6 +9,9 @@
 namespace Microsoft\Graph\Core\Authentication;
 
 
+use InvalidArgumentException;
+use Microsoft\Graph\Core\NationalCloud;
+use Microsoft\Kiota\Authentication\Oauth\ProviderFactory;
 use Microsoft\Kiota\Authentication\Oauth\TokenRequestContext;
 use Microsoft\Kiota\Authentication\PhpLeagueAccessTokenProvider;
 
@@ -24,14 +27,40 @@ use Microsoft\Kiota\Authentication\PhpLeagueAccessTokenProvider;
  */
 class GraphPhpLeagueAccessTokenProvider extends PhpLeagueAccessTokenProvider
 {
+    public const NATIONAL_CLOUD_TO_AZURE_AD_ENDPOINT = [
+        NationalCloud::GLOBAL => 'https://login.microsoftonline.com',
+        NationalCloud::US_GOV => 'https://login.microsoftonline.us',
+        NationalCloud::CHINA => 'https://login.chinacloudapi.cn'
+    ];
+
     /**
      * @param TokenRequestContext $tokenRequestContext
      * @param array<string> $scopes if left empty, it's set to ["https://[graph national cloud host]/.default"] scope
+     * @param string $nationalCloud Defaults to https://graph.microsoft.com. See
+     * https://learn.microsoft.com/en-us/graph/deployments
      */
-    public function __construct(TokenRequestContext $tokenRequestContext, array $scopes = [])
+    public function __construct(
+        TokenRequestContext $tokenRequestContext,
+        array $scopes = [],
+        string $nationalCloud = NationalCloud::GLOBAL
+    )
     {
-        $allowedHosts = ["graph.microsoft.com", "graph.microsoft.us", "dod-graph.microsoft.us", "graph.microsoft.de",
-            "microsoftgraph.chinacloudapi.cn", "canary.graph.microsoft.com"];
-        parent::__construct($tokenRequestContext, $scopes, $allowedHosts);
+        $allowedHosts = [
+            "graph.microsoft.com",
+            "graph.microsoft.us",
+            "dod-graph.microsoft.us",
+            "microsoftgraph.chinacloudapi.cn",
+            "canary.graph.microsoft.com",
+            "graph.microsoft-ppe.com"
+        ];
+        $tokenBaseServiceUrl = self::NATIONAL_CLOUD_TO_AZURE_AD_ENDPOINT[$nationalCloud] ??
+            self::NATIONAL_CLOUD_TO_AZURE_AD_ENDPOINT[NationalCloud::GLOBAL];
+        $oauthProvider = ProviderFactory::create(
+            $tokenRequestContext,
+            [],
+            $tokenBaseServiceUrl,
+            $nationalCloud
+        );
+        parent::__construct($tokenRequestContext, $scopes, $allowedHosts, $oauthProvider);
     }
 }
