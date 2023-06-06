@@ -53,15 +53,12 @@ class GraphPhpLeagueAccessTokenProvider extends PhpLeagueAccessTokenProvider
             "canary.graph.microsoft.com",
             "graph.microsoft-ppe.com"
         ];
-        if (!array_key_exists($nationalCloud, self::NATIONAL_CLOUD_TO_AZURE_AD_ENDPOINT)) {
-            throw new InvalidArgumentException(
-                "No valid Azure AD endpoint linked for nationalCloud=$nationalCloud"
-            );
-        }
+        $tokenBaseServiceUrl = self::NATIONAL_CLOUD_TO_AZURE_AD_ENDPOINT[$nationalCloud] ??
+            self::NATIONAL_CLOUD_TO_AZURE_AD_ENDPOINT[NationalCloud::GLOBAL];
         $oauthProvider = ProviderFactory::create(
             $tokenRequestContext,
             [],
-            self::NATIONAL_CLOUD_TO_AZURE_AD_ENDPOINT[$nationalCloud],
+            $tokenBaseServiceUrl,
             $nationalCloud
         );
         parent::__construct($tokenRequestContext, $scopes, $allowedHosts, $oauthProvider);

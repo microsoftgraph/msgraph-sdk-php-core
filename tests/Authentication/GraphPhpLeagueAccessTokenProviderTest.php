@@ -17,14 +17,16 @@ class GraphPhpLeagueAccessTokenProviderTest extends TestCase
         $this->assertNotEmpty($leagueAccessTokenProvider->getAllowedHostsValidator()->getAllowedHosts());
     }
 
-    public function testInvalidNationalCloudThrowsException(): void
+    public function testTokenServiceDefaultsToAzureADGlobalEndpoint(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
         $tokenProvider = new GraphPhpLeagueAccessTokenProvider(
             new ClientCredentialContext('tenant', 'client', 'secret'),
             [],
             'https://canary.microsoft.com'
         );
+        $baseUrl = GraphPhpLeagueAccessTokenProvider::NATIONAL_CLOUD_TO_AZURE_AD_ENDPOINT[NationalCloud::GLOBAL];
+        $this->assertEquals("$baseUrl/tenant/oauth2/v2.0/token", $tokenProvider->getOauthProvider()->getBaseAccessTokenUrl([]));
+        $this->assertEquals("$baseUrl/tenant/oauth2/v2.0/authorize", $tokenProvider->getOauthProvider()->getBaseAuthorizationUrl());
     }
 
     public function testCorrectOAuthEndpointsSet(): void
