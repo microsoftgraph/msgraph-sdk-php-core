@@ -17,7 +17,6 @@ use Microsoft\Kiota\Abstractions\Serialization\SerializationWriter;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Ramsey\Uuid\Uuid;
-use RuntimeException;
 
 /**
  * Class BatchRequestItem
@@ -31,6 +30,9 @@ use RuntimeException;
  */
 class BatchRequestItem implements Parsable
 {
+    const API_VERSION_REGEX = '/\/(v1.0|beta)/';
+    const ME_TOKEN_REGEX = '/\/users\/me-token-to-replace/';
+
     /**
      * Unique identifier
      *
@@ -134,12 +136,20 @@ class BatchRequestItem implements Parsable
         }
         // Set relative URL
         // Remove API version
-        $urlWithoutVersion = preg_replace("/\/(v1.0|beta)/", '', "{$urlParts['path']}");
+        $urlWithoutVersion = preg_replace(self::API_VERSION_REGEX, '', "{$urlParts['path']}", 1);
         if (!$urlWithoutVersion) {
             throw new InvalidArgumentException(
                 "Error occurred during regex replacement of API version in URL string: $url"
             );
         }
+        // Replace /users/me-token-to-replace with /me
+        $urlWithoutVersion = preg_replace(self::ME_TOKEN_REGEX, '/me', $urlWithoutVersion, 1);
+        if (!$urlWithoutVersion) {
+            throw new InvalidArgumentException(
+                "Error occurred during regex replacement of '/users/me-token-to-replace' in URL string: $url"
+            );
+        }
+
         $this->url = $urlWithoutVersion;
         $this->url .= (array_key_exists('query', $urlParts)) ? "?{$urlParts['query']}" : '';
         $this->url .= (array_key_exists('fragment', $urlParts)) ? "#{$urlParts['fragment']}" : '';

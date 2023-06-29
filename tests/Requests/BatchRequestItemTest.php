@@ -24,7 +24,7 @@ class BatchRequestItemTest extends TestCase
         $this->requestInformation->addHeaders(["test" => ["value", "value2"]]);
         $this->requestInformation->setUri(new Uri('https://graph.microsoft.com/v1.0/users?$top=2'));
 
-        $this->psrRequest = new Request(HttpMethod::POST, "https://graph.microsoft.com/v1.0/users", ["key" => ["value1", "value2"]], Utils::streamFor(json_encode(["key" => "val"])));
+        $this->psrRequest = new Request(HttpMethod::POST, "https://graph.microsoft.com/beta/users", ["key" => ["value1", "value2"]], Utils::streamFor(json_encode(["key" => "val"])));
     }
 
 
@@ -87,5 +87,23 @@ class BatchRequestItemTest extends TestCase
         $item->setMethod('GET');
         $item->setUrl('');
         $item->setHeaders([]);
+    }
+
+    public function testMePlaceholderIsReplacedInUrls(): void
+    {
+        $meUrlPath = '/me';
+        $tokenToReplaceUrl = 'https://graph.microsoft.com/v1.0/users/me-token-to-replace';
+
+        $this->requestInformation->setUri(new Uri('https://graph.microsoft.com/beta/me'));
+        $this->assertEquals($meUrlPath, (new BatchRequestItem($this->requestInformation))->getUrl());
+
+        $this->requestInformation->setUri(new Uri($tokenToReplaceUrl));
+        $this->assertEquals($meUrlPath, (new BatchRequestItem($this->requestInformation))->getUrl());
+
+        $this->requestInformation->setUri(new Uri("$tokenToReplaceUrl/messages"));
+        $this->assertEquals("$meUrlPath/messages", (new BatchRequestItem($this->requestInformation))->getUrl());
+
+        $this->requestInformation->setUri(new Uri("$tokenToReplaceUrl/messages/123"));
+        $this->assertEquals("$meUrlPath/messages/123", (new BatchRequestItem($this->requestInformation))->getUrl());
     }
 }
