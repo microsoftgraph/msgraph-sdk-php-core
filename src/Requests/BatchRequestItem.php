@@ -91,7 +91,7 @@ class BatchRequestItem implements Parsable
         $this->method = $requestInformation->httpMethod;
         $this->setUrl($requestInformation->getUri());
         $this->headers = $requestInformation->getHeaders();
-        $this->body = $requestInformation->content;
+        $this->setBody($requestInformation->content);
         $this->dependsOn($dependsOn);
     }
 

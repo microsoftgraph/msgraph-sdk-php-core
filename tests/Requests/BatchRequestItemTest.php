@@ -85,8 +85,8 @@ class BatchRequestItemTest extends TestCase
         $item = new BatchRequestItem($this->requestInformation);
         $item->setId('1243');
         $item->setMethod('GET');
-        $item->setUrl('');
         $item->setHeaders([]);
+        $item->setUrl('');
     }
 
     public function testMePlaceholderIsReplacedInUrls(): void
