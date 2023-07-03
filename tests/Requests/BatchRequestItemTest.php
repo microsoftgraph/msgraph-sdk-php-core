@@ -5,6 +5,7 @@ namespace Microsoft\Graph\Core\Test\Requests;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\Psr7\Utils;
+use InvalidArgumentException;
 use Microsoft\Graph\Core\Requests\BatchRequestItem;
 use Microsoft\Kiota\Abstractions\HttpMethod;
 use Microsoft\Kiota\Abstractions\RequestInformation;
@@ -36,6 +37,13 @@ class BatchRequestItemTest extends TestCase
         $this->assertEquals($this->requestInformation->httpMethod, $batchRequestItem->getMethod());
         $this->assertEquals($this->requestInformation->getHeaders()->getAll(), $batchRequestItem->getHeaders());
         $this->assertEquals('/users?$top=2', $batchRequestItem->getUrl()); // relative URL is set
+    }
+
+    public function testInvalidRequestInformationThrowsException()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->requestInformation->httpMethod = '';
+        new BatchRequestItem($this->requestInformation);
     }
 
     public function testCreateWithPsrRequest()
@@ -79,13 +87,21 @@ class BatchRequestItemTest extends TestCase
         $this->assertEquals($expectedJson, $jsonSerializationWriter->getSerializedContent()->getContents());
     }
 
-    public function testSettingInvalidUrl(): void
+    public function testSettingInvalidUrlPathThrowsException(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $item = new BatchRequestItem($this->requestInformation);
         $item->setId('1243');
         $item->setMethod('GET');
         $item->setHeaders([]);
+        $item->getFieldDeserializers();
+        $item->setUrl('https://a.b.com$1');
+    }
+
+    public function testSetEmptyUrlThrowsException(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $item = new BatchRequestItem($this->requestInformation);
         $item->setUrl('');
     }
 

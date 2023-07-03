@@ -136,21 +136,21 @@ class BatchRequestItem implements Parsable
         }
         // Set relative URL
         // Remove API version
-        $urlWithoutVersion = preg_replace(self::API_VERSION_REGEX, '', "{$urlParts['path']}", 1);
-        if (!$urlWithoutVersion) {
+        $relativeUrl = preg_replace(self::API_VERSION_REGEX, '', "{$urlParts['path']}", 1);
+        if (!$relativeUrl) {
             throw new InvalidArgumentException(
                 "Error occurred during regex replacement of API version in URL string: $url"
             );
         }
         // Replace /users/me-token-to-replace with /me
-        $urlWithoutVersion = preg_replace(self::ME_TOKEN_REGEX, '/me', $urlWithoutVersion, 1);
-        if (!$urlWithoutVersion) {
+        $relativeUrl = preg_replace(self::ME_TOKEN_REGEX, '/me', $relativeUrl, 1);
+        if (!$relativeUrl) {
             throw new InvalidArgumentException(
                 "Error occurred during regex replacement of '/users/me-token-to-replace' in URL string: $url"
             );
         }
 
-        $this->url = $urlWithoutVersion;
+        $this->url = $relativeUrl;
         $this->url .= (array_key_exists('query', $urlParts)) ? "?{$urlParts['query']}" : '';
         $this->url .= (array_key_exists('fragment', $urlParts)) ? "#{$urlParts['fragment']}" : '';
     }
