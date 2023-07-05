@@ -5,6 +5,7 @@ namespace Microsoft\Graph\Core\Test\Requests;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\Psr7\Utils;
+use InvalidArgumentException;
 use Microsoft\Graph\Core\Requests\BatchRequestItem;
 use Microsoft\Kiota\Abstractions\HttpMethod;
 use Microsoft\Kiota\Abstractions\RequestInformation;
@@ -24,7 +25,7 @@ class BatchRequestItemTest extends TestCase
         $this->requestInformation->addHeaders(["test" => ["value", "value2"]]);
         $this->requestInformation->setUri(new Uri('https://graph.microsoft.com/v1.0/users?$top=2'));
 
-        $this->psrRequest = new Request(HttpMethod::POST, "https://graph.microsoft.com/v1.0/users", ["key" => ["value1", "value2"]], Utils::streamFor(json_encode(["key" => "val"])));
+        $this->psrRequest = new Request(HttpMethod::POST, "https://graph.microsoft.com/beta/users", ["key" => ["value1", "value2"]], Utils::streamFor(json_encode(["key" => "val"])));
     }
 
 
@@ -36,6 +37,13 @@ class BatchRequestItemTest extends TestCase
         $this->assertEquals($this->requestInformation->httpMethod, $batchRequestItem->getMethod());
         $this->assertEquals($this->requestInformation->getHeaders()->getAll(), $batchRequestItem->getHeaders());
         $this->assertEquals('/users?$top=2', $batchRequestItem->getUrl()); // relative URL is set
+    }
+
+    public function testInvalidRequestInformationThrowsException()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->requestInformation->httpMethod = '';
+        new BatchRequestItem($this->requestInformation);
     }
 
     public function testCreateWithPsrRequest()
@@ -79,13 +87,39 @@ class BatchRequestItemTest extends TestCase
         $this->assertEquals($expectedJson, $jsonSerializationWriter->getSerializedContent()->getContents());
     }
 
-    public function testSettingInvalidUrl(): void
+    public function testSettingInvalidUrlPathThrowsException(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $item = new BatchRequestItem($this->requestInformation);
         $item->setId('1243');
         $item->setMethod('GET');
-        $item->setUrl('');
         $item->setHeaders([]);
+        $item->getFieldDeserializers();
+        $item->setUrl('https://a.b.com$1');
+    }
+
+    public function testSetEmptyUrlThrowsException(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $item = new BatchRequestItem($this->requestInformation);
+        $item->setUrl('');
+    }
+
+    public function testMePlaceholderIsReplacedInUrls(): void
+    {
+        $meUrlPath = '/me';
+        $tokenToReplaceUrl = 'https://graph.microsoft.com/v1.0/users/me-token-to-replace';
+
+        $this->requestInformation->setUri(new Uri('https://graph.microsoft.com/beta/me'));
+        $this->assertEquals($meUrlPath, (new BatchRequestItem($this->requestInformation))->getUrl());
+
+        $this->requestInformation->setUri(new Uri($tokenToReplaceUrl));
+        $this->assertEquals($meUrlPath, (new BatchRequestItem($this->requestInformation))->getUrl());
+
+        $this->requestInformation->setUri(new Uri("$tokenToReplaceUrl/messages"));
+        $this->assertEquals("$meUrlPath/messages", (new BatchRequestItem($this->requestInformation))->getUrl());
+
+        $this->requestInformation->setUri(new Uri("$tokenToReplaceUrl/messages/123"));
+        $this->assertEquals("$meUrlPath/messages/123", (new BatchRequestItem($this->requestInformation))->getUrl());
     }
 }
