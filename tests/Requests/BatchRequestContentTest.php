@@ -108,6 +108,7 @@ class BatchRequestContentTest extends TestCase
 
     public function testSerializationWithJsonBody()
     {
+        $this->requestInformation->removeHeader('content-type');
         $this->requestInformation->setContentFromParsable($this->mockRequestAdapter, 'application/json', new TestUserModel('1', '1'));
         $batchRequestContent = new BatchRequestContent([$this->requestInformation]);
 
@@ -120,7 +121,7 @@ class BatchRequestContentTest extends TestCase
                     "id" => $batchRequestContent->getRequests()[0]->getId(),
                     "method" => $this->requestInformation->httpMethod,
                     "url" => '/v1/users',
-                    'headers' => ['content-type' => 'application/octet-stream, application/json'],
+                    'headers' => ['content-type' => 'application/json'],
                     "body" => ["id" => "1", "name" => "1"]
                 ]
             ]
