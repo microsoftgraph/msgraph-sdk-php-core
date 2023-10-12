@@ -37,7 +37,6 @@ class BatchRequestContent implements Parsable
      * @param RequestInformation[]|BatchRequestItem[] $requests Converts $requests to BatchRequestItems with auto-generated incrementing IDs starting from "0".
      *                                         Use getRequests() to fetch created BatchRequestItem objects.
      * @throws \JsonException
-     * @throws \League\Uri\Contracts\UriException
      */
     public function __construct(array $requests = [])
     {
@@ -82,7 +81,6 @@ class BatchRequestContent implements Parsable
     /**
      * @param RequestInformation $request
      * @throws \JsonException
-     * @throws \League\Uri\Contracts\UriException
      */
     public function addRequestInformation(RequestInformation $request): void
     {
@@ -92,7 +90,6 @@ class BatchRequestContent implements Parsable
     /**
      * @param RequestInterface $request
      * @throws \JsonException
-     * @throws \League\Uri\Contracts\UriException
      */
     public function addPsrRequest(RequestInterface $request): void
     {
