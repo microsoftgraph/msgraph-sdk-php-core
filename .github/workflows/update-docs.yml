@@ -15,7 +15,7 @@ jobs:
   run-php-documentor:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3.6.0
+      - uses: actions/checkout@v4.1.0
         with:
           ref: ${{ github.ref }}
 

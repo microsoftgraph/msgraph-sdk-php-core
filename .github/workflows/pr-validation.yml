@@ -20,7 +20,7 @@ jobs:
       matrix:
         php-versions: ['7.4', '8.0', '8.1', '8.2']
     steps:
-    - uses: actions/checkout@v3.6.0
+    - uses: actions/checkout@v4.1.0
       with:
         submodules: 'true'
     - name: Setup PHP and Xdebug for Code Coverage report
