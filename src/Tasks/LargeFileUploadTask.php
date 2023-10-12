@@ -209,7 +209,7 @@ class LargeFileUploadTask
         $info->setHeaders(array_merge($info->getHeaders()->getAll(), ['Content-Range' => 'bytes '.($start).'-'.($end).'/'.$this->fileSize]));
         $info->setHeaders(array_merge($info->getHeaders()->getAll(), ['Content-Length' => (string) strlen($chunkData)]));
 
-        $info->setStreamContent(Utils::streamFor($chunkData));
+        $info->setStreamContent(Utils::streamFor($chunkData), 'application/octet-stream');
         return $this->adapter->sendAsync($info, [LargeFileUploadSession::class, 'createFromDiscriminatorValue']);
     }
 
