@@ -13,10 +13,10 @@
 	],
 	"require": {
 		"php": "^8.0 || ^7.4",
-		"microsoft/kiota-authentication-phpleague": "^0.8.0",
-		"microsoft/kiota-http-guzzle": "^0.8.0",
-		"microsoft/kiota-serialization-json": "^0.6.0",
-		"microsoft/kiota-serialization-text": "^0.7.0",
+		"microsoft/kiota-authentication-phpleague": "^0.9.0",
+		"microsoft/kiota-http-guzzle": "^0.9.0",
+		"microsoft/kiota-serialization-json": "^0.7.0",
+		"microsoft/kiota-serialization-text": "^0.8.0",
 		"ext-json": "*"
 	},
 	"require-dev": {
