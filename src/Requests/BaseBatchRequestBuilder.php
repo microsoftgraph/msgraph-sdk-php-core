@@ -79,7 +79,7 @@ class BaseBatchRequestBuilder
     /**
      * @param BatchRequestContent $body
      * @param BatchRequestBuilderPostRequestConfiguration|null $requestConfig
-     * @return Promise
+     * @return Promise<BatchResponseContent|null>
      */
     public function postAsync(BatchRequestContent $body,
                               ?BatchRequestBuilderPostRequestConfiguration $requestConfig = null): Promise

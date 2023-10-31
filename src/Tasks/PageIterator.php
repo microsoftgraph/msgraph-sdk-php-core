@@ -26,7 +26,7 @@ class PageIterator
     private bool $hasNext = false;
     private int $pauseIndex;
     /**
-     * @var array{class-string<Parsable>, string} $constructorCallable
+     * @var array{class-string<T>, string} $constructorCallable
     */
     private array $constructorCallable;
     /** @var RequestHeaders */
@@ -37,7 +37,7 @@ class PageIterator
     /**
      * @param Parsable|array<mixed>|object|null $response paged collection response
      * @param RequestAdapter $requestAdapter
-     * @param array{class-string<Parsable>,string}|null $constructorCallable
+     * @param array{class-string<T>,string}|null $constructorCallable
      * The method to construct a paged response object.
      * @throws JsonException
      */
@@ -45,6 +45,7 @@ class PageIterator
     {
         $this->requestAdapter = $requestAdapter;
         if ($response instanceof Parsable && !$constructorCallable) {
+            /** @var array{class-string<T>, string} */
             $constructorCallable = [get_class($response), 'createFromDiscriminatorValue'];
         } elseif ($constructorCallable === null) {
             $constructorCallable = [PageResult::class, 'createFromDiscriminatorValue'];
@@ -85,7 +86,7 @@ class PageIterator
     }
 
     /**
-     * @param callable(Parsable|array<mixed>|object): bool $callback The callback function
+     * @param callable(T|array<mixed>|object): bool $callback The callback function
      * to apply on every entity. Pauses iteration if false is returned
      * @throws Exception
      */
@@ -118,7 +119,6 @@ class PageIterator
         }
 
         $response = $this->fetchNextPage();
-        /** @var Parsable $result */
         $result = $response->wait();
         return self::convertToPage($result);
     }
@@ -159,6 +159,10 @@ class PageIterator
         $page->setValue($value);
         return $page;
     }
+
+    /**
+     * @return Promise<T|null>
+     */
     private function fetchNextPage(): Promise
     {
         $nextLink = $this->currentPage->getOdataNextLink();
