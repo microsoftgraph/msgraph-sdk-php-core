@@ -137,25 +137,26 @@ class LargeFileUploadTask
         $uploadedRange = [$rangeParts[0], $end];
         while($this->chunks > 0){
             $session = $processNext;
-            $promise = $session->then(function (?LargeFileUploadSession $lfuSession) use (&$processNext, &$uploadedRange){
-                if (is_null($lfuSession)) {
+            $promise = $session->then(
+                function (?LargeFileUploadSession $lfuSession) use (&$processNext, &$uploadedRange){
+                    if (is_null($lfuSession)) {
+                        return $lfuSession;
+                    }
+                    $nextRange = $lfuSession->getNextExpectedRanges();
+                    $oldUrl = $this->getValidatedUploadUrl($this->uploadSession);
+                    $lfuSession->setUploadUrl($oldUrl);
+                    if (!is_null($this->onChunkUploadComplete)) {
+                        call_user_func($this->onChunkUploadComplete, $uploadedRange);
+                    }
+                    if (empty($nextRange)) {
+                        return $lfuSession;
+                    }
+                    $rangeParts = explode("-", $nextRange[0]);
+                    $end = min(intval($rangeParts[0]) + $this->maxChunkSize, $this->fileSize);
+                    $uploadedRange = [$rangeParts[0], $end];
+                    $this->setNextRange($nextRange[0] . "-");
+                    $processNext = $this->nextChunk($this->stream);
                     return $lfuSession;
-                }
-                $nextRange = $lfuSession->getNextExpectedRanges();
-                $oldUrl = $this->getValidatedUploadUrl($this->uploadSession);
-                $lfuSession->setUploadUrl($oldUrl);
-                if (!is_null($this->onChunkUploadComplete)) {
-                    call_user_func($this->onChunkUploadComplete, $uploadedRange);
-                }
-                if (empty($nextRange)) {
-                    return $lfuSession;
-                }
-                $rangeParts = explode("-", $nextRange[0]);
-                $end = min(intval($rangeParts[0]) + $this->maxChunkSize, $this->fileSize);
-                $uploadedRange = [$rangeParts[0], $end];
-                $this->setNextRange($nextRange[0] . "-");
-                $processNext = $this->nextChunk($this->stream);
-                return $lfuSession;
             }, function ($error) {
                 throw $error;
             });
