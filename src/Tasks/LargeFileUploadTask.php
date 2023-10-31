@@ -58,7 +58,7 @@ class LargeFileUploadTask
      * @param RequestAdapter $adapter
      * @param Parsable&AdditionalDataHolder $requestBody
      * @param string $url
-     * @return Promise
+     * @return Promise<LargeFileUploadSession|null>
      */
     public static function createUploadSession(RequestAdapter $adapter, $requestBody, string $url): Promise {
         $requestInformation = new RequestInformation();
@@ -117,7 +117,7 @@ class LargeFileUploadTask
     /**
      * Perform the actual upload for the whole file in bits.
      * @param callable(array{int, int}): void | null $afterChunkUpload
-     * @return Promise
+     * @return Promise<LargeFileUploadSession|null>
      * @throws Exception
      */
     public function upload(?callable $afterChunkUpload = null): Promise {
@@ -137,22 +137,26 @@ class LargeFileUploadTask
         $uploadedRange = [$rangeParts[0], $end];
         while($this->chunks > 0){
             $session = $processNext;
-            $promise = $session->then(function (LargeFileUploadSession $lfuSession) use (&$processNext, &$uploadedRange){
-                $nextRange = $lfuSession->getNextExpectedRanges();
-                $oldUrl = $this->getValidatedUploadUrl($this->uploadSession);
-                $lfuSession->setUploadUrl($oldUrl);
-                if (!is_null($this->onChunkUploadComplete)) {
-                    call_user_func($this->onChunkUploadComplete, $uploadedRange);
-                }
-                if (empty($nextRange)) {
+            $promise = $session->then(
+                function (?LargeFileUploadSession $lfuSession) use (&$processNext, &$uploadedRange){
+                    if (is_null($lfuSession)) {
+                        return $lfuSession;
+                    }
+                    $nextRange = $lfuSession->getNextExpectedRanges();
+                    $oldUrl = $this->getValidatedUploadUrl($this->uploadSession);
+                    $lfuSession->setUploadUrl($oldUrl);
+                    if (!is_null($this->onChunkUploadComplete)) {
+                        call_user_func($this->onChunkUploadComplete, $uploadedRange);
+                    }
+                    if (empty($nextRange)) {
+                        return $lfuSession;
+                    }
+                    $rangeParts = explode("-", $nextRange[0]);
+                    $end = min(intval($rangeParts[0]) + $this->maxChunkSize, $this->fileSize);
+                    $uploadedRange = [$rangeParts[0], $end];
+                    $this->setNextRange($nextRange[0] . "-");
+                    $processNext = $this->nextChunk($this->stream);
                     return $lfuSession;
-                }
-                $rangeParts = explode("-", $nextRange[0]);
-                $end = min(intval($rangeParts[0]) + $this->maxChunkSize, $this->fileSize);
-                $uploadedRange = [$rangeParts[0], $end];
-                $this->setNextRange($nextRange[0] . "-");
-                $processNext = $this->nextChunk($this->stream);
-                return $lfuSession;
             }, function ($error) {
                 throw $error;
             });
@@ -173,6 +177,7 @@ class LargeFileUploadTask
 
     /**
      * Upload the next chunk of file.
+     * @return Promise<LargeFileUploadSession|null>
      * @throws Exception
      */
     public function nextChunk(StreamInterface $file, int $rangeStart = 0, int $rangeEnd = 0): Promise {
@@ -223,7 +228,7 @@ class LargeFileUploadTask
 
     /**
      * Cancel an existing upload session from the File upload task.
-     * @return Promise
+     * @return Promise<LargeFileUploadSession|Parsable>
      * @throws Exception
      */
     public function cancel(): Promise {
@@ -285,7 +290,7 @@ class LargeFileUploadTask
 
     /**
      * Resumes an upload task.
-     * @return Promise
+     * @return Promise<LargeFileUploadSession|null>
      * @throws Exception
      */
     public function resume(): Promise {
