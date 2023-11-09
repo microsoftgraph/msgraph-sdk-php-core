@@ -8,7 +8,7 @@ To install the `microsoft-graph-core` library with Composer, either run `compose
 ```
 {
     "require": {
-        "microsoft/microsoft-graph-core": "^2.0.0-RC12"
+        "microsoft/microsoft-graph-core": "^2.0.0"
     }
 }
 ```
@@ -26,17 +26,15 @@ To authenticate as an application, please see [this guide](https://docs.microsof
 
 You can use the [Guzzle HTTP client](http://docs.guzzlephp.org/en/stable/), which comes preinstalled with this library, to get an access token like this:
 ```php
-$guzzle = new \GuzzleHttp\Client();
-$url = 'https://login.microsoftonline.com/' . $tenantId . '/oauth2/token?api-version=1.0';
-$token = json_decode($guzzle->post($url, [
-    'form_params' => [
-        'client_id' => $clientId,
-        'client_secret' => $clientSecret,
-        'resource' => 'https://graph.microsoft.com/',
-        'grant_type' => 'client_credentials',
-    ],
-])->getBody()->getContents());
-$accessToken = $token->access_token;
+
+$tokenRequestContext = new ClientCredentialContext(
+    'tenantId',
+    'clientId',
+    'clientSecret'
+);
+// requests using https://graph.microsoft.com/.default scopes by default
+$tokenProvider = new GraphPhpLeagueAccessTokenProvider($tokenRequestContext);
+$token = $tokenProvider->getAuthorizationTokenAsync(GraphConstants::REST_ENDPOINT)->wait();
 ```
 
 ### 3. Create a Guzzle HTTP client object
