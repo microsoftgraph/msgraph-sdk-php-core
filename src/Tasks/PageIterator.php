@@ -57,7 +57,7 @@ class PageIterator
 
         if ($page !== null) {
             $this->currentPage = $page;
-            $this->hasNext = true;
+            $this->hasNext = !(empty($page->getValue()) || is_null($page->getValue()));
         }
     }
 
@@ -137,7 +137,7 @@ class PageIterator
 
         $value = null;
         if (is_array($response)) {
-            $value = $response['value'] ?? ['value' => []];
+            $value = $response['value'] ?? [];
         } elseif ($response instanceof Parsable &&
             method_exists($response, 'getValue')) {
             $value = $response->getValue();

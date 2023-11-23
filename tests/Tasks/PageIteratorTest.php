@@ -224,4 +224,47 @@ class PageIteratorTest extends TestCase
         $this->assertEquals(2, $count);
         $this->assertInstanceOf(User::class, $data[0]);
     }
+
+    public function testHasNextIsFalseWithEmptyOrNullInitialCollection(): void
+    {
+        $pageIterator = new PageIterator([], $this->mockRequestAdapter);
+        $this->assertFalse($pageIterator->hasNext());
+
+        $pageIterator = new PageIterator([1, 2, 3], $this->mockRequestAdapter);
+        $this->assertFalse($pageIterator->hasNext());
+
+        $pageIterator = new PageIterator(['value' => []], $this->mockRequestAdapter);
+        $this->assertFalse($pageIterator->hasNext());
+
+        $pageIterator = new PageIterator(['value' => null], $this->mockRequestAdapter);
+        $this->assertFalse($pageIterator->hasNext());
+
+        $pageIterator = new PageIterator((object) [], $this->mockRequestAdapter);
+        $this->assertFalse($pageIterator->hasNext());
+
+        $pageIterator = new PageIterator((object) [1, 2], $this->mockRequestAdapter);
+        $this->assertFalse($pageIterator->hasNext());
+
+        $pageIterator = new PageIterator((object) [], $this->mockRequestAdapter);
+        $this->assertFalse($pageIterator->hasNext());
+
+        $usersResponse = new UsersResponse();
+        $usersResponse->setValue([]);
+        $pageIterator = new PageIterator($usersResponse, $this->mockRequestAdapter);
+        $this->assertFalse($pageIterator->hasNext());
+    }
+
+    public function testHasNextInitialisedToTrueWhenValueHasItems(): void
+    {
+        $pageIterator = new PageIterator(['value' => [1, 2, 3]], $this->mockRequestAdapter);
+        $this->assertTrue($pageIterator->hasNext());
+
+        $pageIterator = new PageIterator((object) ['value' => [1]], $this->mockRequestAdapter);
+        $this->assertTrue($pageIterator->hasNext());
+
+        $usersResponse = new UsersResponse();
+        $usersResponse->setValue([1, 2]);
+        $pageIterator = new PageIterator($usersResponse, $this->mockRequestAdapter);
+        $this->assertTrue($pageIterator->hasNext());
+    }
 }
