@@ -57,7 +57,7 @@ class PageIterator
 
         if ($page !== null) {
             $this->currentPage = $page;
-            $this->hasNext = !(empty($page->getValue()) || is_null($page->getValue()));
+            $this->hasNext = !empty($page->getValue());
         }
     }
 
@@ -124,7 +124,7 @@ class PageIterator
     }
 
     /**
-     * @param object|array<mixed> $response
+     * @param object|array<mixed>|Parsable|null $response
      * @return PageResult|null
      * @throws JsonException
      */
