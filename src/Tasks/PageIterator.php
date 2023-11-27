@@ -35,7 +35,7 @@ class PageIterator
     private ?array $requestOptions = [];
 
     /**
-     * @param Parsable|array<mixed>|object|null $response paged collection response
+     * @param Parsable|array<mixed>|object $response paged collection response
      * @param RequestAdapter $requestAdapter
      * @param array{class-string<T>,string}|null $constructorCallable
      * The method to construct a paged response object.
@@ -57,7 +57,7 @@ class PageIterator
 
         if ($page !== null) {
             $this->currentPage = $page;
-            $this->hasNext = true;
+            $this->hasNext = !empty($page->getValue());
         }
     }
 
@@ -124,7 +124,7 @@ class PageIterator
     }
 
     /**
-     * @param object|array<mixed>|null $response
+     * @param object|array<mixed>|Parsable|null $response
      * @return PageResult|null
      * @throws JsonException
      */
@@ -137,7 +137,7 @@ class PageIterator
 
         $value = null;
         if (is_array($response)) {
-            $value = $response['value'] ?? ['value' => []];
+            $value = $response['value'] ?? [];
         } elseif ($response instanceof Parsable &&
             method_exists($response, 'getValue')) {
             $value = $response->getValue();
