@@ -5,3 +5,12 @@
 /vendor export-ignore
 .gitattributes export-ignore
 .gitignore export-ignore
+/.github export-ignore
+/.vscode export-ignore
+/scripts export-ignore
+/tests export-ignore
+.editorconfig export-ignore
+sonar-project.properties export-ignore
+phpunit.xml export-ignore
+phpstan.neon export-ignore
+phpdoc.dist.xml export-ignore
