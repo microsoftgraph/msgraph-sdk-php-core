@@ -18,15 +18,34 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-versions: ['7.4', '8.0', '8.1', '8.2']
+        php-versions: ['7.4', '8.1', '8.2', '8.3']
     steps:
     - uses: actions/checkout@v4.1.1
-      with:
-        submodules: 'true'
-    - name: Setup PHP and Xdebug for Code Coverage report
+    - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
         php-version: ${{ matrix.php-versions }}
+        coverage: none
+    - name: Validate composer file
+      run: |
+        composer validate
+    - name: Install dependencies
+      run: |
+        composer install
+    - name: Run tests
+      run: ./vendor/bin/phpunit
+    - name: Run static analysis
+      run: |
+        vendor/bin/phpstan analyse --memory-limit=500M --error-format=github
+
+  code-coverage:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4.1.1
+    - name: Setup PHP and Xdebug for Code Coverage report
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.0'
         coverage: xdebug
     - name: Validate composer file
       run: |
@@ -39,20 +58,17 @@ jobs:
     - name: Fix code coverage paths
       run: sed -i 's@'$GITHUB_WORKSPACE'@/github/workspace/@g' coverage.xml
     - name: SonarCloud Scan
-      if: ${{ matrix.php-versions == '8.0' && !github.event.pull_request.head.repo.fork }}
+      if: ${{ !github.event.pull_request.head.repo.fork }}
       uses: SonarSource/sonarcloud-github-action@master
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-    - name: Run static analysis
-      run: |
-        vendor/bin/phpstan analyse --memory-limit=500M --error-format=github
 
   # The check-php-version-matrix returns success if all matrix jobs in build are successful; otherwise, it returns a failure.
   # Use this as a PR status check for GitHub Policy Service instead of individual matrix entry checks.
   check-php-version-matrix:
     runs-on: ubuntu-latest
-    needs: validate-pull-request
+    needs: [validate-pull-request, code-coverage]
     if: always()
     steps:
       - name: All build matrix options are successful
