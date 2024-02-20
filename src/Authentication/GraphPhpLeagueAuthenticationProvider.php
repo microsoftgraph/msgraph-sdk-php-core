@@ -9,8 +9,8 @@
 namespace Microsoft\Graph\Core\Authentication;
 
 use Microsoft\Graph\Core\NationalCloud;
-use Microsoft\Kiota\Abstractions\Authentication\BaseBearerTokenAuthenticationProvider;
 use Microsoft\Kiota\Authentication\Oauth\TokenRequestContext;
+use Microsoft\Kiota\Authentication\PhpLeagueAuthenticationProvider;
 
 /**
  * Class GraphPhpLeagueAuthenticationProvider
@@ -19,7 +19,7 @@ use Microsoft\Kiota\Authentication\Oauth\TokenRequestContext;
  * @license https://opensource.org/licenses/MIT MIT License
  * @link https://developer.microsoft.com/graph
  */
-class GraphPhpLeagueAuthenticationProvider extends BaseBearerTokenAuthenticationProvider
+class GraphPhpLeagueAuthenticationProvider extends PhpLeagueAuthenticationProvider
 {
     /**
      * @param TokenRequestContext $tokenRequestContext
@@ -34,6 +34,7 @@ class GraphPhpLeagueAuthenticationProvider extends BaseBearerTokenAuthentication
     )
     {
         $accessTokenProvider = new GraphPhpLeagueAccessTokenProvider($tokenRequestContext, $scopes, $nationalCloud);
-        parent::__construct($accessTokenProvider);
+        parent::__construct($tokenRequestContext, $scopes, $accessTokenProvider->getAllowedHosts());
     }
+
 }
