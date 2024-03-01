@@ -13,7 +13,7 @@
 	],
 	"require": {
 		"php": "^8.0 || ^7.4",
-		"microsoft/kiota-authentication-phpleague": "^1.0.1",
+		"microsoft/kiota-authentication-phpleague": "^1.1.0",
 		"microsoft/kiota-http-guzzle": "^1.1.0",
 		"microsoft/kiota-serialization-json": "^1.0.1",
 		"microsoft/kiota-serialization-text": "^1.0.1",
