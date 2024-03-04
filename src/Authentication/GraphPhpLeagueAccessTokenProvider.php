@@ -9,8 +9,8 @@
 namespace Microsoft\Graph\Core\Authentication;
 
 
-use InvalidArgumentException;
 use Microsoft\Graph\Core\NationalCloud;
+use Microsoft\Kiota\Authentication\Cache\AccessTokenCache;
 use Microsoft\Kiota\Authentication\Oauth\ProviderFactory;
 use Microsoft\Kiota\Authentication\Oauth\TokenRequestContext;
 use Microsoft\Kiota\Authentication\PhpLeagueAccessTokenProvider;
@@ -38,13 +38,16 @@ class GraphPhpLeagueAccessTokenProvider extends PhpLeagueAccessTokenProvider
      * @param array<string> $scopes if left empty, it's set to ["https://[graph national cloud host]/.default"] scope
      * @param string $nationalCloud Defaults to https://graph.microsoft.com. See
      * https://learn.microsoft.com/en-us/graph/deployments
+     * @param AccessTokenCache|null $accessTokenCache Defaults to an in-memory cache if null
      */
     public function __construct(
         TokenRequestContext $tokenRequestContext,
         array $scopes = [],
-        string $nationalCloud = NationalCloud::GLOBAL
+        string $nationalCloud = NationalCloud::GLOBAL,
+        ?AccessTokenCache $accessTokenCache = null
     )
     {
+        $nationalCloud = empty($nationalCloud) ? NationalCloud::GLOBAL : $nationalCloud;
         $allowedHosts = [
             "graph.microsoft.com",
             "graph.microsoft.us",
@@ -61,6 +64,24 @@ class GraphPhpLeagueAccessTokenProvider extends PhpLeagueAccessTokenProvider
             $tokenBaseServiceUrl,
             $nationalCloud
         );
-        parent::__construct($tokenRequestContext, $scopes, $allowedHosts, $oauthProvider);
+        parent::__construct($tokenRequestContext, $scopes, $allowedHosts, $oauthProvider, $accessTokenCache);
+    }
+
+    /**
+     * Get an instance of GraphPhpLeagueAccessTokenProvider with a custom cache
+     *
+     * @param AccessTokenCache $accessTokenCache
+     * @param TokenRequestContext $tokenRequestContext
+     * @param array<string> $scopes
+     * @return GraphPhpLeagueAccessTokenProvider
+     */
+    public static function createWithCache(
+        AccessTokenCache $accessTokenCache,
+        TokenRequestContext $tokenRequestContext,
+        array $scopes = []
+    ): self
+    {
+        return new GraphPhpLeagueAccessTokenProvider(
+            $tokenRequestContext, $scopes, NationalCloud::GLOBAL, $accessTokenCache);
     }
 }
