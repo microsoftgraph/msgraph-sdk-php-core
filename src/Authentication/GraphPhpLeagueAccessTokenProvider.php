@@ -81,6 +81,7 @@ class GraphPhpLeagueAccessTokenProvider extends PhpLeagueAccessTokenProvider
         array $scopes = []
     ): self
     {
-        return new GraphPhpLeagueAccessTokenProvider($tokenRequestContext, $scopes, NationalCloud::GLOBAL, $accessTokenCache);
+        return new GraphPhpLeagueAccessTokenProvider(
+            $tokenRequestContext, $scopes, NationalCloud::GLOBAL, $accessTokenCache);
     }
 }
