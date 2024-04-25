@@ -21,7 +21,7 @@ jobs:
   create-tag:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4.1.3
+    - uses: actions/checkout@v4.1.4
 
     - name: Get SDK version and set environment variable
       run: |
