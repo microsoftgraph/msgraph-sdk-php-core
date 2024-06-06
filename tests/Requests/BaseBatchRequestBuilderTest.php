@@ -33,7 +33,7 @@ class BaseBatchRequestBuilderTest extends TestCase
                 Utils::streamFor(json_encode([
                     "responses" => [
                         [
-                            "id" => 1,
+                            "id" => "1",
                             "status" => 200,
                             "headers" => ['content-type' => 'text/plain', 'content-length' => '10'],
                             "body" => "text"
@@ -47,13 +47,13 @@ class BaseBatchRequestBuilderTest extends TestCase
                 Utils::streamFor(json_encode([
                     "responses" => [
                         [
-                            "id" => 1,
+                            "id" => "1",
                             "status" => 200,
                             "headers" => ['content-type' => 'text/plain'],
                             "body" => "text"
                         ],
                         [
-                            "id" => 2,
+                            "id" => "2",
                             "status" => 424,
                             "headers" => ['content-type' => 'text/plain'],
                             "body" => "Failed Dependency"
