@@ -25,7 +25,9 @@ final class GraphConstants
     const REST_ENDPOINT = "https://graph.microsoft.com/";
 
     // Define HTTP request constants
+    // x-release-please-start-version
     const SDK_VERSION = "2.1.0";
+    // x-release-please-end
 
     // Define error constants
     const MAX_PAGE_SIZE = 999;
