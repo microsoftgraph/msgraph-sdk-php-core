@@ -8,7 +8,9 @@ To install the `microsoft-graph-core` library with Composer, either run `compose
 ```
 {
     "require": {
+        // x-release-please-start-version
         "microsoft/microsoft-graph-core": "^2.1.1"
+        // x-release-please-end
     }
 }
 ```
@@ -16,7 +18,7 @@ To install the `microsoft-graph-core` library with Composer, either run `compose
 
 ### 1. Register your application
 
-Register your application to use the Microsoft Graph API by following the steps at [Register an an application with the Microsoft Identity platform](https://aka.ms/registerApplication).
+Register your application to use the Microsoft Graph API by following the steps at [Register an application with the Microsoft Identity platform](https://aka.ms/registerApplication).
 
 ### 2. Authenticate with the Microsoft Graph service
 
@@ -129,7 +131,7 @@ View or log issues on the [Issues](https://github.com/microsoftgraph/msgraph-sdk
 
 ## Contribute
 
-Please read our [Contributing](https://github.com/microsoftgraph/msgraph-sdk-php-core/blob/master/CONTRIBUTING.md) guidelines carefully for advice on how to contribute to this repo.
+Please read our [Contributing](https://github.com/microsoftgraph/msgraph-sdk-php-core/blob/main/CONTRIBUTING.md) guidelines carefully for advice on how to contribute to this repo.
 
 ## Copyright and license
 
