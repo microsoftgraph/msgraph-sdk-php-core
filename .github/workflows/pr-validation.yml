@@ -5,9 +5,9 @@ name: "Validate Pull Request"
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, dev ]
+    branches: [ main ]
 
 defaults:
   run:
