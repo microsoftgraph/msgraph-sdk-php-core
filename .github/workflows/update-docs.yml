@@ -5,7 +5,7 @@ name: "Update Docs"
 
 on:
   push:
-    branches: dev
+    branches: main
 
 defaults:
   run:
@@ -49,4 +49,4 @@ jobs:
           LABELS: generated
         run: |
           curl -fsSL https://github.com/github/hub/raw/master/script/get | bash -s 2.14.1
-          bin/hub pull-request -b dev -m "$MESSAGE_TITLE" -m "$MESSAGE_BODY" -l "$LABELS"
+          bin/hub pull-request -b main -m "$MESSAGE_TITLE" -m "$MESSAGE_BODY" -l "$LABELS"
