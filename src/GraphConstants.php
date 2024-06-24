@@ -26,7 +26,7 @@ final class GraphConstants
 
     // Define HTTP request constants
     // x-release-please-start-version
-    const SDK_VERSION = "2.1.1";
+    const SDK_VERSION = "2.2.0";
     // x-release-please-end
 
     // Define error constants
