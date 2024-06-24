@@ -9,6 +9,7 @@
 namespace Microsoft\Graph\Core\Authentication;
 
 
+use League\OAuth2\Client\Provider\AbstractProvider;
 use Microsoft\Graph\Core\NationalCloud;
 use Microsoft\Kiota\Authentication\Cache\AccessTokenCache;
 use Microsoft\Kiota\Authentication\Oauth\ProviderFactory;
@@ -39,12 +40,14 @@ class GraphPhpLeagueAccessTokenProvider extends PhpLeagueAccessTokenProvider
      * @param string $nationalCloud Defaults to https://graph.microsoft.com. See
      * https://learn.microsoft.com/en-us/graph/deployments
      * @param AccessTokenCache|null $accessTokenCache Defaults to an in-memory cache if null
+     * @param AbstractProvider|null $oauthProvider Your own oauth provider if you don't want to use the default.
      */
     public function __construct(
         TokenRequestContext $tokenRequestContext,
         array $scopes = [],
         string $nationalCloud = NationalCloud::GLOBAL,
-        ?AccessTokenCache $accessTokenCache = null
+        ?AccessTokenCache $accessTokenCache = null,
+        ?AbstractProvider $oauthProvider = null
     )
     {
         $nationalCloud = empty($nationalCloud) ? NationalCloud::GLOBAL : $nationalCloud;
@@ -58,7 +61,7 @@ class GraphPhpLeagueAccessTokenProvider extends PhpLeagueAccessTokenProvider
         ];
         $tokenBaseServiceUrl = self::NATIONAL_CLOUD_TO_AZURE_AD_ENDPOINT[$nationalCloud] ??
             self::NATIONAL_CLOUD_TO_AZURE_AD_ENDPOINT[NationalCloud::GLOBAL];
-        $oauthProvider = ProviderFactory::create(
+        $oauthProvider = $oauthProvider ?? ProviderFactory::create(
             $tokenRequestContext,
             [],
             $tokenBaseServiceUrl,
@@ -73,7 +76,7 @@ class GraphPhpLeagueAccessTokenProvider extends PhpLeagueAccessTokenProvider
      * @param AccessTokenCache $accessTokenCache
      * @param TokenRequestContext $tokenRequestContext
      * @param array<string> $scopes
-     * @return GraphPhpLeagueAccessTokenProvider
+     * @return self
      */
     public static function createWithCache(
         AccessTokenCache $accessTokenCache,
