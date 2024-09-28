@@ -46,14 +46,13 @@ sets some Guzzle config defaults such as connection and request timeouts, and th
 In the near future, the `GraphClientFactory` will provide some default middleware to use with the Graph API such as retry handlers.
 
 ```php
-use Microsoft\Graph\Core\Core\Http\GraphClientFactory;
+use Microsoft\Graph\Core\GraphClientFactory;
 
 $guzzleConfig = [
     // your preferred guzzle config
 ];
 
-$httpClient = GraphClientFactory::setClientConfig($guzzleConfig)::create();
-
+$httpClient = GraphClientFactory::createWithConfig($guzzleConfig);
 ```
 
 ### 4. Call Microsoft Graph using the v1.0 endpoint
@@ -61,7 +60,7 @@ $httpClient = GraphClientFactory::setClientConfig($guzzleConfig)::create();
 The following is an example that shows how to call Microsoft Graph.
 
 ```php
-use Microsoft\Graph\Core\Core\Http\GraphClientFactory;
+use Microsoft\Graph\Core\GraphClientFactory;
 
 class UsageExample
 {
@@ -71,11 +70,11 @@ class UsageExample
 
         $config = [
             'headers' => [
-                'Authorization' => 'Bearer '.$accessToken
+                'Authorization' => $accessToken
             ]
         ];
 
-        $httpClient = GraphClientFactory::setClientConfig($config)::create();
+        $httpClient = GraphClientFactory::createWithConfig($config);
         $response = $httpClient->get("/v1.0/me");
         $currentUser = json_decode($response->getBody());
 
