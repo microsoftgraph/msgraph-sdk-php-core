@@ -47,6 +47,13 @@ final class GraphClientFactory extends KiotaClientFactory
     private static string $nationalCloud = NationalCloud::GLOBAL;
 
     /**
+     * Graph API version
+     *
+     * @var string
+     */
+    private static string $apiVersion = GraphConstants::V1_API_VERSION;
+
+    /**
      * @var GraphClientFactory|null Store singleton instance of the GraphClientFactory
      */
     private static ?GraphClientFactory $instance = null;
@@ -102,6 +109,17 @@ final class GraphClientFactory extends KiotaClientFactory
     public static function setTelemetryOption(GraphTelemetryOption $telemetryOption): GraphClientFactory
     {
         self::$graphTelemetryOption = $telemetryOption;
+        return self::getInstance();
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param string $apiVersion
+     * @return GraphClientFactory
+     */
+    public static function setApiVersion(string $apiVersion): GraphClientFactory {
+        self::$apiVersion = $apiVersion;
         return self::getInstance();
     }
 
@@ -174,7 +192,7 @@ final class GraphClientFactory extends KiotaClientFactory
                 "Content-Type" => "application/json",
             ],
             RequestOptions::HTTP_ERRORS => false,
-            "base_uri" => self::$nationalCloud,
+            "base_uri" => self::$nationalCloud + self::$apiVersion,
             'handler' => self::getDefaultHandlerStack()
         ];
         if (extension_loaded('curl') && defined('CURL_VERSION_HTTP2')) {
