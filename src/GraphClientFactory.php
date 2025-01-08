@@ -80,7 +80,7 @@ final class GraphClientFactory extends KiotaClientFactory
      * Set national cloud to be used as the base URL
      *
      * @param string $nationalCloud
-     * @return $this
+     * @return static
      * @throws InvalidArgumentException if $nationalCloud is empty or an invalid national cloud Host
      */
     public static function setNationalCloud(string $nationalCloud = NationalCloud::GLOBAL): GraphClientFactory {

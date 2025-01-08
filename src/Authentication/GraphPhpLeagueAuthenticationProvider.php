@@ -24,13 +24,12 @@ class GraphPhpLeagueAuthenticationProvider extends PhpLeagueAuthenticationProvid
     /**
      * @param TokenRequestContext $tokenRequestContext
      * @param array<string> $scopes defaults to ["https://[graph national cloud host]/.default"] scope
-     * @param string $nationalCloud defaults to https://graph.microsoft.com. See
-     * https://learn.microsoft.com/en-us/graph/deployments
+     * @param string $nationalCloud @deprecated Parameter is not passed up to the parent class. Use createWithAccessTokenProvider() instead
      */
     public function __construct(
         TokenRequestContext $tokenRequestContext,
         array $scopes = [],
-        string $nationalCloud = NationalCloud::GLOBAL
+        string $nationalCloud = NationalCloud::GLOBAL // @deprecated parameter is not passed up to the parent class. Use createWithAccessTokenProvider() instead
     )
     {
         $accessTokenProvider = new GraphPhpLeagueAccessTokenProvider($tokenRequestContext, $scopes, $nationalCloud);
