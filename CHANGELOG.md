@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.1](https://github.com/microsoftgraph/msgraph-sdk-php-core/compare/v2.2.0...v2.2.1) (2025-01-08)
+
+
+### Bug Fixes
+
+* Mark nationalCloud constructor parameter in GraphPhpLeagueAuthenticationProvider as deprecated ([37e4d46](https://github.com/microsoftgraph/msgraph-sdk-php-core/commit/37e4d4642bf850065e769109ead6b6e1c9493d30))
+
 ## [2.2.0](https://github.com/microsoftgraph/msgraph-sdk-php-core/compare/2.1.1...v2.2.0) (2024-06-24)
 
 
