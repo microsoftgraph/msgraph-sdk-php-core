@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.1](https://github.com/microsoftgraph/msgraph-sdk-php-core/compare/v2.3.0...v2.3.1) (2025-03-18)
+
+
+### Bug Fixes
+
+* correct condition for maximum requests in BatchRequestContent ([c5549f9](https://github.com/microsoftgraph/msgraph-sdk-php-core/commit/c5549f9d651d1d9c1785224c535aa83be0fd4a77))
+* correct condition for maximum requests in BatchRequestContent ([5572c89](https://github.com/microsoftgraph/msgraph-sdk-php-core/commit/5572c896fff44ed3b76c877894ca2b0314e16365))
+
 ## [2.3.0](https://github.com/microsoftgraph/msgraph-sdk-php-core/compare/v2.2.1...v2.3.0) (2025-02-19)
 
 
