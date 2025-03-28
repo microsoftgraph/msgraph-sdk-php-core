@@ -46,7 +46,7 @@ class BaseBatchRequestBuilder
      * @param RequestAdapter $requestAdapter
      * @param array<string, array{class-string<T>, string}>|null $errorMappings
      */
-    public function __construct(RequestAdapter $requestAdapter, array $errorMappings = null)
+    public function __construct(RequestAdapter $requestAdapter, ?array $errorMappings = null)
     {
         $this->requestAdapter = $requestAdapter;
         $this->errorMappings = $errorMappings;
