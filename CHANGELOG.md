@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0](https://github.com/microsoftgraph/msgraph-sdk-php-core/compare/v2.3.1...v2.4.0) (2025-03-28)
+
+
+### Features
+
+* PHP 8.4 compatibility ([#209](https://github.com/microsoftgraph/msgraph-sdk-php-core/issues/209)) ([fd8cc94](https://github.com/microsoftgraph/msgraph-sdk-php-core/commit/fd8cc94968d9bfe7f7012a6deda01bfc3f96ac20))
+
 ## [2.3.1](https://github.com/microsoftgraph/msgraph-sdk-php-core/compare/v2.3.0...v2.3.1) (2025-03-18)
 
 
