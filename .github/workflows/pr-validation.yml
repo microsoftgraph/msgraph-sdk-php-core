@@ -59,7 +59,7 @@ jobs:
       run: sed -i 's@'$GITHUB_WORKSPACE'@/github/workspace/@g' coverage.xml
     - name: SonarCloud Scan
       if: ${{ !github.event.pull_request.head.repo.fork }}
-      uses: SonarSource/sonarqube-scan-action@v5
+      uses: SonarSource/sonarqube-scan-action@v6
       env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
