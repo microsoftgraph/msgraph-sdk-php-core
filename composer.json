@@ -13,12 +13,12 @@
 	],
 	"require": {
 		"php": "^8.2",
-		"microsoft/kiota-authentication-phpleague": "^1.5.0",
-		"microsoft/kiota-http-guzzle": "^1.5.0",
-		"microsoft/kiota-serialization-json": "^1.5.0",
-		"microsoft/kiota-serialization-text": "^1.5.0",
-		"microsoft/kiota-serialization-form": "^1.5.0",
-		"microsoft/kiota-serialization-multipart": "^1.5.0",
+		"microsoft/kiota-authentication-phpleague": "^2.0.2",
+		"microsoft/kiota-http-guzzle": "^2.0.2",
+		"microsoft/kiota-serialization-json": "^2.0.2",
+		"microsoft/kiota-serialization-text": "^2.0.2",
+		"microsoft/kiota-serialization-form": "^2.0.2",
+		"microsoft/kiota-serialization-multipart": "^2.0.2",
 		"ext-json": "*"
 	},
 	"require-dev": {
