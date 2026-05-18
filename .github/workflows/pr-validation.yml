@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-versions: ['7.4', '8.1', '8.2', '8.3', '8.4']
+        php-versions: ['8.2', '8.3', '8.4']
     steps:
     - uses: actions/checkout@v6
     - name: Setup PHP
@@ -45,7 +45,7 @@ jobs:
     - name: Setup PHP and Xdebug for Code Coverage report
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '8.0'
+        php-version: '8.2'
         coverage: xdebug
     - name: Validate composer file
       run: |
@@ -59,7 +59,7 @@ jobs:
       run: sed -i 's@'$GITHUB_WORKSPACE'@/github/workspace/@g' coverage.xml
     - name: SonarCloud Scan
       if: ${{ !github.event.pull_request.head.repo.fork }}
-      uses: SonarSource/sonarqube-scan-action@v5
+      uses: SonarSource/sonarqube-scan-action@v7
       env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
